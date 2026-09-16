@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  @apply font-heading;
+}
+
+.prose-legal h2 {
+  @apply mt-10 text-xl font-bold tracking-[-0.01em] text-mk-ink first:mt-0;
+}
+
+.prose-legal h3 {
+  @apply mt-6 text-base font-bold text-mk-ink;
+}
+
+.prose-legal p {
+  @apply mt-3;
+}
+
+.prose-legal ul {
+  @apply mt-3 list-disc space-y-2 pl-5;
+}
+
+.prose-legal a {
+  @apply underline underline-offset-4;
+}
+
+.prose-legal strong {
+  @apply font-semibold text-mk-ink;
+}
+
+.prose-legal .legal-warning {
+  @apply mt-10 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900;
+}
