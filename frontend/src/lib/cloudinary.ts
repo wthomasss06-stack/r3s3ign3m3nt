@@ -4,8 +4,12 @@ const DEFAULT_FOLDER = "akatech/landing-images";
 
 export function cloudImage(publicPath: string, options: { width?: number } = {}) {
   const cleanPath = publicPath.replace(/^\/+/, "").replace(/\\/g, "/");
-  const segments = cleanPath.split("/").filter(Boolean);
-  const fileName = segments.pop() ?? cleanPath;
+  const normalizedPath = cleanPath
+    .replace(/^((frontend\/)?public\/|images\/|akatech\/)+/i, "")
+    .replace(/^\/+/, "");
+
+  const segments = normalizedPath.split("/").filter(Boolean);
+  const fileName = segments.pop() ?? normalizedPath;
 
   const folder =
     segments.length > 0
