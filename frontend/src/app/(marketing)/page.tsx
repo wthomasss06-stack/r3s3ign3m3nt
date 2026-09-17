@@ -8,11 +8,9 @@ import { useGSAP } from "@gsap/react";
 
 import { ArrowDownRight, ArrowUpRight, CheckMark } from "@/components/icons";
 import Logo from "@/components/Logo";
+import { cloudImage } from "@/lib/cloudinary";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-const cloudImage = (filename: string) =>
-  `https://res.cloudinary.com/gks3f2st/image/upload/f_auto,q_auto/akatech/images/${filename}`;
 
 const FEATURES = [
   {
