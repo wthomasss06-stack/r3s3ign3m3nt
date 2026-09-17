@@ -6,7 +6,7 @@ export default function Loader({ label = "Chargement...", fullScreen = true }: {
     <div
       className={`flex flex-col items-center justify-center gap-3 ${fullScreen ? "min-h-screen" : "py-16"}`}
     >
-      <Logo size={40} className="animate-pulse" />
+      <Logo size={80} className="animate-pulse" />
       <p className="text-sm text-ink-soft">{label}</p>
     </div>
   );

@@ -41,11 +41,8 @@ export default function Header() {
         scrolled ? "border-b border-mk-ink/10 bg-mk-paper/90 backdrop-blur-md" : "border-b border-transparent"
       }`}
     >
-      <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
-        <Logo size={30} />
-        <span className="text-[15px]">
-          R3S3IGN3M3NT <em className="font-mk-serif text-[14px] font-normal not-italic sm:italic">registre digital</em>
-        </span>
+      <Link href="/" className="flex items-center gap-2.5">
+        <Logo size={48} />
       </Link>
 
       <nav className="hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[0.06em] md:flex" aria-label="Navigation principale">

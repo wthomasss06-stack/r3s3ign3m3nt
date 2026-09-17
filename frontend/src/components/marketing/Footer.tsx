@@ -32,9 +32,8 @@ export default function Footer() {
     <footer className="border-t border-mk-ink/10 bg-mk-paper px-5 pb-8 pt-16 sm:px-10">
       <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
-            <Logo size={34} />
-            <span>R3S3IGN3M3NT</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <Logo size={48} />
           </Link>
           <p className="mt-4 max-w-[220px] text-sm leading-relaxed text-mk-moss">
             Le registre d&apos;accueil qui remplace le cahier — sans compte pour le visiteur, même hors-ligne.
