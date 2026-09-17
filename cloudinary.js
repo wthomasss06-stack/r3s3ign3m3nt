@@ -1,47 +1,42 @@
 // lib/cloudinary.js
-// Convertit un chemin local ('/images/xxx.ext') en URL Cloudinary — même
-// arborescence, juste une autre origine + optimisation auto (format + qualité).
-//
-// Pourquoi : tout le dossier public/images (67 images, hero compris) est
-// aujourd'hui committé dans le repo Git et servi par Vercel à chaque
-// build/déploiement. Ça alourdit le repo et les déploiements. Cloudinary
-// sert exactement les mêmes fichiers depuis un CDN, dans le format/poids
-// le plus léger que le navigateur du visiteur accepte (AVIF/WebP) — même
-// rendu, en plus léger et sans alourdir le repo.
-//
-// Usage : cld('/images/projects/akatech.webp') — le chemin d'entrée est
-// identique à ce qui était utilisé en local, seule l'origine change.
-// Ça suppose que les mêmes fichiers, avec les mêmes noms et la même
-// arborescence, ont été uploadés sur Cloudinary sous BASE_FOLDER — sinon
-// les URL générées ici pointent vers des fichiers qui n'existent pas.
-//
-// (Adapté du helper équivalent du projet Chez Florence — dossier et casse
-// du chemin corrigés pour coller à la vraie arborescence AKATech, qui est
-// en minuscules : public/images/, pas public/IMAGES/.)
+// Convertit un chemin d'image local ou relatif en URL CDN Cloudinary optimisée.
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'gks3f2st'
-
-// Le dossier Cloudinary doit refléter le dossier local réel du fichier.
-// On ne préfixe plus par "akatech" : les chemins locaux servent de source
-// de vérité et l'URL générée correspond à cette arborescence.
-const BASE_FOLDER = ''
-
-const VIDEO_EXTENSIONS = new Set(['webm', 'mp4', 'mov'])
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "gks3f2st";
+const DEFAULT_LANDING_FOLDER = "landing-images";
+const ROOT_ASSETS = new Set(["favicon.png", "favicon.ico", "manifest.json"]);
+const VIDEO_EXTENSIONS = new Set(["webm", "mp4", "mov", "m4v", "avi"]);
 
 /**
- * @param {string} localPath - chemin local tel qu'utilisé avant, ex: '/images/foo/bar.webp'
- * @param {{ width?: number }} [options] - largeur optionnelle (sinon Cloudinary sert l'original, juste optimisé format/qualité)
- * @returns {string} URL Cloudinary prête à mettre dans un src/poster/background-image
+ * Generates Cloudinary CDN URL for local image paths.
+ * @param {string} publicPath - ex: '01-hero-landing.webp', 'landing-images/01-hero-landing.webp', 'brand/logo-mark.png'
+ * @param {{ width?: number }} [options]
+ * @returns {string}
  */
-export function cld(localPath, options = {}) {
-  const clean = localPath.replace(/^\/?images\//i, '')
-  const dotIndex = clean.lastIndexOf('.')
-  const base = dotIndex !== -1 ? clean.slice(0, dotIndex) : clean
-  const ext = dotIndex !== -1 ? clean.slice(dotIndex + 1).toLowerCase() : 'jpg'
-  const resourceType = VIDEO_EXTENSIONS.has(ext) ? 'video' : 'image'
+export function cloudImage(publicPath, options = {}) {
+  const cleanPath = publicPath.replace(/^\/+/, "").replace(/\\/g, "/");
+  const normalizedPath = cleanPath
+    .replace(/^((frontend\/)?public\/|images\/|akatech\/)+/i, "")
+    .replace(/^\/+/, "");
 
-  const transforms = ['f_auto', 'q_auto']
-  if (options.width) transforms.push(`w_${options.width}`)
+  const segments = normalizedPath.split("/").filter(Boolean);
+  const fileName = segments.pop() ?? normalizedPath;
 
-  return `https://res.cloudinary.com/${CLOUD_NAME}/${resourceType}/upload/${transforms.join(',')}/${BASE_FOLDER}/${base}.${ext}`
+  let folder = "";
+  if (segments.length > 0) {
+    folder = segments.join("/");
+  } else if (!ROOT_ASSETS.has(fileName.toLowerCase())) {
+    folder = DEFAULT_LANDING_FOLDER;
+  }
+
+  const baseName = fileName.includes(".") ? fileName.slice(0, fileName.lastIndexOf(".")) : fileName;
+  const ext = fileName.includes(".") ? fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase() : "jpg";
+  const resourceType = VIDEO_EXTENSIONS.has(ext) ? "video" : "image";
+
+  const transforms = ["f_auto", "q_auto"];
+  if (options.width) transforms.push(`w_${options.width}`);
+
+  const folderPath = folder && folder.trim().length > 0 ? `${folder}/` : "";
+  return `https://res.cloudinary.com/${CLOUD_NAME}/${resourceType}/upload/${transforms.join(",")}/${folderPath}${baseName}.${ext}`;
 }
+
+export const cld = cloudImage;

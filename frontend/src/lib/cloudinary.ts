@@ -1,6 +1,7 @@
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "gks3f2st";
 
-const DEFAULT_FOLDER = "landing-images";
+const DEFAULT_LANDING_FOLDER = "landing-images";
+const ROOT_ASSETS = new Set(["favicon.png", "favicon.ico", "manifest.json"]);
 
 export function cloudImage(publicPath: string, options: { width?: number } = {}) {
   const cleanPath = publicPath.replace(/^\/+/, "").replace(/\\/g, "/");
@@ -10,7 +11,13 @@ export function cloudImage(publicPath: string, options: { width?: number } = {})
 
   const segments = normalizedPath.split("/").filter(Boolean);
   const fileName = segments.pop() ?? normalizedPath;
-  const folder = segments.length > 1 ? segments.slice(0, -1).join("/") : segments.length === 1 ? segments[0] : DEFAULT_FOLDER;
+
+  let folder = "";
+  if (segments.length > 0) {
+    folder = segments.join("/");
+  } else if (!ROOT_ASSETS.has(fileName.toLowerCase())) {
+    folder = DEFAULT_LANDING_FOLDER;
+  }
 
   const baseName = fileName.includes(".") ? fileName.slice(0, fileName.lastIndexOf(".")) : fileName;
   const ext = fileName.includes(".") ? fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase() : "jpg";
