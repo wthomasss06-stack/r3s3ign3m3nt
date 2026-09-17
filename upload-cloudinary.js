@@ -33,17 +33,18 @@ if (!cloudName || !apiKey || !apiSecret) {
   process.exit(1);
 }
 
-const BASE_FOLDER = 'akatech/images';
+const BASE_FOLDER = 'akatech';
 const fallbackImagesDir = path.join(__dirname, 'ecomm');
-const projectImagesDir = path.join(__dirname, 'frontend', 'public', 'landing-images');
+const projectPublicDir = path.join(__dirname, 'frontend', 'public');
 const legacyDefaultImagesDir = path.join(__dirname, 'public', 'images');
-const defaultImagesDir = fs.existsSync(projectImagesDir)
-  ? projectImagesDir
+const defaultImagesDir = fs.existsSync(projectPublicDir)
+  ? projectPublicDir
   : (fs.existsSync(legacyDefaultImagesDir) ? legacyDefaultImagesDir : fallbackImagesDir);
 const imagesDir = process.env.CLOUDINARY_SOURCE_DIR
   ? path.resolve(__dirname, process.env.CLOUDINARY_SOURCE_DIR)
   : defaultImagesDir;
 const manifestPath = path.join(__dirname, '.cloudinary-manifest.json');
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.avif', '.bmp']);
 const FORCE = process.argv.includes('--force');
 const DRY_RUN = process.argv.includes('--dry-run');
 const VIDEO_EXTENSIONS = new Set(['.webm', '.mp4', '.mov', '.m4v', '.avi']);
@@ -124,7 +125,7 @@ async function uploadAll() {
     throw new Error(`Le dossier source n'existe pas. Attendu: ${defaultImagesDir} ou ${fallbackImagesDir}`);
   }
   const manifest = loadManifest();
-  const files = getFilesRecursively(imagesDir);
+  const files = getFilesRecursively(imagesDir).filter((filePath) => IMAGE_EXTENSIONS.has(path.extname(filePath).toLowerCase()));
   let uploaded = 0;
   let skipped = 0;
   let failed = 0;
