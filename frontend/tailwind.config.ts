@@ -1,15 +1,27 @@
 import type { Config } from "tailwindcss";
 
-// Design system unifié — palette et police de base extraites de Fichier.html
-// (vert forêt + crème), appliquées à TOUT le site via ces tokens centraux : un
-// composant qui utilise "bg-cta" ou "text-ink" hérite automatiquement, sans
-// modification de son propre code. Playfair Display / DM Mono restent chargées
-// uniquement dans la zone marketing (accent décoratif, pas nécessaire sur les
-// libellés du formulaire kiosque ni du dashboard).
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        xs: "480px",
+        "3xl": "1920px",
+      },
+      maxWidth: {
+        shell: "var(--container-max)",
+        "shell-wide": "var(--container-wide)",
+        prose: "var(--content-max)",
+        auth: "26.25rem",
+      },
+      spacing: {
+        header: "var(--header-h)",
+        "mobile-nav": "var(--mobile-nav-h)",
+        "page-x": "var(--page-x)",
+        "page-y": "var(--page-y)",
+        "safe-bottom": "env(safe-area-inset-bottom, 0px)",
+        "safe-top": "env(safe-area-inset-top, 0px)",
+      },
       fontFamily: {
         heading: ["var(--font-serif)", "Georgia", "serif"],
         sans: ["var(--font-sans)", "-apple-system", "ui-sans-serif", "system-ui", "sans-serif"],
@@ -18,7 +30,6 @@ const config: Config = {
         "mk-mono": ["var(--font-sans)", "sans-serif"],
       },
       colors: {
-        // Tokens de base — utilisés partout (dashboard, kiosque, marketing)
         canvas: "#eeeee2",
         surface: "#FFFFFF",
         border: "#d6d8c9",
@@ -32,8 +43,6 @@ const config: Config = {
         "error-text": "#9F2F2D",
         "info-bg": "#E1F3FE",
         "info-text": "#1F6C9F",
-        // Alias "mk-" conservés (mêmes valeurs) pour les fichiers de la zone
-        // marketing déjà écrits avec ces noms explicites.
         "mk-ink": "#12231a",
         "mk-deep": "#173426",
         "mk-moss": "#536c57",
@@ -46,12 +55,21 @@ const config: Config = {
         md: "6px",
         lg: "10px",
         xl: "12px",
+        card: "var(--radius-card)",
       },
       boxShadow: {
         subtle: "0 2px 8px rgba(0,0,0,0.04)",
+        card: "var(--shadow-card)",
+        "card-lg": "var(--shadow-card-lg)",
       },
       transitionTimingFunction: {
         quiet: "cubic-bezier(0.16, 1, 0.3, 1)",
+      },
+      fontSize: {
+        "fluid-display": ["var(--text-display)", { lineHeight: "0.92", letterSpacing: "-0.04em" }],
+        "fluid-h1": ["var(--text-h1)", { lineHeight: "1.05", letterSpacing: "-0.03em" }],
+        "fluid-h2": ["var(--text-h2)", { lineHeight: "0.95", letterSpacing: "-0.03em" }],
+        "fluid-lead": ["var(--text-lead)", { lineHeight: "1.6" }],
       },
     },
   },

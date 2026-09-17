@@ -4,20 +4,21 @@ import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 import QRCodeManager from "@/components/QRCodeManager";
 import { apiClient } from "@/lib/api";
-import type { Organization } from "@/types";
+import type { Organization, UserProfile } from "@/types";
 
 type ViewState = "loading" | "error" | "ready";
 
 export default function QRCodePage() {
   const [org, setOrg] = useState<Organization | null>(null);
+  const [canRegenerate, setCanRegenerate] = useState(false);
   const [state, setState] = useState<ViewState>("loading");
 
   const load = () => {
     setState("loading");
-    apiClient
-      .get<Organization>("/org/me/")
-      .then((res) => {
-        setOrg(res.data);
+    Promise.all([apiClient.get<Organization>("/org/me/"), apiClient.get<UserProfile>("/auth/me/")])
+      .then(([orgRes, meRes]) => {
+        setOrg(orgRes.data);
+        setCanRegenerate(meRes.data.role === "BOSS");
         setState("ready");
       })
       .catch(() => setState("error"));
@@ -43,7 +44,7 @@ export default function QRCodePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-ink">QR Code</h1>
-      <QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} />
+      <QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} canRegenerate={canRegenerate} />
     </div>
   );
 }

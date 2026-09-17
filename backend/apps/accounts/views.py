@@ -14,6 +14,7 @@ from .cookies import clear_refresh_cookie, set_refresh_cookie
 from .serializers import (
     GoogleAuthSerializer,
     InviteStaffSerializer,
+    UserProfileUpdateSerializer,
     UserRoleUpdateSerializer,
     UserSerializer,
 )
@@ -99,6 +100,19 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    def patch(self, request):
+        serializer = UserProfileUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        update_fields = []
+        for field in ("full_name", "avatar_url"):
+            if field in serializer.validated_data:
+                setattr(user, field, serializer.validated_data[field])
+                update_fields.append(field)
+        if update_fields:
+            user.save(update_fields=update_fields)
+        return Response(UserSerializer(user).data)
 
 
 class UserRoleUpdateView(APIView):

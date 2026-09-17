@@ -37,15 +37,18 @@ export default function Header() {
   return (
     <header
       ref={navRef}
-      className={`fixed inset-x-0 top-0 z-30 flex h-[72px] items-center justify-between px-5 transition-all duration-300 sm:px-10 ${
+      className={`site-header ${
         scrolled ? "border-b border-mk-ink/10 bg-mk-paper/90 backdrop-blur-md" : "border-b border-transparent"
       }`}
     >
-      <Link href="/" className="flex items-center gap-2.5">
-        <Logo size={48} />
-      </Link>
+      <div className="md:hidden">
+        <Logo size={52} href="/" />
+      </div>
+      <div className="hidden md:block">
+        <Logo size={64} href="/" />
+      </div>
 
-      <nav className="hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[0.06em] md:flex" aria-label="Navigation principale">
+      <nav className="hidden items-center gap-6 text-[11px] font-bold uppercase tracking-[0.06em] md:flex lg:gap-8" aria-label="Navigation principale">
         {NAV_LINKS.map((link) => (
           <Link key={link.href} href={link.href} className="opacity-75 transition-opacity hover:opacity-100">
             {link.label}
@@ -68,7 +71,10 @@ export default function Header() {
       </button>
 
       {menuOpen && (
-        <div className="absolute inset-x-0 top-[72px] flex flex-col gap-5 border-b border-mk-ink/10 bg-mk-paper p-6 text-sm font-bold uppercase tracking-wide md:hidden">
+        <div
+          className="absolute inset-x-0 flex flex-col gap-5 border-b border-mk-ink/10 bg-mk-paper p-6 text-sm font-bold uppercase tracking-wide md:hidden"
+          style={{ top: "calc(var(--header-h) + env(safe-area-inset-top, 0px))" }}
+        >
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
               {link.label}

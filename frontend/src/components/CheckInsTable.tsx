@@ -12,7 +12,7 @@ export default function CheckInsTable({
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="overflow-x-auto">
+      <div className="table-scroll">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-border bg-canvas text-ink-soft">
             <tr>

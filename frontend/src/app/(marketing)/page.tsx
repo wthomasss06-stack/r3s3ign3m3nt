@@ -96,16 +96,16 @@ export default function LandingPage() {
   return (
     <div ref={heroRef}>
       {/* Hero */}
-      <section className="grid min-h-[720px] items-center gap-12 px-5 pb-20 pt-16 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-24 lg:pt-24">
+      <section className="app-shell-wide hero-section">
         <div>
           <div className="hero-kicker flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Registre d&apos;accueil sans papier
           </div>
-          <h1 className="hero-h1 mt-6 max-w-xl text-[3.2rem] font-extrabold leading-[0.92] tracking-[-0.04em] sm:text-[4.5rem] lg:text-[5.2rem]">
+          <h1 className="hero-h1 mt-6 max-w-xl text-fluid-display font-extrabold">
             Le cahier <br />
             <span className="font-mk-serif italic font-semibold text-mk-moss">prend forme.</span>
           </h1>
-          <p className="hero-lead mt-6 max-w-md text-[1.05rem] leading-relaxed text-mk-ink/70">
+          <p className="hero-lead mt-6 max-w-md text-fluid-lead text-mk-ink/70">
             R3S3IGN3M3NT remplace le registre papier des bureaux, restaurants, hôtels et accès chantier — par un
             QR Code que le visiteur scanne sans jamais créer de compte.
           </p>
@@ -148,12 +148,13 @@ export default function LandingPage() {
       </section>
 
       {/* Manifesto */}
-      <section className="manifesto grid gap-12 bg-mk-deep px-5 py-24 text-mk-paper sm:px-10 lg:grid-cols-[1fr_3fr] lg:py-36">
+      <section className="manifesto bg-mk-deep section-y text-mk-paper">
+        <div className="app-shell-wide grid gap-10 lg:grid-cols-[1fr_3fr] lg:gap-12">
         <div className="flex items-start justify-between font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-sage lg:flex-col lg:gap-4">
           <span>D&apos;où ça vient</span>
         </div>
         <div>
-          <p className="big-statement max-w-3xl text-[2.4rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[3.5rem] lg:text-[4.2rem]">
+          <p className="big-statement max-w-3xl text-fluid-h1 font-bold">
             Un cahier à 1000 FCFA reste imbattable sur le terrain. <em className="font-mk-serif font-semibold not-italic text-mk-lime italic">Jusqu&apos;à ce qu&apos;il faille relire l&apos;écriture de quelqu&apos;un.</em>
           </p>
           <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
@@ -182,19 +183,21 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* Fonctionnalités */}
-      <section id="fonctionnalites" className="px-5 py-24 sm:px-10 lg:py-36">
-        <div className="mb-16 max-w-xl">
+      <section id="fonctionnalites" className="section-y">
+        <div className="app-shell-wide">
+        <div className="mb-12 max-w-xl md:mb-16">
           <div className="flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Ce que ça change
           </div>
-          <h2 className="mt-6 text-[2.6rem] leading-[0.95] tracking-[-0.03em] sm:text-[3.5rem]">
+          <h2 className="mt-6 text-fluid-h2">
             Le strict nécessaire, <em className="font-mk-serif italic font-semibold text-mk-moss">rien à installer.</em>
           </h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="feature-grid">
           {FEATURES.map((f) => (
             <article key={f.n} className="feature-card overflow-hidden rounded-[1.4rem] border border-mk-ink/10 bg-white/40">
               <div className="aspect-[4/3] overflow-hidden">
@@ -206,23 +209,25 @@ export default function LandingPage() {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="p-8">
+              <div className="p-5 sm:p-6 md:p-8">
                 <span className="font-mk-mono text-xs text-mk-moss">{f.n}</span>
-                <h3 className="mt-4 text-xl font-bold tracking-[-0.01em]">{f.title}</h3>
+                <h3 className="mt-4 text-lg font-bold tracking-[-0.01em] md:text-xl">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-mk-ink/70">{f.body}</p>
               </div>
             </article>
           ))}
         </div>
+        </div>
       </section>
 
       {/* Méthode / Comment ça marche */}
-      <section id="comment-ca-marche" className="grid gap-12 px-5 py-24 sm:px-10 lg:grid-cols-[1fr_1.4fr] lg:py-36">
+      <section id="comment-ca-marche" className="section-y">
+        <div className="app-shell-wide grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-12">
         <div>
           <div className="flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Le parcours
           </div>
-          <h2 className="mt-6 text-[2.6rem] leading-[0.95] tracking-[-0.03em] sm:text-[3.5rem]">
+          <h2 className="mt-6 text-fluid-h2">
             Du scan <br />
             <em className="font-mk-serif italic font-semibold text-mk-moss">au dashboard.</em>
           </h2>
@@ -231,29 +236,31 @@ export default function LandingPage() {
             chaque visiteur.
           </p>
         </div>
-        <ol className="method-steps flex flex-col gap-8">
+        <ol className="method-steps flex flex-col gap-6 md:gap-8">
           {STEPS.map((step) => (
-            <li key={step.n} className="flex gap-6 border-t border-mk-ink/10 pt-6 first:border-t-0 first:pt-0">
+            <li key={step.n} className="flex gap-4 border-t border-mk-ink/10 pt-5 first:border-t-0 first:pt-0 md:gap-6 md:pt-6">
               <span className="font-mk-mono text-sm text-mk-moss">{step.n}</span>
               <div>
-                <h3 className="text-lg font-bold">{step.title}</h3>
+                <h3 className="text-base font-bold md:text-lg">{step.title}</h3>
                 <p className="mt-1 max-w-md text-sm leading-relaxed text-mk-ink/70">{step.body}</p>
               </div>
             </li>
           ))}
         </ol>
+        </div>
       </section>
 
       {/* Promesses */}
-      <section className="border-t border-mk-ink/10 px-5 py-20 sm:px-10">
-        <div className="flex justify-between font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-moss">
+      <section className="border-t border-mk-ink/10 section-y-tight">
+        <div className="app-shell-wide">
+        <div className="flex flex-col gap-2 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-moss sm:flex-row sm:justify-between">
           <span>Pensé pour le terrain</span>
           <span>R3S3IGN3M3NT / 2026</span>
         </div>
-        <p className="mt-10 max-w-3xl text-2xl font-semibold leading-snug tracking-[-0.02em] sm:text-4xl">
+        <p className="mt-8 max-w-3xl text-xl font-semibold leading-snug tracking-[-0.02em] sm:mt-10 sm:text-2xl lg:text-4xl">
           Une bonne expérience d&apos;accueil <em className="font-mk-serif italic font-semibold text-mk-moss">se remarque quand elle ne pose aucun problème.</em>
         </p>
-        <div className="promise-list mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="promise-list mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-4">
           {[
             "Zéro compte, zéro friction pour le visiteur",
             "Hors-ligne par défaut, pas en option",
@@ -266,12 +273,14 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       {/* CTA final */}
-      <section className="px-5 py-24 sm:px-10 lg:py-32">
-        <div className="rounded-[1.4rem] bg-mk-stone px-8 py-16 text-center sm:px-16">
-          <h2 className="mx-auto max-w-lg text-3xl font-bold tracking-[-0.02em] sm:text-4xl">
+      <section className="section-y">
+        <div className="app-shell-wide">
+        <div className="rounded-card bg-mk-stone px-6 py-12 text-center sm:px-12 sm:py-16 lg:px-16">
+          <h2 className="mx-auto max-w-lg text-2xl font-bold tracking-[-0.02em] sm:text-3xl lg:text-4xl">
             Prêt à ranger le cahier ?
           </h2>
           <p className="mx-auto mt-4 max-w-sm text-sm text-mk-ink/70">
@@ -283,6 +292,7 @@ export default function LandingPage() {
           >
             Se connecter <ArrowUpRight />
           </Link>
+        </div>
         </div>
       </section>
     </div>

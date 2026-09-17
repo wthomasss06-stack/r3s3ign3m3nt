@@ -62,6 +62,7 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
         user = User.objects.create_user(
             email=email,
             full_name=google_profile.get("name", ""),
+            avatar_url=google_profile.get("picture", ""),
             role=User.Role.STAFF,
             organization=invitation.organization,
         )
@@ -76,6 +77,7 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     user = User.objects.create_user(
         email=email,
         full_name=google_profile.get("name", ""),
+        avatar_url=google_profile.get("picture", ""),
         role=User.Role.BOSS,
         organization=organization,
     )

@@ -36,6 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255, blank=True)
+    avatar_url = models.TextField(blank=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.BOSS)
     organization = models.ForeignKey(
         "organizations.Organization",

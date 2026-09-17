@@ -1,16 +1,17 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ClipboardText, NotePencil, QrCode, SignOut, Users } from "@phosphor-icons/react";
+import { ClipboardText, Gear, QrCode, SignOut, Users } from "@phosphor-icons/react";
 
+import Logo from "@/components/Logo";
 import { apiClient } from "@/lib/api";
 import { setAccessToken } from "@/lib/tokenStore";
 
 const LINKS = [
   { href: "/dashboard", label: "Registre", icon: ClipboardText },
-  { href: "/dashboard/formulaire", label: "Formulaire", icon: NotePencil, allowed: ["BOSS", "GERANT"] },
   { href: "/dashboard/qr-code", label: "QR Code", icon: QrCode, allowed: ["BOSS", "GERANT"] },
   { href: "/dashboard/equipe", label: "Équipe", icon: Users, allowed: ["BOSS"] },
+  { href: "/dashboard/parametres", label: "Paramètres", icon: Gear, allowed: ["BOSS", "GERANT"] },
 ];
 
 export default function Sidebar({ orgName, role }: { orgName: string; role: "BOSS" | "GERANT" | "STAFF" }) {
@@ -27,9 +28,10 @@ export default function Sidebar({ orgName, role }: { orgName: string; role: "BOS
   };
 
   return (
-    <aside className="hidden w-64 flex-col border-r border-border bg-surface p-6 md:flex">
-      <div className="mb-8">
-        <p className="text-xs uppercase tracking-wide text-ink-soft">Établissement</p>
+    <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-surface p-5 md:flex lg:w-64 lg:p-6">
+      <div className="mb-6">
+        <Logo size={52} back />
+        <p className="mt-4 text-xs uppercase tracking-wide text-ink-soft">Établissement</p>
         <p className="font-heading font-semibold text-ink">{orgName}</p>
       </div>
 

@@ -80,7 +80,7 @@ export default function FormBuilder({
     <div className="space-y-8">
       <section>
         <h2 className="mb-3 text-sm font-medium text-ink-soft">Repartir d&apos;un modèle</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {FORM_PRESETS.map((preset) => (
             <button
               key={preset.id}
@@ -109,14 +109,11 @@ export default function FormBuilder({
 
         <div className="space-y-3">
           {fields.map((field) => (
-            <div
-              key={field.id}
-              className="flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:items-center"
-            >
+            <div key={field.id} className="form-field-row">
               <input
                 value={field.label}
                 onChange={(e) => updateField(field.id, "label", e.target.value)}
-                className="flex-1 rounded-md border border-border bg-canvas p-2 text-sm text-ink outline-none focus:border-ink"
+                className="rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
                 placeholder="Nom du champ"
               />
               <select

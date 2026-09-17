@@ -5,7 +5,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   return (
     <div>
       <Header />
-      <main className="pt-[72px]">{children}</main>
+      <main className="site-main-offset">{children}</main>
       <Footer />
     </div>
   );

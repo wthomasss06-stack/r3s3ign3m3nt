@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import Loader from "@/components/Loader";
+import MobileNav from "@/components/dashboard/MobileNav";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSilentSession } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/api";
@@ -10,6 +11,8 @@ import type { UserProfile } from "@/types";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isOnboarding = pathname.startsWith("/dashboard/onboarding");
   const { loading: sessionLoading, isAuthenticated } = useSilentSession();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +49,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) return null; // redirection déjà déclenchée vers "/"
 
+  if (isOnboarding) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen bg-canvas">
       <Sidebar orgName={user.organization_name} role={user.role} />
-      <main className="flex-1 p-6 md:p-10">{children}</main>
+      <main className="dashboard-main">
+        <div className="dashboard-content">{children}</div>
+      </main>
+      <MobileNav role={user.role} />
     </div>
   );
 }
