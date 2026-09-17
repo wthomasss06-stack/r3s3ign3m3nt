@@ -20,7 +20,7 @@ export function useGoogleAuthLogin() {
       try {
         const { data } = await axios.post(`${API_URL}/auth/google/`, { credential }, { withCredentials: true });
         setAccessToken(data.access);
-        router.push("/dashboard");
+        router.push(data.is_new ? "/dashboard/onboarding" : "/dashboard");
       } catch {
         setError("Connexion impossible. Réessaie.");
       } finally {

@@ -18,3 +18,13 @@ class GoogleAuthSerializer(serializers.Serializer):
 
 class InviteStaffSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class UserRoleUpdateSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(
+        choices=[
+            ("BOSS", "Patron"),
+            ("GERANT", "Gérant"),
+            ("STAFF", "Agent"),
+        ]
+    )

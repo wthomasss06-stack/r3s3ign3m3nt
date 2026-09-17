@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 
+import Loader from "@/components/Loader";
 import VisitorForm from "@/components/VisitorForm";
 import { useBackgroundSync } from "@/hooks/useBackgroundSync";
 import { usePublicForm } from "@/hooks/usePublicForm";
@@ -15,7 +16,7 @@ export default function VisitorPage() {
   useBackgroundSync();
 
   if (status === "loading") {
-    return <CenteredMessage title="Chargement..." />;
+    return <Loader />;
   }
   if (status === "not_found") {
     return <CenteredMessage title="QR Code invalide" message="Ce lien n'est plus actif. Contacte l'accueil." />;

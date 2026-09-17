@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import gsap from "gsap";
@@ -6,29 +7,37 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 import { ArrowDownRight, ArrowUpRight, CheckMark } from "@/components/icons";
+import Logo from "@/components/Logo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const cloudImage = (filename: string) =>
+  `https://res.cloudinary.com/gks3f2st/image/upload/f_auto,q_auto/akatech/images/${filename}`;
 
 const FEATURES = [
   {
     n: "01",
     title: "Aucune connexion pour le visiteur",
     body: "Il scanne le QR affiché à l'accueil, remplit le formulaire, signe du doigt. Aucun compte, aucune donnée mobile à lui demander.",
+    image: cloudImage("05-qr-accueil.webp"),
   },
   {
     n: "02",
     title: "Hors-ligne, vraiment",
     body: "La tablette d'accueil continue d'enregistrer même sans réseau pendant plusieurs jours. Tout part vers le dashboard dès que la connexion revient.",
+    image: cloudImage("02-sans-reseau.webp"),
   },
   {
     n: "03",
     title: "Un formulaire par métier",
     body: "Bureau, restaurant, hôtel, accès chantier — un modèle de départ pour chaque secteur, entièrement modifiable ensuite.",
+    image: cloudImage("07-pour-tous-les-etablissements.webp"),
   },
   {
     n: "04",
     title: "Un dashboard qui s'adapte",
     body: "Le tableau de bord affiche automatiquement les champs choisis. Export CSV et régénération du QR en un clic.",
+    image: cloudImage("06-patron-dashboard.webp"),
   },
 ];
 
@@ -50,9 +59,6 @@ export default function LandingPage() {
       .from(".hero-lead", { y: 20, opacity: 0, duration: 0.7 }, "-=0.5")
       .from(".hero-actions", { y: 20, opacity: 0, duration: 0.6 }, "-=0.4")
       .from(".hero-visual", { scale: 0.92, opacity: 0, duration: 1 }, "-=0.7");
-
-    gsap.to(".orbit-one", { rotation: 402, duration: 30, repeat: -1, ease: "none" });
-    gsap.to(".orbit-two", { rotation: -400, duration: 35, repeat: -1, ease: "none" });
 
     gsap.from(".big-statement", {
       scrollTrigger: { trigger: ".manifesto", start: "top 75%" },
@@ -126,34 +132,18 @@ export default function LandingPage() {
         </div>
 
         <div className="hero-visual relative">
-          <div className="flex justify-between font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-moss">
-            <span>Accueil / Kiosque</span>
-            <span>Hors-ligne par défaut</span>
-          </div>
-          <div
-            className="relative mx-auto my-5 grid aspect-square place-items-center overflow-hidden rounded-full"
-            style={{ background: "linear-gradient(145deg, #627761, #294735)", boxShadow: "22px 35px 70px rgba(22,51,37,0.22)" }}
-          >
-            <div
-              className="orbit-one absolute rounded-full border border-mk-paper/25"
-              style={{ width: "82%", height: "38%", transform: "rotate(42deg)" }}
+          <div className="overflow-hidden rounded-[1.4rem] shadow-[0_30px_70px_rgba(23,52,38,0.18)]">
+            <Image
+              src={cloudImage("01-hero-landing.webp")}
+              alt="Visiteur signant sur une tablette à l'accueil, formulaire R3S3IGN3M3NT"
+              width={1280}
+              height={720}
+              className="h-auto w-full"
+              priority
             />
-            <div
-              className="orbit-two absolute rounded-full border border-mk-paper/25"
-              style={{ width: "30%", height: "88%", transform: "rotate(-40deg)" }}
-            />
-            <div className="grid h-[60%] w-[60%] place-items-center rounded-full border border-white/20 bg-[radial-gradient(circle,rgba(214,231,168,0.4)_0%,rgba(23,52,38,0.8)_100%)] [mix-blend-mode:screen]">
-              <span className="font-mk-serif text-5xl italic text-mk-paper">R3</span>
-            </div>
-            <span className="absolute left-[13%] top-[16%] font-mk-mono text-[9px] uppercase tracking-[0.08em] text-mk-paper">
-              R3S3IGN3M3NT
-            </span>
-            <span className="absolute bottom-[15%] right-[12%] text-right font-mk-mono text-[9px] uppercase tracking-[0.08em] text-mk-paper">
-              Cahier → <strong className="font-normal text-mk-lime">QR Code</strong>
-            </span>
           </div>
-          <div className="flex justify-between px-2 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-ink">
-            <span>Une forme reconnaissable.</span>
+          <div className="mt-4 flex justify-between px-2 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-ink">
+            <span>Une prise en main immédiate.</span>
             <span>Un accueil qui reste fluide.</span>
           </div>
         </div>
@@ -168,20 +158,29 @@ export default function LandingPage() {
           <p className="big-statement max-w-3xl text-[2.4rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[3.5rem] lg:text-[4.2rem]">
             Un cahier à 1000 FCFA reste imbattable sur le terrain. <em className="font-mk-serif font-semibold not-italic text-mk-lime italic">Jusqu&apos;à ce qu&apos;il faille relire l&apos;écriture de quelqu&apos;un.</em>
           </p>
-          <div className="mt-16 grid gap-10 border-t border-mk-paper/15 pt-6 sm:grid-cols-2">
-            <p className="max-w-sm text-sm leading-relaxed text-mk-sage">
-              Le papier ne tombe jamais en panne, ne demande pas de réseau. Mais il se perd, s&apos;abîme, et personne
-              ne peut le consulter à distance. R3S3IGN3M3NT garde la simplicité du cahier et ajoute ce qu&apos;il ne
-              pourra jamais faire.
-            </p>
-            <div className="flex items-center gap-4 font-mk-mono text-[10px] leading-relaxed text-mk-sage">
-              <span className="grid h-11 w-11 place-items-center rounded-full border border-mk-sage font-mk-serif text-base italic text-mk-paper">
-                R3
-              </span>
-              <span>
-                Conçu pour le terrain
-                <br />à Abidjan
-              </span>
+          <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+            <div className="border-t border-mk-paper/15 pt-6">
+              <p className="max-w-sm text-sm leading-relaxed text-mk-sage">
+                Le papier ne tombe jamais en panne, ne demande pas de réseau. Mais il se perd, s&apos;abîme, et
+                personne ne peut le consulter à distance. R3S3IGN3M3NT garde la simplicité du cahier et ajoute
+                ce qu&apos;il ne pourra jamais faire.
+              </p>
+              <div className="mt-8 flex items-center gap-4 font-mk-mono text-[10px] leading-relaxed text-mk-sage">
+                <Logo size={40} className="rounded-full border border-mk-sage/40 bg-mk-paper/5 p-1.5" />
+                <span>
+                  Conçu pour le terrain
+                  <br />à Abidjan
+                </span>
+              </div>
+            </div>
+            <div className="overflow-hidden rounded-[1.4rem]">
+              <Image
+                src={cloudImage("04-papier-vers-digital.webp")}
+                alt="Du registre papier au formulaire digital R3S3IGN3M3NT"
+                width={900}
+                height={1120}
+                className="h-auto w-full"
+              />
             </div>
           </div>
         </div>
@@ -199,10 +198,21 @@ export default function LandingPage() {
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           {FEATURES.map((f) => (
-            <article key={f.n} className="feature-card rounded-[1.4rem] border border-mk-ink/10 bg-white/40 p-8">
-              <span className="font-mk-mono text-xs text-mk-moss">{f.n}</span>
-              <h3 className="mt-4 text-xl font-bold tracking-[-0.01em]">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-mk-ink/70">{f.body}</p>
+            <article key={f.n} className="feature-card overflow-hidden rounded-[1.4rem] border border-mk-ink/10 bg-white/40">
+              <div className="aspect-[4/3] overflow-hidden">
+                <Image
+                  src={f.image}
+                  alt={f.title}
+                  width={640}
+                  height={480}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-8">
+                <span className="font-mk-mono text-xs text-mk-moss">{f.n}</span>
+                <h3 className="mt-4 text-xl font-bold tracking-[-0.01em]">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-mk-ink/70">{f.body}</p>
+              </div>
             </article>
           ))}
         </div>

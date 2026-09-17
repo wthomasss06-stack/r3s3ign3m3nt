@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status, throttling
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -5,11 +7,16 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.common.permissions import IsBoss
+from apps.common.permissions import IsBoss, IsManager
 from apps.common.responses import error_response
 
 from .cookies import clear_refresh_cookie, set_refresh_cookie
-from .serializers import GoogleAuthSerializer, InviteStaffSerializer, UserSerializer
+from .serializers import (
+    GoogleAuthSerializer,
+    InviteStaffSerializer,
+    UserRoleUpdateSerializer,
+    UserSerializer,
+)
 from .services import (
     InvalidGoogleTokenError,
     create_staff_invitation,
@@ -34,8 +41,15 @@ class GoogleAuthView(APIView):
             google_profile = verify_google_credential(serializer.validated_data["credential"])
         except InvalidGoogleTokenError:
             return error_response("Jeton Google invalide ou expiré. Reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
+        except Exception:
+            logging.exception("Erreur non gérée pendant la vérification du token Google")
+            return error_response("Erreur d'authentification Google. Réessaie dans un instant.", status.HTTP_401_UNAUTHORIZED)
 
-        user, created = resolve_or_create_user(google_profile)
+        try:
+            user, created = resolve_or_create_user(google_profile)
+        except Exception:
+            logging.exception("Erreur non gérée pendant la résolution du compte Google")
+            return error_response("Impossible de créer ou retrouver le compte utilisateur.", status.HTTP_500_INTERNAL_SERVER_ERROR)
         refresh = RefreshToken.for_user(user)
 
         response = Response(
@@ -84,6 +98,25 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        return Response(UserSerializer(request.user).data)
+
+
+class UserRoleUpdateView(APIView):
+    """Permet de choisir le role lors du flux onboarding initial. Le patron garde la
+    permission complete ; le gerant a un sous-ensemble ; le staff est un membre simple."""
+
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        serializer = UserRoleUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        role = serializer.validated_data["role"]
+        if role == "BOSS" and request.user.role not in {"BOSS", "GERANT", "STAFF"}:
+            return error_response("Rôle invalide pour ce compte.", status.HTTP_400_BAD_REQUEST)
+
+        request.user.role = role
+        request.user.save(update_fields=["role"])
         return Response(UserSerializer(request.user).data)
 
 

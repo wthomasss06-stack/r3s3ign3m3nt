@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
+import Loader from "@/components/Loader";
 import FormBuilder from "@/components/FormBuilder";
 import { apiClient } from "@/lib/api";
 import type { FormField } from "@/types";
@@ -24,7 +25,7 @@ export default function FormulairePage() {
 
   useEffect(load, []);
 
-  if (state === "loading") return <p className="text-ink-soft">Chargement...</p>;
+  if (state === "loading") return <Loader fullScreen={false} />;
   if (state === "error") {
     return (
       <div className="flex flex-col items-start gap-3">

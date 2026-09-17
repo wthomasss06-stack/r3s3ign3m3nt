@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { ArrowUpRight, CloseIcon, MenuIcon } from "@/components/icons";
+import Logo from "@/components/Logo";
 
 gsap.registerPlugin(useGSAP);
 
@@ -40,10 +41,8 @@ export default function Header() {
         scrolled ? "border-b border-mk-ink/10 bg-mk-paper/90 backdrop-blur-md" : "border-b border-transparent"
       }`}
     >
-      <Link href="/" className="flex items-center gap-3 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
-        <span className="grid h-8 w-8 place-items-center rounded-full border border-mk-ink font-mk-serif text-[13px] italic">
-          R3
-        </span>
+      <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
+        <Logo size={30} />
         <span className="text-[15px]">
           R3S3IGN3M3NT <em className="font-mk-serif text-[14px] font-normal not-italic sm:italic">registre digital</em>
         </span>

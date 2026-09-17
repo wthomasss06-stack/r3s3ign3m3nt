@@ -24,7 +24,13 @@ function newFieldId(): string {
   return `champ_${Date.now()}_${idCounter}`;
 }
 
-export default function FormBuilder({ initialSchema }: { initialSchema: FormField[] }) {
+export default function FormBuilder({
+  initialSchema,
+  onSaved,
+}: {
+  initialSchema: FormField[];
+  onSaved?: () => void;
+}) {
   const [fields, setFields] = useState<FormField[]>(initialSchema);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -62,6 +68,7 @@ export default function FormBuilder({ initialSchema }: { initialSchema: FormFiel
     try {
       await apiClient.put("/form-template/", { fields_schema: fields });
       setSaved(true);
+      onSaved?.();
     } catch {
       setSaveError("Impossible d'enregistrer. Vérifie ta connexion et réessaie.");
     } finally {

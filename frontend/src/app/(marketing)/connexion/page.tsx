@@ -1,6 +1,7 @@
 "use client";
 import { GoogleLogin } from "@react-oauth/google";
 
+import Logo from "@/components/Logo";
 import { useGoogleAuthLogin } from "@/hooks/useAuth";
 
 export default function LoginPage() {
@@ -9,9 +10,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 px-6 py-20">
       <div className="text-center">
-        <span className="mx-auto grid h-11 w-11 place-items-center rounded-full border border-mk-ink font-mk-serif text-base italic">
-          R3
-        </span>
+        <Logo size={44} className="mx-auto" />
         <h1 className="mt-4 text-3xl font-bold tracking-[-0.02em]">Se connecter</h1>
         <p className="mt-2 text-sm text-mk-ink/70">Réservé au patron et à son équipe.</p>
       </div>

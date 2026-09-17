@@ -30,6 +30,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     class Role(models.TextChoices):
         BOSS = "BOSS", "Patron"
+        GERANT = "GERANT", "Gérant"
         STAFF = "STAFF", "Agent"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

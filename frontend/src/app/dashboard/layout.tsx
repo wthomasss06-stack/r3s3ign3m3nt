@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import Loader from "@/components/Loader";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { useSilentSession } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/api";
@@ -26,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [sessionLoading, isAuthenticated, router]);
 
   if (sessionLoading || (isAuthenticated && !user && !error)) {
-    return <div className="flex min-h-screen items-center justify-center text-ink-soft">Chargement...</div>;
+    return <Loader />;
   }
 
   if (error) {

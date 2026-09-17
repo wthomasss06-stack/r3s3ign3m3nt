@@ -8,14 +8,17 @@ import { setAccessToken } from "@/lib/tokenStore";
 
 const LINKS = [
   { href: "/dashboard", label: "Registre", icon: ClipboardText },
-  { href: "/dashboard/formulaire", label: "Formulaire", icon: NotePencil },
-  { href: "/dashboard/qr-code", label: "QR Code", icon: QrCode },
-  { href: "/dashboard/equipe", label: "Équipe", icon: Users, bossOnly: true },
+  { href: "/dashboard/formulaire", label: "Formulaire", icon: NotePencil, allowed: ["BOSS", "GERANT"] },
+  { href: "/dashboard/qr-code", label: "QR Code", icon: QrCode, allowed: ["BOSS", "GERANT"] },
+  { href: "/dashboard/equipe", label: "Équipe", icon: Users, allowed: ["BOSS"] },
 ];
 
-export default function Sidebar({ orgName, role }: { orgName: string; role: "BOSS" | "STAFF" }) {
+export default function Sidebar({ orgName, role }: { orgName: string; role: "BOSS" | "GERANT" | "STAFF" }) {
   const pathname = usePathname();
   const router = useRouter();
+  const visibleLinks = LINKS.filter((link) =>
+    link.allowed ? link.allowed.includes(role) : role !== "STAFF"
+  );
 
   const logout = async () => {
     await apiClient.post("/auth/logout/").catch(() => {});
@@ -31,7 +34,7 @@ export default function Sidebar({ orgName, role }: { orgName: string; role: "BOS
       </div>
 
       <nav className="flex-1 space-y-1">
-        {LINKS.filter((link) => !link.bossOnly || role === "BOSS").map(({ href, label, icon: Icon }) => {
+        {visibleLinks.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
+import Loader from "@/components/Loader";
 import QRCodeManager from "@/components/QRCodeManager";
 import { apiClient } from "@/lib/api";
 import type { Organization } from "@/types";
@@ -24,7 +25,7 @@ export default function QRCodePage() {
 
   useEffect(load, []);
 
-  if (state === "loading") return <p className="text-ink-soft">Chargement...</p>;
+  if (state === "loading") return <Loader fullScreen={false} />;
   if (state === "error" || !org) {
     return (
       <div className="flex flex-col items-start gap-3">
