@@ -33,7 +33,7 @@ if (!cloudName || !apiKey || !apiSecret) {
   process.exit(1);
 }
 
-const BASE_FOLDER = 'akatech';
+const BASE_FOLDER = '';
 const fallbackImagesDir = path.join(__dirname, 'ecomm');
 const projectPublicDir = path.join(__dirname, 'frontend', 'public');
 const legacyDefaultImagesDir = path.join(__dirname, 'public', 'images');
@@ -73,7 +73,8 @@ function getFilesRecursively(dir) {
 function publicIdFor(relativePath) {
   const normalized = relativePath.replace(/\\/g, '/').normalize('NFC');
   const extension = path.posix.extname(normalized);
-  return `${BASE_FOLDER}/${extension ? normalized.slice(0, -extension.length) : normalized}`;
+  const withoutExt = extension ? normalized.slice(0, -extension.length) : normalized;
+  return BASE_FOLDER ? `${BASE_FOLDER}/${withoutExt}` : withoutExt;
 }
 
 function resourceTypeFor(relativePath) {

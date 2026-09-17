@@ -6,13 +6,14 @@ function cloudImage(publicPath, options = {}) {
 
   const segments = normalizedPath.split('/').filter(Boolean);
   const fileName = segments.pop() ?? normalizedPath;
-  const DEFAULT_FOLDER = 'akatech/landing-images';
-  const folder = segments.length > 0 ? ['akatech', ...segments].join('/') : DEFAULT_FOLDER;
+  const DEFAULT_FOLDER = 'landing-images';
+  const folder = segments.length > 1 ? segments.slice(0, -1).join('/') : segments.length === 1 ? segments[0] : DEFAULT_FOLDER;
   const baseName = fileName.includes('.') ? fileName.slice(0, fileName.lastIndexOf('.')) : fileName;
   const ext = fileName.includes('.') ? fileName.slice(fileName.lastIndexOf('.') + 1).toLowerCase() : 'jpg';
   const transforms = ['f_auto', 'q_auto'];
   if (options.width) transforms.push('w_' + options.width);
-  return `https://res.cloudinary.com/gks3f2st/image/upload/${transforms.join(',')}/${folder}/${baseName}.${ext}`;
+  const folderPath = folder && folder.trim().length > 0 ? `${folder}/` : '';
+  return `https://res.cloudinary.com/gks3f2st/image/upload/${transforms.join(',')}/${folderPath}${baseName}.${ext}`;
 }
 
 const samples = [
