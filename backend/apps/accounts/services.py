@@ -62,8 +62,7 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
         user = User.objects.create_user(
             email=email,
             full_name=google_profile.get("name", ""),
-            avatar_url=google_profile.get("picture", ""),
-            role=User.Role.STAFF,
+            role=invitation.role,
             organization=invitation.organization,
         )
         invitation.accepted_at = user.created_at
@@ -77,7 +76,6 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     user = User.objects.create_user(
         email=email,
         full_name=google_profile.get("name", ""),
-        avatar_url=google_profile.get("picture", ""),
         role=User.Role.BOSS,
         organization=organization,
     )
@@ -90,10 +88,11 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     return user, True
 
 
-def create_staff_invitation(organization, email: str, invited_by: User) -> StaffInvitation:
+def create_staff_invitation(organization, email: str, invited_by: User, role: str = User.Role.STAFF) -> StaffInvitation:
     return StaffInvitation.objects.create(
         organization=organization,
         email=email,
+        role=role,
         token=secrets.token_urlsafe(24),
         invited_by=invited_by,
     )

@@ -2,7 +2,7 @@
 obligatoires (le client PWA peut etre contourne, cf. senior-dev-guardrails)."""
 from apps.checkins.models import CheckIn
 
-from .conftest import valid_checkin_payload
+from apps.testing_utils import valid_checkin_payload
 
 
 def test_sync_creates_checkin(db, api_client, organization, form_template):

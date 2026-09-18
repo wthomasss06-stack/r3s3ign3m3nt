@@ -26,14 +26,14 @@ const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
 if (!cloudName || !apiKey || !apiSecret) {
   console.error('❌ CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY ou CLOUDINARY_API_SECRET manquant.');
-  console.error('Veuillez configurer ces variables dans votre fichier .env ou .env.local :');
-  console.error('  CLOUDINARY_CLOUD_NAME=votre_cloud_name');
-  console.error('  CLOUDINARY_API_KEY=votre_api_key');
-  console.error('  CLOUDINARY_API_SECRET=votre_api_secret');
+  console.error('PowerShell correct :');
+  console.error("  $env:CLOUDINARY_CLOUD_NAME='gks3f2st'");
+  console.error("  $env:CLOUDINARY_API_KEY='674331848559466'");
+  console.error("  $env:CLOUDINARY_API_SECRET='V8-tl1howLhCFFPDNcdwS4XjB64faut'");
   process.exit(1);
 }
 
-const BASE_FOLDER = '';
+const BASE_FOLDER = 'akatech';
 const fallbackImagesDir = path.join(__dirname, 'ecomm');
 const projectPublicDir = path.join(__dirname, 'frontend', 'public');
 const legacyDefaultImagesDir = path.join(__dirname, 'public', 'images');
@@ -73,8 +73,7 @@ function getFilesRecursively(dir) {
 function publicIdFor(relativePath) {
   const normalized = relativePath.replace(/\\/g, '/').normalize('NFC');
   const extension = path.posix.extname(normalized);
-  const withoutExt = extension ? normalized.slice(0, -extension.length) : normalized;
-  return BASE_FOLDER ? `${BASE_FOLDER}/${withoutExt}` : withoutExt;
+  return `${BASE_FOLDER}/${extension ? normalized.slice(0, -extension.length) : normalized}`;
 }
 
 function resourceTypeFor(relativePath) {
@@ -99,23 +98,8 @@ async function uploadFile(filePath, relativePath) {
     use_filename: 'false',
   };
   const signature = generateSignature(paramsToSign, apiSecret);
-  const mimeTypes = {
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.webp': 'image/webp',
-    '.svg': 'image/svg+xml',
-    '.gif': 'image/gif',
-    '.avif': 'image/avif',
-    '.bmp': 'image/bmp',
-    '.mp4': 'video/mp4',
-    '.webm': 'video/webm',
-  };
-  const ext = path.extname(filePath).toLowerCase();
-  const mimeType = mimeTypes[ext] || 'application/octet-stream';
-
   const formData = new FormData();
-  formData.append('file', new Blob([fs.readFileSync(filePath)], { type: mimeType }), path.basename(filePath));
+  formData.append('file', new Blob([fs.readFileSync(filePath)]), path.basename(filePath));
   formData.append('api_key', apiKey);
   formData.append('timestamp', String(timestamp));
   formData.append('public_id', publicId);

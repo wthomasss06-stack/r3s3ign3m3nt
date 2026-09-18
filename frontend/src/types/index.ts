@@ -28,14 +28,11 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-export type AccountRole = "BOSS" | "GERANT" | "STAFF";
-
 export interface UserProfile {
   id: string;
   email: string;
   full_name: string;
-  avatar_url: string;
-  role: AccountRole;
+  role: "BOSS" | "GERANT" | "STAFF";
   organization_id: string;
   organization_name: string;
 }

@@ -9,20 +9,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            "id",
-            "email",
-            "full_name",
-            "avatar_url",
-            "role",
-            "organization_id",
-            "organization_name",
-        ]
+        fields = ["id", "email", "full_name", "avatar_url", "role", "organization_id", "organization_name"]
 
 
 class UserProfileUpdateSerializer(serializers.Serializer):
+    """Volontairement restreint a full_name/avatar_url : le role ne se change JAMAIS
+    par cette voie (uniquement via une invitation, cf. services.resolve_or_create_user) —
+    une auto-promotion serait une faille de privilege escalation."""
+
     full_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
-    avatar_url = serializers.CharField(required=False, allow_blank=True, max_length=500_000)
+    avatar_url = serializers.CharField(required=False, allow_blank=True)
 
 
 class GoogleAuthSerializer(serializers.Serializer):
@@ -31,13 +27,4 @@ class GoogleAuthSerializer(serializers.Serializer):
 
 class InviteStaffSerializer(serializers.Serializer):
     email = serializers.EmailField()
-
-
-class UserRoleUpdateSerializer(serializers.Serializer):
-    role = serializers.ChoiceField(
-        choices=[
-            ("BOSS", "Patron"),
-            ("GERANT", "Gérant"),
-            ("STAFF", "Agent"),
-        ]
-    )
+    role = serializers.ChoiceField(choices=["GERANT", "STAFF"], default="STAFF", required=False)

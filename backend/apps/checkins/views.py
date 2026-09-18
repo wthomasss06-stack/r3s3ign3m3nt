@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import StreamingHttpResponse
 
-from apps.common.permissions import IsBoss, IsManager, IsOrgMember
+from apps.common.permissions import IsBossOrGerant, IsOrgMember
 from apps.common.responses import error_response
 from apps.organizations.models import Organization
 
@@ -34,8 +34,8 @@ class FormTemplateView(APIView):
         return Response(FormTemplateSerializer(template).data)
 
     def put(self, request):
-        if request.user.role not in {"BOSS", "GERANT"}:
-            self.permission_denied(request, message=IsManager.message)
+        if request.user.role not in ("BOSS", "GERANT"):
+            self.permission_denied(request, message=IsBossOrGerant.message)
 
         template = request.user.organization.form_template
         serializer = FormTemplateSerializer(template, data=request.data, partial=True)
@@ -125,7 +125,7 @@ class CheckInListView(generics.ListAPIView):
 
 
 class CheckInExportView(APIView):
-    permission_classes = [IsAuthenticated, IsManager]
+    permission_classes = [IsAuthenticated, IsBossOrGerant]
 
     def get(self, request):
         organization = request.user.organization

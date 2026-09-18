@@ -1,104 +1,170 @@
 {
   "brand/logo-mark.png": {
     "hash": "cb7865c277da79dbc31111c29d16516e60d2a0a42b12aa4eba249f855a73fa71",
-    "publicId": "brand/logo-mark",
+    "publicId": "akatech/brand/logo-mark",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:46.906Z"
+    "updatedAt": "2026-09-17T05:26:21.004Z"
   },
   "brand/logo-source.png": {
     "hash": "80039808b8f204ea355482f41647826a6a15627fd8737d14e606971b037ea99e",
-    "publicId": "brand/logo-source",
+    "publicId": "akatech/brand/logo-source",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:48.781Z"
+    "updatedAt": "2026-09-17T05:26:24.209Z"
   },
   "favicon.png": {
     "hash": "16786d11f16c672d4bbcd0b546bc5ea2fc80c38ab1aa048e92dc8d5f260e1018",
-    "publicId": "favicon",
+    "publicId": "akatech/favicon",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:49.491Z"
+    "updatedAt": "2026-09-17T05:26:24.944Z"
   },
   "icons/icon-192.png": {
     "hash": "8c13bcf4560a455d72e87c03576be42ba8677a4729ca44d262b4f9ad29638076",
-    "publicId": "icons/icon-192",
+    "publicId": "akatech/icons/icon-192",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:50.253Z"
+    "updatedAt": "2026-09-17T05:26:25.622Z"
   },
   "icons/icon-512.png": {
     "hash": "045ef83ee2fe2fb7cf47784b5c4b0db0eec5850ed6d980e38210de8ba67c100d",
-    "publicId": "icons/icon-512",
+    "publicId": "akatech/icons/icon-512",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:51.946Z"
+    "updatedAt": "2026-09-17T05:26:26.626Z"
   },
   "icons/icon-maskable-512.png": {
     "hash": "3d6269fd9b7b2374c525c3e7bf571802883f689b2ccbe671449b1ea701c558b7",
-    "publicId": "icons/icon-maskable-512",
+    "publicId": "akatech/icons/icon-maskable-512",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:52.969Z"
+    "updatedAt": "2026-09-17T05:26:28.528Z"
+  },
+  "image landing/01-accueil-moderne.webp": {
+    "hash": "3cf9ca3accbe9802e51d78e67f0c873f50cd2309ccf7cb03ae7ab26917edd5c7",
+    "publicId": "akatech/image landing/01-accueil-moderne",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:35.073Z"
+  },
+  "image landing/01-hero-landing.webp": {
+    "hash": "3a662b7df0427bc439aad3d02e6036ea73dcf6f33b642bf28e9f9a93ca48e392",
+    "publicId": "akatech/image landing/01-hero-landing",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:39.071Z"
+  },
+  "image landing/02-sans-reseau.webp": {
+    "hash": "91989bfa822348a887cda8fa12dc5ea2bc0cc18b4347c656a0c05846180b82a7",
+    "publicId": "akatech/image landing/02-sans-reseau",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:44.316Z"
+  },
+  "image landing/03-signe-et-passe.webp": {
+    "hash": "6eacfd4b0012e8cbe58222f8a0a90a83456adcef819bd472a35cf960166967a2",
+    "publicId": "akatech/image landing/03-signe-et-passe",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:47.916Z"
+  },
+  "image landing/04-papier-vers-digital.webp": {
+    "hash": "7c8cafdeb6eb707dadaca2a08e3b2d4b9d5245ee5b517d9560de71aefa9086fb",
+    "publicId": "akatech/image landing/04-papier-vers-digital",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:51.870Z"
+  },
+  "image landing/05-qr-accueil.webp": {
+    "hash": "1fc0c4ed260e79e02fe68587157b0f8251d1fe48d616a01eaa15a046dd59eb0a",
+    "publicId": "akatech/image landing/05-qr-accueil",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:55.585Z"
+  },
+  "image landing/06-patron-dashboard.webp": {
+    "hash": "cf80a1f3081e26a0126d92b9897f2938a89b23355b5876e51b3b0873808b9ec7",
+    "publicId": "akatech/image landing/06-patron-dashboard",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:26:59.330Z"
+  },
+  "image landing/07-pour-tous-les-etablissements.webp": {
+    "hash": "54f1281613d362d795fcf40a4674d4c2cc2be7be8e8f85155428e6250df63c83",
+    "publicId": "akatech/image landing/07-pour-tous-les-etablissements",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:27:06.910Z"
+  },
+  "image landing/08-confidentialite.webp": {
+    "hash": "6e45d67074cd1b2c3c81219cf88d68a107ede02dc2cd12566b67875c93b6724a",
+    "publicId": "akatech/image landing/08-confidentialite",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:27:11.975Z"
+  },
+  "image landing/09-mise-en-place.webp": {
+    "hash": "995b2f00789203e41c4dd7a45cc2540f0f68c5c0cac9baeb294d929329d22208",
+    "publicId": "akatech/image landing/09-mise-en-place",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:27:17.297Z"
+  },
+  "image landing/10-signature-marque.webp": {
+    "hash": "d7aa304615204115befbcf46c60a795eef85e8bd8d823bcb55573cbf18f70f45",
+    "publicId": "akatech/image landing/10-signature-marque",
+    "resourceType": "image",
+    "updatedAt": "2026-09-17T05:27:21.747Z"
   },
   "landing-images/01-accueil-moderne.webp": {
     "hash": "3cf9ca3accbe9802e51d78e67f0c873f50cd2309ccf7cb03ae7ab26917edd5c7",
-    "publicId": "landing-images/01-accueil-moderne",
+    "publicId": "akatech/landing-images/01-accueil-moderne",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:54.618Z"
+    "updatedAt": "2026-09-17T05:27:26.617Z"
   },
   "landing-images/01-hero-landing.webp": {
     "hash": "3a662b7df0427bc439aad3d02e6036ea73dcf6f33b642bf28e9f9a93ca48e392",
-    "publicId": "landing-images/01-hero-landing",
+    "publicId": "akatech/landing-images/01-hero-landing",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:56.342Z"
+    "updatedAt": "2026-09-17T05:27:29.330Z"
   },
   "landing-images/02-sans-reseau.webp": {
     "hash": "91989bfa822348a887cda8fa12dc5ea2bc0cc18b4347c656a0c05846180b82a7",
-    "publicId": "landing-images/02-sans-reseau",
+    "publicId": "akatech/landing-images/02-sans-reseau",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:58.127Z"
+    "updatedAt": "2026-09-17T05:27:43.899Z"
   },
   "landing-images/03-signe-et-passe.webp": {
     "hash": "6eacfd4b0012e8cbe58222f8a0a90a83456adcef819bd472a35cf960166967a2",
-    "publicId": "landing-images/03-signe-et-passe",
+    "publicId": "akatech/landing-images/03-signe-et-passe",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:13:59.749Z"
+    "updatedAt": "2026-09-17T05:27:52.660Z"
   },
   "landing-images/04-papier-vers-digital.webp": {
     "hash": "7c8cafdeb6eb707dadaca2a08e3b2d4b9d5245ee5b517d9560de71aefa9086fb",
-    "publicId": "landing-images/04-papier-vers-digital",
+    "publicId": "akatech/landing-images/04-papier-vers-digital",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:01.860Z"
+    "updatedAt": "2026-09-17T05:28:00.746Z"
   },
   "landing-images/05-qr-accueil.webp": {
     "hash": "1fc0c4ed260e79e02fe68587157b0f8251d1fe48d616a01eaa15a046dd59eb0a",
-    "publicId": "landing-images/05-qr-accueil",
+    "publicId": "akatech/landing-images/05-qr-accueil",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:03.088Z"
+    "updatedAt": "2026-09-17T05:28:04.889Z"
   },
   "landing-images/06-patron-dashboard.webp": {
     "hash": "cf80a1f3081e26a0126d92b9897f2938a89b23355b5876e51b3b0873808b9ec7",
-    "publicId": "landing-images/06-patron-dashboard",
+    "publicId": "akatech/landing-images/06-patron-dashboard",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:04.317Z"
+    "updatedAt": "2026-09-17T05:28:08.650Z"
   },
   "landing-images/07-pour-tous-les-etablissements.webp": {
     "hash": "54f1281613d362d795fcf40a4674d4c2cc2be7be8e8f85155428e6250df63c83",
-    "publicId": "landing-images/07-pour-tous-les-etablissements",
+    "publicId": "akatech/landing-images/07-pour-tous-les-etablissements",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:05.924Z"
+    "updatedAt": "2026-09-17T05:28:13.845Z"
   },
   "landing-images/08-confidentialite.webp": {
     "hash": "6e45d67074cd1b2c3c81219cf88d68a107ede02dc2cd12566b67875c93b6724a",
-    "publicId": "landing-images/08-confidentialite",
+    "publicId": "akatech/landing-images/08-confidentialite",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:08.420Z"
+    "updatedAt": "2026-09-17T05:28:16.355Z"
   },
   "landing-images/09-mise-en-place.webp": {
     "hash": "995b2f00789203e41c4dd7a45cc2540f0f68c5c0cac9baeb294d929329d22208",
-    "publicId": "landing-images/09-mise-en-place",
+    "publicId": "akatech/landing-images/09-mise-en-place",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:10.074Z"
+    "updatedAt": "2026-09-17T05:28:21.146Z"
   },
   "landing-images/10-signature-marque.webp": {
     "hash": "d7aa304615204115befbcf46c60a795eef85e8bd8d823bcb55573cbf18f70f45",
-    "publicId": "landing-images/10-signature-marque",
+    "publicId": "akatech/landing-images/10-signature-marque",
     "resourceType": "image",
-    "updatedAt": "2026-09-17T16:14:11.416Z"
+    "updatedAt": "2026-09-17T05:28:25.870Z"
   }
 }

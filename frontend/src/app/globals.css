@@ -2,216 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Tokens responsive (mobile → tablette → desktop → grand écran) ─── */
+/* Design tokens — triplets RGB pour permettre les modificateurs d'opacite Tailwind
+   (bg-canvas/50 etc.) via rgb(var(--x) / <alpha-value>). Une seule paire de valeurs
+   par role : clair sous :root, sombre sous .dark. Bascule via la classe .dark sur
+   <html> (voir useTheme) — jamais de flash au chargement grace au script inline
+   dans layout.tsx qui l'applique avant le premier rendu. */
 :root {
-  --header-h: 4rem;
-  --mobile-nav-h: 4.25rem;
-  --page-x: 1rem;
-  --page-y: 1.25rem;
-  --container-max: 72rem;
-  --container-wide: 90rem;
-  --content-max: 42rem;
-  --radius-card: 1.25rem;
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-card-lg: 0 24px 64px rgba(18, 35, 26, 0.08);
-
-  --text-display: clamp(2.25rem, 5vw + 1rem, 5.2rem);
-  --text-h1: clamp(1.75rem, 3vw + 0.75rem, 3.5rem);
-  --text-h2: clamp(1.65rem, 2.5vw + 0.65rem, 3.5rem);
-  --text-lead: clamp(0.9375rem, 0.5vw + 0.85rem, 1.0625rem);
+  --c-canvas: 238 238 226;
+  --c-surface: 255 255 255;
+  --c-border: 214 216 201;
+  --c-ink: 18 35 26;
+  --c-ink-soft: 83 108 87;
+  --c-cta: 23 52 38;
+  --c-cta-hover: 83 108 87;
+  --c-cta-ink: 238 238 226;
+  --c-success-bg: 237 243 236;
+  --c-success-text: 52 101 56;
+  --c-error-bg: 253 235 236;
+  --c-error-text: 159 47 45;
+  --c-info-bg: 225 243 254;
+  --c-info-text: 31 108 159;
+  --c-sage: 186 200 173;
+  --c-lime: 214 231 168;
 }
 
-@media (min-width: 480px) {
-  :root {
-    --page-x: 1.25rem;
-    --page-y: 1.5rem;
-    --header-h: 4.25rem;
-  }
+.dark {
+  --c-canvas: 13 26 19;
+  --c-surface: 22 38 28;
+  --c-border: 42 59 48;
+  --c-ink: 238 238 226;
+  --c-ink-soft: 168 184 171;
+  --c-cta: 27 201 142;
+  --c-cta-hover: 61 219 163;
+  --c-cta-ink: 13 26 19;
+  --c-success-bg: 20 48 31;
+  --c-success-text: 111 207 135;
+  --c-error-bg: 58 22 22;
+  --c-error-text: 242 139 139;
+  --c-info-bg: 20 42 56;
+  --c-info-text: 126 196 236;
+  --c-sage: 186 200 173;
+  --c-lime: 214 231 168;
 }
 
-@media (min-width: 768px) {
-  :root {
-    --page-x: 1.75rem;
-    --page-y: 2rem;
-    --header-h: 4.5rem;
-    --mobile-nav-h: 0px;
-    --radius-card: 1.4rem;
-  }
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+  line-height: 1.6;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-@media (min-width: 1024px) {
-  :root {
-    --page-x: 2.5rem;
-    --page-y: 2.5rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  :root {
-    --page-x: 3rem;
-  }
-}
-
-@media (min-width: 1920px) {
-  :root {
-    --container-max: 80rem;
-    --container-wide: 96rem;
-    --page-x: 3.5rem;
-  }
-}
-
-@layer base {
-  html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    scroll-behavior: smooth;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
-
-  body {
-    @apply bg-canvas text-ink font-sans antialiased;
-    line-height: 1.6;
-    min-height: 100dvh;
-    overflow-x: hidden;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    @apply font-heading;
-  }
-
-  img,
-  video,
-  svg {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Cibles tactiles confortables sur mobile / tablette */
-  @media (max-width: 1023px) {
-    button:not([class*="p-"]):not([class*="py-"]),
-    a[role="button"],
-    .tap-target {
-      min-height: 2.75rem;
-    }
-  }
-}
-
-@layer components {
-  .app-shell {
-    @apply mx-auto w-full max-w-shell px-page-x;
-  }
-
-  .app-shell-wide {
-    @apply mx-auto w-full max-w-shell-wide px-page-x;
-  }
-
-  .section-y {
-    @apply py-16 sm:py-20 md:py-24 lg:py-28 3xl:py-32;
-  }
-
-  .section-y-tight {
-    @apply py-12 sm:py-16 md:py-20 lg:py-24;
-  }
-
-  .dashboard-main {
-    @apply flex-1 px-page-x pb-[calc(var(--mobile-nav-h)+env(safe-area-inset-bottom,0px)+0.75rem)] pt-page-y md:pb-page-y md:pt-8 lg:px-10 lg:pt-10;
-  }
-
-  .dashboard-content {
-    @apply mx-auto w-full max-w-shell-wide;
-  }
-
-  .auth-shell {
-    @apply flex min-h-[100dvh] flex-col items-center justify-center px-page-x py-page-y;
-    padding-bottom: calc(var(--page-y) + env(safe-area-inset-bottom, 0px));
-    padding-top: calc(var(--page-y) + env(safe-area-inset-top, 0px));
-  }
-
-  .auth-card {
-    @apply w-full max-w-auth rounded-card border bg-white px-6 py-8 shadow-card-lg sm:px-10 sm:py-10 md:py-12;
-    border-color: rgb(18 35 26 / 0.08);
-  }
-
-  .mobile-nav-bar {
-    @apply fixed inset-x-0 bottom-0 z-20 flex border-t border-border px-2 py-1.5 backdrop-blur-md md:hidden;
-    background-color: rgb(255 255 255 / 0.95);
-    padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  .site-header {
-    @apply fixed inset-x-0 top-0 z-30 flex items-center justify-between px-page-x transition-all duration-300;
-    height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-
-  .site-main-offset {
-    padding-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-  }
-
-  .table-scroll {
-    @apply -mx-page-x overflow-x-auto px-page-x sm:mx-0 sm:px-0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .table-scroll table {
-    min-width: 36rem;
-  }
-
-  @media (min-width: 768px) {
-    .table-scroll table {
-      min-width: 0;
-      width: 100%;
-    }
-  }
-
-  /* Bouton Google : largeur fluide sur petits écrans */
-  .google-login-wrap {
-    @apply flex w-full max-w-full justify-center overflow-hidden;
-  }
-
-  .google-login-wrap > div,
-  .google-login-wrap iframe {
-    max-width: 100% !important;
-  }
-
-  .hero-section {
-    @apply grid min-h-[min(720px,100dvh)] items-center gap-8 py-12 sm:py-16 md:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-24 xl:gap-24;
-  }
-
-  .feature-grid {
-    @apply grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-2 3xl:gap-6;
-  }
-
-  .onboarding-shell {
-    @apply mx-auto w-full max-w-3xl px-page-x py-page-y sm:py-8 lg:max-w-4xl lg:py-12;
-  }
-
-  .form-field-row {
-    @apply flex flex-col gap-2 rounded-lg border border-border p-3 sm:flex-row sm:flex-wrap sm:items-center;
-  }
-
-  .form-field-row input,
-  .form-field-row select {
-    @apply min-h-[2.75rem] w-full sm:min-h-0 sm:flex-1;
-  }
-}
-
-@layer utilities {
-  .pb-safe-nav {
-    padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
+h1, h2, h3, h4 {
+  @apply font-heading;
 }
 
 .prose-legal h2 {
@@ -239,5 +80,5 @@
 }
 
 .prose-legal .legal-warning {
-  @apply mt-10 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900;
+  @apply mt-10 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200;
 }

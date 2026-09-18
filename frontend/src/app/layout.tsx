@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Chelsea_Market, Instrument_Serif } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 
 import Providers from "@/components/Providers";
+import { THEME_INIT_SCRIPT } from "@/hooks/useTheme";
 import "./globals.css";
 
 // Police unique du site appliquée partout : Chelsea Market pour le texte UI et
@@ -34,17 +34,16 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#173426",
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${sans.variable} ${serif.variable}`}>
       <body>
+        {/* Applique la classe .dark avant l'hydratation React : evite un flash du
+            mauvais theme au chargement (lit localStorage puis prefers-color-scheme). */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <Providers>{children}</Providers>
-        <Analytics />
       </body>
     </html>
   );

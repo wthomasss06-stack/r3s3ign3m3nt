@@ -29,6 +29,7 @@ export default function FormBuilder({
   onSaved,
 }: {
   initialSchema: FormField[];
+  /** Optionnel — utilisé par l'onboarding pour savoir quand proposer de continuer. */
   onSaved?: () => void;
 }) {
   const [fields, setFields] = useState<FormField[]>(initialSchema);
@@ -77,16 +78,16 @@ export default function FormBuilder({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <section>
         <h2 className="mb-3 text-sm font-medium text-ink-soft">Repartir d&apos;un modèle</h2>
-        <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
           {FORM_PRESETS.map((preset) => (
             <button
               key={preset.id}
               type="button"
               onClick={() => applyPreset(preset.fields)}
-              className="rounded-lg border border-border bg-surface p-3 text-left transition hover:border-ink"
+              className="rounded-lg border border-border bg-surface p-3 text-left text-sm transition hover:border-ink"
             >
               <p className="font-medium text-ink">{preset.label}</p>
               <p className="mt-0.5 text-xs text-ink-soft">{preset.fields.length} champs</p>
@@ -95,86 +96,95 @@ export default function FormBuilder({
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-surface p-5">
-        <div className="mb-4 flex items-center justify-between">
+      <section>
+        <div className="mb-3 flex items-center justify-between">
           <h2 className="font-heading font-semibold text-ink">Champs du formulaire</h2>
           <button
             type="button"
             onClick={addField}
             className="flex items-center gap-1 text-sm font-medium text-ink transition hover:text-cta-hover"
           >
-            <Plus size={16} weight="bold" /> Ajouter un champ
+            <Plus size={16} weight="bold" /> Ajouter
           </button>
         </div>
 
-        <div className="space-y-3">
-          {fields.map((field) => (
-            <div key={field.id} className="form-field-row">
-              <input
-                value={field.label}
-                onChange={(e) => updateField(field.id, "label", e.target.value)}
-                className="rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
-                placeholder="Nom du champ"
-              />
-              <select
-                value={field.type}
-                onChange={(e) => updateField(field.id, "type", e.target.value as FieldType)}
-                className="rounded-md border border-border bg-canvas p-2 text-sm text-ink outline-none focus:border-ink"
-              >
-                {(Object.entries(FIELD_TYPE_LABELS) as [FieldType, string][]).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              {field.type === "select" && (
-                <input
-                  value={field.options?.join(", ") ?? ""}
-                  onChange={(e) =>
-                    updateField(
-                      field.id,
-                      "options",
-                      e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
-                    )
-                  }
-                  className="rounded-md border border-border bg-canvas p-2 text-sm text-ink outline-none focus:border-ink sm:w-56"
-                  placeholder="Options séparées par une virgule"
-                />
-              )}
-              <label className="flex items-center gap-1.5 whitespace-nowrap text-sm text-ink-soft">
-                <input
-                  type="checkbox"
-                  checked={field.required}
-                  onChange={(e) => updateField(field.id, "required", e.target.checked)}
-                  className="h-4 w-4 accent-cta"
-                />
-                Obligatoire
-              </label>
-              <button
-                type="button"
-                onClick={() => removeField(field.id)}
-                aria-label="Supprimer ce champ"
-                className="self-end text-ink-soft transition hover:text-error-text sm:self-auto"
-              >
-                <Trash size={18} weight="bold" />
-              </button>
-            </div>
-          ))}
+        {fields.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-ink-soft">
+            Aucun champ pour l&apos;instant — choisis un modèle ci-dessus ou ajoute tes propres champs.
+          </p>
+        ) : (
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+            {fields.map((field) => (
+              <div key={field.id} className="p-4">
+                {/* Ligne 1 : libellé + supprimer — toujours pleine largeur, jamais compressée */}
+                <div className="flex items-center gap-3">
+                  <input
+                    value={field.label}
+                    onChange={(e) => updateField(field.id, "label", e.target.value)}
+                    placeholder="Nom du champ"
+                    className="min-w-0 flex-1 rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeField(field.id)}
+                    aria-label="Supprimer ce champ"
+                    className="shrink-0 p-1 text-ink-soft transition hover:text-error-text"
+                  >
+                    <Trash size={18} weight="bold" />
+                  </button>
+                </div>
 
-          {fields.length === 0 && (
-            <p className="py-6 text-center text-sm text-ink-soft">
-              Aucun champ pour l&apos;instant — choisis un modèle ci-dessus ou ajoute tes propres champs.
-            </p>
-          )}
-        </div>
+                {/* Ligne 2 : type + obligatoire — s'enroule naturellement sur petit écran */}
+                <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <select
+                    value={field.type}
+                    onChange={(e) => updateField(field.id, "type", e.target.value as FieldType)}
+                    className="rounded-md border border-border bg-canvas p-2 text-sm text-ink outline-none focus:border-ink"
+                  >
+                    {(Object.entries(FIELD_TYPE_LABELS) as [FieldType, string][]).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="flex items-center gap-1.5 text-sm text-ink-soft">
+                    <input
+                      type="checkbox"
+                      checked={field.required}
+                      onChange={(e) => updateField(field.id, "required", e.target.checked)}
+                      className="h-4 w-4 accent-cta"
+                    />
+                    Obligatoire
+                  </label>
+                </div>
+
+                {/* Ligne 3 : options — seulement pour une liste déroulante */}
+                {field.type === "select" && (
+                  <input
+                    value={field.options?.join(", ") ?? ""}
+                    onChange={(e) =>
+                      updateField(
+                        field.id,
+                        "options",
+                        e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                      )
+                    }
+                    placeholder="Options séparées par une virgule (ex : Rendez-vous, Livraison)"
+                    className="mt-2.5 w-full rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={save}
           disabled={saving || fields.length === 0}
-          className="flex items-center justify-center gap-1.5 rounded-full bg-cta px-6 py-3 font-medium text-white transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover active:scale-[0.98] disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 rounded-full bg-cta px-6 py-3 font-medium text-cta-ink transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover active:scale-[0.98] disabled:opacity-50"
         >
           {saving ? (
             "Enregistrement..."

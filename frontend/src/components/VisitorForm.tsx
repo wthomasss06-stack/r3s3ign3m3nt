@@ -121,7 +121,7 @@ export default function VisitorForm({
       <button
         type="submit"
         disabled={status === "saving"}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-cta py-3.5 font-medium text-white transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover active:scale-[0.98] disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-cta py-3.5 font-medium text-cta-ink transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover active:scale-[0.98] disabled:opacity-50"
       >
         {status === "saving" ? "Enregistrement..." : (
           <>

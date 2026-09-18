@@ -71,6 +71,7 @@ class StaffInvitation(models.Model):
         "organizations.Organization", on_delete=models.CASCADE, related_name="invitations"
     )
     email = models.EmailField()
+    role = models.CharField(max_length=10, choices=User.Role.choices, default=User.Role.STAFF)
     token = models.CharField(max_length=64, unique=True)
     invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     accepted_at = models.DateTimeField(null=True, blank=True)

@@ -10,7 +10,7 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <article className="app-shell mx-auto max-w-2xl py-16 sm:py-20">
+    <article className="mx-auto max-w-2xl px-5 py-20 sm:px-10">
       <p className="font-mk-mono text-[10px] uppercase tracking-[0.1em] text-mk-moss">
         Dernière mise à jour : {lastUpdated}
       </p>

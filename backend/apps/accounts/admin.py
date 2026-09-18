@@ -12,5 +12,5 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(StaffInvitation)
 class StaffInvitationAdmin(admin.ModelAdmin):
-    list_display = ("email", "organization", "accepted_at", "created_at")
-    list_filter = ("organization",)
+    list_display = ("email", "role", "organization", "accepted_at", "created_at")
+    list_filter = ("organization", "role")

@@ -11,15 +11,15 @@ class IsBoss(BasePermission):
         return bool(request.user and request.user.is_authenticated and request.user.role == "BOSS")
 
 
-class IsManager(BasePermission):
-    """Autorise BOSS et GERANT. Le gestionnaire peut superviser sans être patron."""
-    message = "Cette action est reservee au patron ou au gerant de l'etablissement."
+class IsBossOrGerant(BasePermission):
+    """Autorise BOSS et GERANT — actions de gestion courante deleguees par le patron
+    (formulaire, export, invitation de STAFF), mais pas les actions sensibles
+    (regeneration du QR, suppression de l'organisation) reservees a IsBoss."""
+    message = "Cette action est reservee au patron ou au gerant."
 
     def has_permission(self, request, view):
         return bool(
-            request.user
-            and request.user.is_authenticated
-            and request.user.role in {"BOSS", "GERANT"}
+            request.user and request.user.is_authenticated and request.user.role in ("BOSS", "GERANT")
         )
 
 

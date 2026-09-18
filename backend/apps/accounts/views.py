@@ -1,5 +1,3 @@
-import logging
-
 from rest_framework import status, throttling
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -7,17 +5,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.common.permissions import IsBoss, IsManager
+from apps.common.permissions import IsBossOrGerant
 from apps.common.responses import error_response
 
 from .cookies import clear_refresh_cookie, set_refresh_cookie
-from .serializers import (
-    GoogleAuthSerializer,
-    InviteStaffSerializer,
-    UserProfileUpdateSerializer,
-    UserRoleUpdateSerializer,
-    UserSerializer,
-)
+from .serializers import GoogleAuthSerializer, InviteStaffSerializer, UserProfileUpdateSerializer, UserSerializer
 from .services import (
     InvalidGoogleTokenError,
     create_staff_invitation,
@@ -42,15 +34,8 @@ class GoogleAuthView(APIView):
             google_profile = verify_google_credential(serializer.validated_data["credential"])
         except InvalidGoogleTokenError:
             return error_response("Jeton Google invalide ou expiré. Reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
-        except Exception:
-            logging.exception("Erreur non gérée pendant la vérification du token Google")
-            return error_response("Erreur d'authentification Google. Réessaie dans un instant.", status.HTTP_401_UNAUTHORIZED)
 
-        try:
-            user, created = resolve_or_create_user(google_profile)
-        except Exception:
-            logging.exception("Erreur non gérée pendant la résolution du compte Google")
-            return error_response("Impossible de créer ou retrouver le compte utilisateur.", status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user, created = resolve_or_create_user(google_profile)
         refresh = RefreshToken.for_user(user)
 
         response = Response(
@@ -104,55 +89,42 @@ class MeView(APIView):
     def patch(self, request):
         serializer = UserProfileUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = request.user
+
         update_fields = []
         for field in ("full_name", "avatar_url"):
             if field in serializer.validated_data:
-                setattr(user, field, serializer.validated_data[field])
+                setattr(request.user, field, serializer.validated_data[field])
                 update_fields.append(field)
         if update_fields:
-            user.save(update_fields=update_fields)
-        return Response(UserSerializer(user).data)
-
-
-class UserRoleUpdateView(APIView):
-    """Permet de choisir le role lors du flux onboarding initial. Le patron garde la
-    permission complete ; le gerant a un sous-ensemble ; le staff est un membre simple."""
-
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request):
-        serializer = UserRoleUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        role = serializer.validated_data["role"]
-        if role == "BOSS" and request.user.role not in {"BOSS", "GERANT", "STAFF"}:
-            return error_response("Rôle invalide pour ce compte.", status.HTTP_400_BAD_REQUEST)
-
-        request.user.role = role
-        request.user.save(update_fields=["role"])
+            request.user.save(update_fields=update_fields)
         return Response(UserSerializer(request.user).data)
 
 
 class InviteStaffView(APIView):
-    """Seul le patron invite. Le rattachement reel se fait par email a la connexion
-    Google de l'invite (voir services.resolve_or_create_user) : ce endpoint ne fait
-    que preparer l'invitation et fournir un lien a partager manuellement (WhatsApp/email) —
-    aucun envoi automatique en V1 (pas de service d'emailing configure, cf. cahier des charges)."""
+    """BOSS et GERANT peuvent tous deux inviter — mais seul BOSS peut accorder le
+    role GERANT (un GERANT ne peut inviter que des STAFF, jamais un pair)."""
 
-    permission_classes = [IsAuthenticated, IsBoss]
+    permission_classes = [IsAuthenticated, IsBossOrGerant]
     throttle_classes = [throttling.UserRateThrottle]
 
     def post(self, request):
         serializer = InviteStaffSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        requested_role = serializer.validated_data.get("role", "STAFF")
+        if requested_role == "GERANT" and request.user.role != "BOSS":
+            return error_response(
+                "Seul le patron peut inviter un gérant.", status.HTTP_403_FORBIDDEN
+            )
+
         invitation = create_staff_invitation(
             organization=request.user.organization,
             email=serializer.validated_data["email"],
             invited_by=request.user,
+            role=requested_role,
         )
         invite_link = f"{request.build_absolute_uri('/')[:-1]}?invite={invitation.token}"
         return Response(
-            {"invite_link": invite_link, "email": invitation.email}, status=status.HTTP_201_CREATED
+            {"invite_link": invite_link, "email": invitation.email, "role": invitation.role},
+            status=status.HTTP_201_CREATED,
         )

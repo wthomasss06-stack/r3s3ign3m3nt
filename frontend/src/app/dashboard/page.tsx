@@ -44,7 +44,7 @@ export default function RegistrePage() {
         <p className="text-ink-soft">Impossible de charger le registre.</p>
         <button
           onClick={load}
-          className="rounded-full bg-cta px-4 py-2 text-sm font-medium text-white transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover"
+          className="rounded-full bg-cta px-4 py-2 text-sm font-medium text-cta-ink transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover"
         >
           Réessayer
         </button>
@@ -64,7 +64,7 @@ export default function RegistrePage() {
         <button
           onClick={() => exportToCSV(records, schema, orgName)}
           disabled={records.length === 0}
-          className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover disabled:opacity-50"
+          className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-cta-ink transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover disabled:opacity-50"
         >
           Exporter en CSV
         </button>

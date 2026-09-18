@@ -29,10 +29,13 @@ export default function Footer() {
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="border-t border-mk-ink/10 bg-mk-paper pb-[calc(2rem+env(safe-area-inset-bottom,0px))] pt-16">
-      <div className="app-shell-wide grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 md:gap-12">
+    <footer className="border-t border-mk-ink/10 bg-mk-paper px-5 pb-8 pt-16 sm:px-10">
+      <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <Logo size={64} href="/" />
+          <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
+            <Logo size={34} />
+            <span>R3S3IGN3M3NT</span>
+          </Link>
           <p className="mt-4 max-w-[220px] text-sm leading-relaxed text-mk-moss">
             Le registre d&apos;accueil qui remplace le cahier — sans compte pour le visiteur, même hors-ligne.
           </p>
@@ -53,7 +56,7 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="app-shell-wide mt-12 flex flex-col items-start justify-between gap-4 border-t border-mk-ink/10 pt-6 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-moss sm:mt-16 sm:flex-row sm:items-center">
+      <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-mk-ink/10 pt-6 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-moss sm:flex-row sm:items-center">
         <span>© 2026 R3S3IGN3M3NT</span>
         <a
           href="https://akatech.vercel.app/"

@@ -52,7 +52,4 @@ secrets/
 # Local data
 *.local
 frontend/hh
-qr-register-saas.zip
-qr-register-saasv0.1.zip
-qr-register-saas0.2.zip
 qr-register-saasv0.3.zip
