@@ -1,3 +1,4 @@
+export type AccountRole = "BOSS" | "GERANT" | "STAFF";
 export type FieldType = "text" | "phone" | "email" | "number" | "date" | "select" | "checkbox" | "signature";
 
 export interface FormField {
@@ -32,7 +33,8 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string;
-  role: "BOSS" | "GERANT" | "STAFF";
+  avatar_url?: string | null;
+  role: AccountRole;
   organization_id: string;
   organization_name: string;
 }

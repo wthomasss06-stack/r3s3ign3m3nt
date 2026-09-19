@@ -8,6 +8,8 @@
    <html> (voir useTheme) — jamais de flash au chargement grace au script inline
    dans layout.tsx qui l'applique avant le premier rendu. */
 :root {
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: Georgia, "Times New Roman", Times, serif;
   --c-canvas: 238 238 226;
   --c-surface: 255 255 255;
   --c-border: 214 216 201;
