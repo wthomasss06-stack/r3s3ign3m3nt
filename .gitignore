@@ -48,7 +48,7 @@ build/
 *.key
 *.crt
 secrets/
-
+ 
 # Local data
 *.local
 frontend/hh
