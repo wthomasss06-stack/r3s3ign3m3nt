@@ -80,44 +80,31 @@ function resourceTypeFor(relativePath) {
   return VIDEO_EXTENSIONS.has(path.extname(relativePath).toLowerCase()) ? 'video' : 'image';
 }
 
-function generateSignature(params, secret) {
-  const payload = Object.keys(params).sort().map(key => `${key}=${params[key]}`).join('&');
-  return crypto.createHash('sha1').update(payload + secret).digest('hex');
-}
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
+  secure: true,
+});
 
 async function uploadFile(filePath, relativePath) {
   const publicId = publicIdFor(relativePath);
   const resourceType = resourceTypeFor(relativePath);
-  const timestamp = Math.floor(Date.now() / 1000);
-  const paramsToSign = {
-    invalidate: 'true',
-    overwrite: 'true',
-    public_id: publicId,
-    timestamp,
-    unique_filename: 'false',
-    use_filename: 'false',
-  };
-  const signature = generateSignature(paramsToSign, apiSecret);
-  const formData = new FormData();
-  formData.append('file', new Blob([fs.readFileSync(filePath)]), path.basename(filePath));
-  formData.append('api_key', apiKey);
-  formData.append('timestamp', String(timestamp));
-  formData.append('public_id', publicId);
-  formData.append('overwrite', 'true');
-  formData.append('invalidate', 'true');
-  formData.append('unique_filename', 'false');
-  formData.append('use_filename', 'false');
-  formData.append('signature', signature);
 
   if (DRY_RUN) return { secure_url: '[dry-run]', public_id: publicId, resource_type: resourceType };
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
-    method: 'POST',
-    body: formData,
+  const res = await cloudinary.uploader.upload(filePath, {
+    public_id: publicId,
+    resource_type: resourceType,
+    overwrite: true,
+    invalidate: true,
+    use_filename: false,
+    unique_filename: false,
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || JSON.stringify(data));
-  return data;
+
+  return res;
 }
 
 async function uploadAll() {
