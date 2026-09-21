@@ -1,7 +1,6 @@
 import hashlib
 import secrets
 import time
-from urllib.parse import urlencode
 
 from django.conf import settings
 from rest_framework import status
@@ -52,15 +51,20 @@ class CloudinarySignatureView(APIView):
     permission_classes = [IsAuthenticated, IsBoss]
 
     def post(self, request):
-        cloud_name = getattr(settings, "CLOUDINARY_CLOUD_NAME", "").strip()
-        api_key = getattr(settings, "CLOUDINARY_API_KEY", "").strip()
-        api_secret = getattr(settings, "CLOUDINARY_API_SECRET", "").strip()
+        cloud_name = getattr(settings, "CLOUDINARY_CLOUD_NAME", "").strip().strip("\"'")
+        api_key = getattr(settings, "CLOUDINARY_API_KEY", "").strip().strip("\"'")
+        api_secret = getattr(settings, "CLOUDINARY_API_SECRET", "").strip().strip("\"'")
         if not cloud_name or not api_key or not api_secret:
             return error_response("Cloudinary n’est pas configuré sur le serveur.", status.HTTP_503_SERVICE_UNAVAILABLE)
         timestamp = int(time.time())
         folder = f"qr-register/{request.user.organization_id}"
         params = {"folder": folder, "timestamp": timestamp}
-        signature = hashlib.sha1(f"{urlencode(sorted(params.items()))}{api_secret}".encode("utf-8")).hexdigest()
+        # Cloudinary signe les paramètres triés sans URL-encoder le slash du
+        # dossier : `folder=qr-register/<org>&timestamp=<unix>`. Utiliser
+        # urlencode() ici transforme `/` en `%2F` et produit une signature
+        # différente de celle recalculée par Cloudinary.
+        string_to_sign = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
+        signature = hashlib.sha1(f"{string_to_sign}{api_secret}".encode("utf-8")).hexdigest()
         return Response({"cloud_name": cloud_name, "api_key": api_key, "timestamp": timestamp, "folder": folder, "signature": signature})
 
 

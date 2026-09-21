@@ -30,7 +30,10 @@ export default function Header() {
       lastY = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const footer = document.querySelector<HTMLElement>("[data-footer-zone]");
+    const footerObserver = footer ? new IntersectionObserver(([entry]) => { if (entry) setHidden(entry.isIntersecting && !menuOpen); }, { threshold: 0.12 }) : null;
+    if (footer) footerObserver?.observe(footer);
+    return () => { window.removeEventListener("scroll", onScroll); footerObserver?.disconnect(); };
   }, [menuOpen]);
 
   useGSAP(

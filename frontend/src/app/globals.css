@@ -71,7 +71,7 @@ body {
 }
 
 h1, h2, h3, h4 {
-  @apply font-heading;
+  @apply font-sans font-bold;
 }
 
 .prose-legal h2 {
@@ -95,7 +95,7 @@ h1, h2, h3, h4 {
 }
 
 .prose-legal strong {
-  @apply font-semibold text-mk-ink;
+  @apply font-bold text-mk-ink;
 }
 
 .prose-legal .legal-warning {

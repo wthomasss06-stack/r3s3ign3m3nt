@@ -12,7 +12,7 @@ export default function Logo({ size = 32, className = "", back }: LogoProps) {
   const content = (
     <Image
       src="/brand/logo-mark.png"
-      alt="R3S3IGN3M3NT"
+      alt="R3NS3IGN3M3NT"
       width={size}
       height={size}
       className={className}

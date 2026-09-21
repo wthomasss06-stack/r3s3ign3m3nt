@@ -17,7 +17,7 @@ export default function LoginPage() {
         <div className="relative hidden flex-col justify-between overflow-hidden bg-mk-deep p-12 text-deep-ink lg:flex">
           <Image
             src="/landing-images/securite-carre.webp"
-            alt="R3S3IGN3M3NT — données protégées, accès par rôle"
+            alt="R3NS3IGN3M3NT — données protégées, accès par rôle"
             fill
             className="object-cover opacity-40 mix-blend-overlay"
             sizes="(min-width: 1024px) 50vw, 100vw"

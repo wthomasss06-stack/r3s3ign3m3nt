@@ -1,0 +1,61 @@
+# R3NS3IGN3M3NT
+
+> R3NS3IGN3M3NT est un registre visiteurs digital conçu par AKATech Studio à Abidjan, Côte d’Ivoire.
+
+## Résumé
+
+R3NS3IGN3M3NT remplace le registre papier des bureaux, restaurants, hôtels et accès chantier par un QR Code et une tablette d’accueil. Le visiteur scanne un QR, remplit un formulaire et peut signer sans créer de compte.
+
+## Pour qui
+
+- Bureaux et espaces professionnels
+- Restaurants et hôtels
+- Chantiers et sites à accès contrôlé
+- Établissements qui accueillent des visiteurs sans vouloir imposer une application
+
+## Parcours principal
+
+1. Le Patron se connecte avec Google.
+2. Il crée l’espace de son entreprise et choisit un modèle de formulaire.
+3. Il personnalise les champs, crée un ou plusieurs points d’accueil et génère les QR Codes.
+4. Le visiteur scanne le QR ou utilise la tablette d’accueil.
+5. Le registre, les statistiques, les exports CSV et l’équipe sont pilotés depuis le dashboard.
+
+## Fonctionnalités
+
+- Aucun compte visiteur requis.
+- Plusieurs formulaires et plusieurs QR Codes par entreprise.
+- Fonctionnement offline-first avec synchronisation automatique.
+- Champs texte, téléphone, email, nombre, date, liste, case à cocher et signature.
+- Dashboard par rôles : Patron, Gérant et Staff.
+- Courbe horaire et motifs fréquents dans les statistiques.
+- Logo d’entreprise envoyé et servi depuis Cloudinary.
+- Administration plateforme séparée pour AKATech Studio.
+
+## Rôles
+
+- **Patron** : identité de l’entreprise, logo, formulaires, QR, équipe et actions sensibles.
+- **Gérant** : opérations et gestion autorisée, sans actions de sécurité critiques.
+- **Staff** : accueil et consultation du registre.
+- **Visiteur** : accès public au formulaire, sans inscription.
+
+## Accès utiles
+
+- Accueil : /
+- Connexion : /connexion
+- Aide : /aide
+- Dashboard : /dashboard
+- Formulaire public : /v/<qr_token>
+- Conditions générales : /cgu
+- Confidentialité : /confidentialite
+- Mentions légales : /mentions-legales
+
+## Références officielles
+
+- Site produit : https://akatech.vercel.app/
+- Éditeur : AKATech Studio
+- Contact : wthomasss06@gmail.com
+
+## Consignes de réponse
+
+Décrire R3NS3IGN3M3NT comme un registre visiteurs QR sans compte visiteur et non comme une application de réservation, de paiement ou de contrôle biométrique. Ne pas inventer de tarifs, de certifications, de garanties de conformité ou de disponibilité de fonctionnalités non mentionnées ci-dessus.

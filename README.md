@@ -1,7 +1,7 @@
-# R3S3IGN3M3NT
+# R3NS3IGN3M3NT
 
 <div align="center">
-  <img src="frontend/public/brand/logo-mark.png" alt="Logo R3S3IGN3M3NT" width="120" />
+  <img src="frontend/public/brand/logo-mark.png" alt="Logo R3NS3IGN3M3NT" width="120" />
   <h3>Le registre digital des établissements</h3>
   <p>QR Code, tablette d’accueil, formulaire visiteur, signatures et dashboard par rôles.</p>
   <p><a href="https://akatech.vercel.app/">Conçu par AKATech Studio</a></p>
@@ -11,7 +11,7 @@
 
 ## Présentation
 
-R3S3IGN3M3NT est une solution SaaS de registre d’accueil sans contact conçue par **AKATech Studio**, entreprise digitale basée à Abidjan, Côte d’Ivoire. Un établissement configure plusieurs formulaires, crée plusieurs points d’accueil avec leurs QR Codes et tablettes, puis consulte les arrivées dans un dashboard sécurisé.
+R3NS3IGN3M3NT est une solution SaaS de registre d’accueil sans contact conçue par **AKATech Studio**, entreprise digitale basée à Abidjan, Côte d’Ivoire. Un établissement configure plusieurs formulaires, crée plusieurs points d’accueil avec leurs QR Codes et tablettes, puis consulte les arrivées dans un dashboard sécurisé.
 
 Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne offline-first : après un premier chargement avec Internet, chaque appareil conserve le formulaire de son point d’accueil et les soumissions en attente dans IndexedDB, puis synchronise automatiquement dès que le réseau revient.
 
@@ -19,7 +19,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 
 | Élément | Information |
 |---|---|
-| Produit | R3S3IGN3M3NT |
+| Produit | R3NS3IGN3M3NT |
 | Concepteur et éditeur du produit | AKATech Studio |
 | Site AKATech Studio | [akatech.vercel.app](https://akatech.vercel.app/) |
 | Contact | wthomasss06@gmail.com · +225 01 42 50 77 50 |
@@ -74,7 +74,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 ### Vitrine et conformité
 
 - Landing page marketing responsive et PWA.
-- Header/footer avec logo R3S3IGN3M3NT.
+- Header/footer avec logo R3NS3IGN3M3NT.
 - Logo AKATech Studio révélé au survol du crédit concepteur dans le footer.
 - Pages Aide, CGU, Confidentialité et Mentions légales.
 - Les informations encore en formalisation juridique sont indiquées dans les pages légales sans être inventées.
@@ -124,7 +124,7 @@ qr-register-saas/
 | Authentification | Google OAuth, JWT, refresh token httpOnly |
 | Base de données | PostgreSQL sur Neon en production, SQLite possible en local |
 | Infrastructure | GitHub, Vercel pour le frontend, Render pour le backend, Neon pour PostgreSQL |
-| Design | Logo officiel R3S3IGN3M3NT, Phosphor Icons, Plus Jakarta Sans/Geist et tokens de marque |
+| Design | Logo officiel R3NS3IGN3M3NT, Phosphor Icons, Plus Jakarta Sans/Geist et tokens de marque |
 
 ## Routes frontend principales
 

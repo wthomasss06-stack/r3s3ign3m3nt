@@ -1,4 +1,4 @@
-# Flow tablette / employé — R3S3IGN3M3NT
+# Flow tablette / employé — R3NS3IGN3M3NT
 
 ## Objectif
 

@@ -84,7 +84,7 @@ export default function OnboardingPage() {
       <div className="mb-10 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <Logo size={28} />
-          <span className="font-heading font-semibold text-ink">R3S3IGN3M3NT</span>
+          <span className="font-heading font-semibold text-ink">R3NS3IGN3M3NT</span>
         </div>
         <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">Étape {step}/3</span>
       </div>

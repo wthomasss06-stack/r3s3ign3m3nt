@@ -9,11 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        heading: ["var(--font-serif)", "serif"],
+        heading: ["var(--font-sans)", "-apple-system", "ui-sans-serif", "system-ui", "sans-serif"],
         sans: ["var(--font-sans)", "-apple-system", "ui-sans-serif", "system-ui", "sans-serif"],
-        "mk-serif": ["var(--font-serif)", "Georgia", "serif"],
+        "mk-serif": ["var(--font-sans)", "-apple-system", "ui-sans-serif", "system-ui", "sans-serif"],
         "mk-sans": ["var(--font-sans)", "-apple-system", "sans-serif"],
-        "mk-mono": ["ui-monospace", "SFMono-Regular", "monospace"],
+        "mk-mono": ["var(--font-sans)", "-apple-system", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       colors: {
         canvas: "rgb(var(--c-canvas) / <alpha-value>)",
