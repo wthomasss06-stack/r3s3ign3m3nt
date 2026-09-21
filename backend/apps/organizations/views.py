@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from apps.common.permissions import IsBoss, IsOrgMember
 
-from .serializers import OrganizationSerializer, RenameOrganizationSerializer
+from .serializers import OrganizationSerializer, OrganizationUpdateSerializer
 
 
 class MyOrganizationView(APIView):
@@ -17,22 +17,20 @@ class MyOrganizationView(APIView):
 
     def patch(self, request):
         self.check_object_permissions(request, request.user.organization)
-        if request.user.role != "BOSS":
+        if request.user.role not in ("BOSS", "GERANT"):
             self.permission_denied(request, message=IsBoss.message)
 
-        serializer = RenameOrganizationSerializer(data=request.data)
+        serializer = OrganizationUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-
         organization = request.user.organization
-        organization.name = serializer.validated_data["name"]
-        organization.save(update_fields=["name"])
+        for field, value in serializer.validated_data.items():
+            setattr(organization, field, value.strip() if isinstance(value, str) else value)
+        if serializer.validated_data:
+            organization.save(update_fields=list(serializer.validated_data.keys()))
         return Response(OrganizationSerializer(organization).data)
 
 
 class RegenerateQRTokenView(APIView):
-    """Invalide instantanement l'ancien QR (utile si un lien fuite ou si un
-    telephone kiosque est vole — cf. RISK-002 du cahier des charges)."""
-
     permission_classes = [IsAuthenticated, IsBoss]
 
     def post(self, request):

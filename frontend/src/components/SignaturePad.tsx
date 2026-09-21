@@ -15,7 +15,10 @@ export default function SignaturePad({ onSave }: { onSave: (signatureBlob: strin
   const handleEnd = () => {
     if (sigCanvas.current?.isEmpty()) return;
     const dataUrl = sigCanvas.current?.getTrimmedCanvas().toDataURL("image/png");
-    if (dataUrl) onSave(dataUrl);
+    if (dataUrl) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 180"><image href="${dataUrl}" width="500" height="180" preserveAspectRatio="none" /></svg>`;
+      onSave(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+    }
   };
 
   return (

@@ -64,7 +64,12 @@ class PublicFormView(APIView):
                 "Aucun formulaire actif pour cet établissement.", status.HTTP_404_NOT_FOUND
             )
 
-        data = {"organization_name": organization.name, "fields_schema": template.fields_schema}
+        data = {
+            "organization_name": organization.name,
+            "organization_logo_url": organization.logo_url,
+            "visit_reasons": organization.visit_reasons or [],
+            "fields_schema": template.fields_schema,
+        }
         return Response(PublicFormSerializer(data).data)
 
 

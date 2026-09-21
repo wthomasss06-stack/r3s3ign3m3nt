@@ -6,9 +6,6 @@ ALLOWED_FIELD_TYPES = ("text", "phone", "email", "number", "date", "select", "ch
 
 
 class FormFieldSchemaSerializer(serializers.Serializer):
-    """Valide chaque entree de fields_schema — evite qu'un JSON malforme casse le
-    rendu du formulaire visiteur cote frontend."""
-
     id = serializers.SlugField()
     type = serializers.ChoiceField(choices=ALLOWED_FIELD_TYPES)
     label = serializers.CharField(max_length=255)
@@ -27,6 +24,8 @@ class FormTemplateSerializer(serializers.ModelSerializer):
 
 class PublicFormSerializer(serializers.Serializer):
     organization_name = serializers.CharField()
+    organization_logo_url = serializers.CharField(allow_blank=True)
+    visit_reasons = serializers.ListField(child=serializers.CharField())
     fields_schema = serializers.JSONField()
 
 
@@ -37,10 +36,6 @@ class CheckInSerializer(serializers.ModelSerializer):
 
 
 class CheckInSyncItemSerializer(serializers.Serializer):
-    """Le client n'envoie jamais organization_id ni form_template_id — uniquement le
-    qr_token public. L'organisation est deduite cote serveur (correction de la faille
-    IDOR identifiee lors de la conception, cf. cahier des charges §11)."""
-
     idempotency_key = serializers.UUIDField()
     qr_token = serializers.CharField(max_length=64)
     responses = serializers.DictField()

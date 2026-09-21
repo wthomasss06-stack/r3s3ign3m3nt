@@ -56,6 +56,8 @@ export function usePublicForm(qrToken: string) {
       if (cached) {
         setData({
           organization_name: cached.organization_name,
+          organization_logo_url: "",
+          visit_reasons: [],
           fields_schema: cached.fields_schema as PublicFormData["fields_schema"],
         });
         setFromCache(true);

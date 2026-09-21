@@ -31,7 +31,15 @@ export default function VisitorPage() {
   }
   if (!data) return null;
 
-  return <VisitorForm schema={data.fields_schema} qrToken={qrToken} orgName={data.organization_name} />;
+  return (
+    <VisitorForm
+      schema={data.fields_schema}
+      qrToken={qrToken}
+      orgName={data.organization_name}
+      logoUrl={data.organization_logo_url}
+      visitReasons={data.visit_reasons}
+    />
+  );
 }
 
 function CenteredMessage({ title, message }: { title: string; message?: string }) {

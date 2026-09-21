@@ -10,6 +10,8 @@ export interface FormField {
 
 export interface PublicFormData {
   organization_name: string;
+  organization_logo_url: string;
+  visit_reasons: string[];
   fields_schema: FormField[];
 }
 
@@ -43,6 +45,8 @@ export interface UserProfile {
 export interface Organization {
   id: string;
   name: string;
+  logo_url: string;
+  visit_reasons: string[];
   qr_secure_token: string;
   created_at: string;
 }
