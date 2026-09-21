@@ -56,6 +56,7 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 - [x] Synchronisation automatique et idempotente (aucun doublon même en cas de coupure réseau)
 - [x] Invitation d'un agent par email (rattachement automatique à la connexion Google de l'invité)
 - [x] Dashboard : registre, export CSV, régénération du QR
+- [x] Pagination responsive du registre : 20 visiteurs par page sur ordinateur et 10 sur mobile
 - [x] Onboarding en 4 étapes : rôle/profil, établissement, formulaire, QR + invitation avec possibilité de passer
 - [x] Marque établissement : nom, logo, motifs de visite et avatar utilisateur
 - [x] QR personnalisé avec logo centré
@@ -170,7 +171,7 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 | `PATCH/DELETE` | `/api/v1/access-points/<id>/` | BOSS/GERANT ou BOSS | Modifier, désactiver ou supprimer un point d’accueil |
 | GET | `/api/v1/public/forms/<qr_token>/` | Public | Formulaire à afficher au scan |
 | POST | `/api/v1/checkins/sync/` | Public | Envoi (groupé, idempotent) des fiches visiteurs |
-| GET | `/api/v1/checkins/` | BOSS/STAFF | Registre paginé |
+| GET | `/api/v1/checkins/` | BOSS/STAFF | Registre paginé (fenêtre backend jusqu’à 100 fiches pour la pagination d’affichage) |
 | GET | `/api/v1/checkins/stats/` | BOSS/GERANT/STAFF | Volume, volume du jour, heures de pointe et motifs fréquents |
 | GET | `/api/v1/checkins/export/` | BOSS | Export CSV |
 | POST | `/api/v1/org/me/regenerate-qr/` | BOSS | Invalide l'ancien QR |
@@ -204,4 +205,4 @@ Un onglet **Entreprise** est désormais disponible dans les paramètres. Le patr
 
 Les états de connexion et de déconnexion sont présentés dans des modales contextualisées : bienvenue pour une première connexion, bon retour pour une connexion existante, et formule de départ adaptée à l’heure. La session repose sur le cookie httpOnly de renouvellement et une erreur réseau transitoire ne provoque pas de déconnexion artificielle après actualisation.
 
-Sur mobile, le feedback est accessible par une icône ronde flottante afin de préserver l’espace de navigation. L’administration plateforme expose ses onglets sur desktop et mobile ; le dashboard établissement affiche également le lien d’administration pour le rôle patron lorsque l’accès plateforme est autorisé côté serveur.
+Sur mobile, le feedback est accessible par une icône ronde flottante afin de préserver l’espace de navigation. Le registre du dashboard affiche 10 visiteurs par page sur mobile et 20 par page sur ordinateur ; la navigation de page reste accessible au clavier et s’adapte au changement de largeur d’écran. L’administration plateforme reste séparée du dashboard établissement et n’est pas affichée dans sa sidebar.

@@ -183,7 +183,9 @@ class SyncCheckInsView(APIView):
 
 
 class CheckInPagination(PageNumberPagination):
-    page_size = 25
+    # Le dashboard applique ensuite une pagination d’affichage responsive :
+    # 20 lignes par page sur desktop et 10 sur mobile.
+    page_size = 100
     max_page_size = 100
 
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 import { restoreSession } from "@/lib/authClient";
-import { setAccessToken } from "@/lib/tokenStore";
+import { getAccessToken, setAccessToken } from "@/lib/tokenStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -21,7 +21,7 @@ export function useGoogleAuthLogin() {
         const { data } = await axios.post(`${API_URL}/auth/google/`, { credential }, { withCredentials: true });
         setAccessToken(data.access);
         if (typeof window !== "undefined") sessionStorage.setItem("qr_login_greeting", JSON.stringify({ isNew: Boolean(data.is_new), name: data.user?.full_name || data.user?.email || "" }));
-        router.push("/dashboard");
+        router.push(data.is_new ? "/dashboard/onboarding" : "/dashboard");
       } catch (error) {
         if (axios.isAxiosError(error)) {
           setError(error.response?.data?.error?.message || "Connexion impossible. Réessaie.");
@@ -42,7 +42,7 @@ export function useGoogleAuthLogin() {
  * une erreur transitoire (cold start Render inclus — skill jwt-auth-resilience). */
 export function useSilentSession() {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAccessToken()));
 
   useEffect(() => {
     let mounted = true;

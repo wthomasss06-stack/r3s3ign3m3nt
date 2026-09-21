@@ -64,7 +64,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 
 ### Dashboard et statistiques
 
-- Registre paginé des visiteurs.
+- Registre paginé des visiteurs : 20 lignes par page sur ordinateur et 10 lignes par page sur mobile, avec adaptation automatique au changement de largeur d’écran.
 - Rafraîchissement automatique toutes les 30 secondes sans rechargement de page.
 - Volume total et volume du jour.
 - Heure de pointe et histogramme des visites par heure.
@@ -89,7 +89,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 - Gestion des entreprises : création, modification, suppression et statistiques par entreprise.
 - Gestion du personnel : rattachement à une entreprise, rôle, activation/désactivation et suppression.
 - Gestion des feedbacks : lecture, classement par statut et suivi des retours utilisateurs.
-- Lien **Administration plateforme** visible dans la navigation Patron, y compris sur mobile ; l’espace `/admin` possède sa propre connexion avec les identifiants Render.
+- L’espace `/admin` possède sa propre connexion avec les identifiants Render et reste séparé de la navigation du dashboard établissement.
 
 ## Architecture
 

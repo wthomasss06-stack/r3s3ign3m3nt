@@ -3,6 +3,7 @@ import axios from "axios";
 import { refreshOnce } from "./authClient";
 import { getAccessToken, setAccessToken } from "./tokenStore";
 import { normalizeApiError } from "./errors";
+import { clearSessionCache } from "./sessionStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -34,6 +35,7 @@ apiClient.interceptors.response.use(
         return Promise.reject(Object.assign(error, { transient: true }));
       }
       setAccessToken(null);
+      clearSessionCache();
       if (typeof window !== "undefined") window.location.href = "/";
     }
     return Promise.reject(error);

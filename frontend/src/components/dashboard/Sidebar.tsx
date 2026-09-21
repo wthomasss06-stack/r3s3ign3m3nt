@@ -6,6 +6,7 @@ import { ClipboardText, GearSix, House, SignOut, UserCircle } from "@phosphor-ic
 import ThemeToggle from "@/components/ThemeToggle";
 import { apiClient } from "@/lib/api";
 import { setAccessToken } from "@/lib/tokenStore";
+import { clearSessionCache } from "@/lib/sessionStore";
 import type { AccountRole } from "@/types";
 import Modal from "@/components/ui/Modal";
 
@@ -13,9 +14,9 @@ export default function Sidebar({ orgName, orgLogo = "", userName = "", userAvat
   const pathname = usePathname(); const router = useRouter(); const [logoutOpen, setLogoutOpen] = useState(false);
   const links = role === "STAFF"
     ? [{ href: "/dashboard/accueil", label: "Accueil", icon: House, exact: true }, { href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }]
-    : [{ href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }, { href: "/dashboard/accueil", label: "Mode staff", icon: House, exact: true }, { href: "/dashboard/parametres", label: "Paramètres", icon: GearSix, exact: false }, ...(role === "BOSS" ? [{ href: "/admin", label: "Administration plateforme", icon: GearSix, exact: true }] : [])];
+    : [{ href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }, { href: "/dashboard/accueil", label: "Mode staff", icon: House, exact: true }, { href: "/dashboard/parametres", label: "Paramètres", icon: GearSix, exact: false }];
   const active = (href: string, exact: boolean) => exact ? pathname === href : pathname.startsWith(href);
-  const logout = async () => { await apiClient.post("/auth/logout/").catch(() => {}); setAccessToken(null); router.push("/"); };
+  const logout = async () => { await apiClient.post("/auth/logout/").catch(() => {}); setAccessToken(null); clearSessionCache(); router.push("/"); };
   const timeLabel = new Date().getHours() >= 18 ? "Bonne soirée" : new Date().getHours() < 12 ? "Bonne journée" : "Bonne fin de journée";
   const Brand = () => orgLogo ? <img src={orgLogo} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" /> : <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-cta text-xs font-bold text-white">{orgName.slice(0, 2).toUpperCase()}</div>;
   const Profile = () => <Link href={role === "STAFF" ? "/dashboard/accueil" : "/dashboard/parametres"} className="flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2 hover:bg-canvas"><div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-canvas">{userAvatar ? <img src={userAvatar} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : <UserCircle size={32} className="text-ink-soft" />}</div><div className="min-w-0 whitespace-nowrap"><p className="truncate text-sm font-medium text-ink">{userName || "Mon profil"}</p><p className="text-[11px] text-ink-soft">{role === "STAFF" ? "Accueil" : "Profil & rôle"}</p></div></Link>;
