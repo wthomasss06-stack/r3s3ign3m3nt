@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Plus, X } from "@phosphor-icons/react";
+import { ArrowRight, Check } from "@phosphor-icons/react";
 
 import CloudinaryImageUploader from "@/components/CloudinaryImageUploader";
 import SimpleFormSetup from "@/components/onboarding/SimpleFormSetup";
@@ -27,8 +27,6 @@ export default function OnboardingPage() {
   const [avatar, setAvatar] = useState("");
   const [name, setName] = useState("");
   const [logo, setLogo] = useState("");
-  const [reasons, setReasons] = useState<string[]>([]);
-  const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -45,7 +43,6 @@ export default function OnboardingPage() {
         setOrg(orgRes.data);
         setName(orgRes.data.name);
         setLogo(orgRes.data.logo_url || "");
-        setReasons(orgRes.data.visit_reasons || []);
       })
       .catch(() => setError("Impossible de charger ton espace."))
       .finally(() => setLoading(false));
@@ -75,7 +72,7 @@ export default function OnboardingPage() {
     setError("");
     try {
       const { data } = await apiClient.patch<Organization>("/org/me/", {
-        name: name.trim(), logo_url: logo, visit_reasons: reasons,
+        name: name.trim(), logo_url: logo,
       });
       setOrg(data);
       setStep(3);
@@ -86,10 +83,9 @@ export default function OnboardingPage() {
     }
   };
 
-  const addReason = () => {
-    const value = reason.trim();
-    if (value && !reasons.includes(value)) setReasons((prev) => [...prev, value]);
-    setReason("");
+  const finishOnboarding = () => {
+    router.replace("/dashboard");
+    router.refresh();
   };
 
   if (loading) return <Loader label="Préparation de ton espace…" />;
@@ -119,7 +115,7 @@ export default function OnboardingPage() {
               <p className="text-sm text-ink-soft">{user.email}</p>
             </div>
           </div>
-          <div className="rounded-xl border border-border p-4"><p className="text-xs uppercase tracking-wide text-ink-soft">Rôle détecté</p><p className="mt-1 font-semibold text-ink">{roleLabel(role)}</p><p className="mt-1 text-sm text-ink-soft">{role === "BOSS" ? "Tu es responsable de la configuration de l’entreprise." : "Tu as été invité : ton accès et tes permissions sont déjà définis."}</p></div>
+          <div className="rounded-xl border border-border p-4"><p className="text-xs uppercase tracking-wide text-ink-soft">Rôle</p><p className="mt-1 font-semibold text-ink">{roleLabel(role)}</p><p className="mt-1 text-sm text-ink-soft">{role === "BOSS" ? "Tu es responsable de la configuration de l’entreprise." : "Tu as été invité : ton accès et tes permissions sont déjà définis."}</p></div>
           {error && <p className="text-sm text-error-text">{error}</p>}
           <div className="flex justify-end"><button onClick={() => void saveProfile()} disabled={saving} className="flex items-center gap-2 rounded-full bg-cta px-6 py-3 font-medium text-white disabled:opacity-50">{saving ? "Enregistrement…" : role === "BOSS" ? "Continuer" : "Accéder à mon dashboard"} {!saving && (role === "BOSS" ? <ArrowRight size={16} /> : <Check size={16} />)}</button></div>
         </div>}
@@ -127,13 +123,12 @@ export default function OnboardingPage() {
         {step === 2 && role === "BOSS" && <div className="space-y-6">
           <div><h2 className="text-2xl font-bold text-ink">Ton entreprise</h2><p className="mt-2 text-sm text-ink-soft">Ces éléments seront visibles sur le formulaire visiteur, le QR code et ton dashboard.</p></div>
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start"><CloudinaryImageUploader value={logo} onChange={setLogo} label="Logo de l’entreprise" /><label className="flex-1 text-sm font-medium text-ink">Nom de l’entreprise<input value={name} onChange={(e) => setName(e.target.value)} className="mt-2 w-full rounded-lg border border-border bg-canvas px-3 py-3 outline-none focus:border-ink" /></label></div>
-          <div><div className="flex items-center justify-between"><div><h3 className="font-semibold text-ink">Motifs de visite</h3><p className="text-sm text-ink-soft">Optionnel : tu pourras les modifier plus tard.</p></div></div><div className="mt-3 flex flex-wrap gap-2">{reasons.map((item) => <span key={item} className="flex items-center gap-1 rounded-full bg-canvas px-3 py-1.5 text-sm text-ink">{item}<button type="button" onClick={() => setReasons(reasons.filter((r) => r !== item))} aria-label={`Supprimer ${item}`}><X size={14} /></button></span>)}</div><div className="mt-3 flex gap-2"><input value={reason} onChange={(e) => setReason(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addReason()} placeholder="Ex. Rendez-vous, Livraison" className="min-w-0 flex-1 rounded-lg border border-border bg-canvas px-3 py-2.5 text-sm" /><button type="button" onClick={addReason} className="rounded-lg border border-border px-3"><Plus size={18} /></button></div></div>
           {error && <p className="text-sm text-error-text">{error}</p>}<div className="flex justify-between"><button onClick={() => setStep(1)} className="rounded-full border border-border px-5 py-3 text-sm">Retour</button><button onClick={() => void saveBranding()} disabled={saving || !name.trim()} className="rounded-full bg-cta px-6 py-3 font-medium text-white disabled:opacity-50">{saving ? "Enregistrement…" : "Enregistrer et continuer"}</button></div>
         </div>}
 
         {step === 3 && role === "BOSS" && <div className="space-y-6"><div><h2 className="text-2xl font-bold text-ink">Ton formulaire visiteur</h2><p className="mt-2 text-sm text-ink-soft">Définis les champs utiles. Tu peux passer et le compléter depuis Paramètres.</p></div><SimpleFormSetup onSaved={() => setStep(4)} /><button onClick={() => setStep(4)} className="rounded-full border border-border px-5 py-3 text-sm">Passer pour l’instant</button></div>}
 
-        {step === 4 && role === "BOSS" && <div className="space-y-6"><div><h2 className="text-2xl font-bold text-ink">La présentation de ton QR code</h2><p className="mt-2 text-sm text-ink-soft">Voici le QR code de ton entreprise. Tu pourras le télécharger ou le régénérer depuis ton dashboard.</p></div><div className="flex justify-center"><QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} logoUrl={org.logo_url} canRegenerate /></div><div className="flex justify-between border-t border-border pt-5"><button onClick={() => setStep(3)} className="rounded-full border border-border px-5 py-3 text-sm">Retour</button><button onClick={() => router.push("/dashboard")} className="flex items-center gap-2 rounded-full bg-cta px-6 py-3 font-medium text-white"><Check size={16} /> Accéder à mon dashboard</button></div></div>}
+        {step === 4 && role === "BOSS" && <div className="space-y-6"><div><h2 className="text-2xl font-bold text-ink">La présentation de ton QR code</h2><p className="mt-2 text-sm text-ink-soft">Voici le QR code de ton entreprise. Tu pourras le télécharger ou le régénérer depuis ton dashboard.</p></div><div className="flex justify-center"><QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} logoUrl={org.logo_url} canRegenerate /></div><div className="flex justify-between border-t border-border pt-5"><button onClick={() => setStep(3)} className="rounded-full border border-border px-5 py-3 text-sm">Retour</button><button onClick={finishOnboarding} className="flex items-center gap-2 rounded-full bg-cta px-6 py-3 font-medium text-white"><Check size={16} /> Accéder à mon dashboard</button></div></div>}
       </section>
     </div>
   );
