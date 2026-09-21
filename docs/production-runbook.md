@@ -2,9 +2,11 @@
 
 ## Pré-déploiement staging
 
-Depuis `backend/`, injecter les secrets du gestionnaire de secrets de l’hébergeur puis lancer `python scripts/verify_production.py`. Le contrôle refuse `DEBUG=True`, une clé Django trop courte, `ALLOWED_HOSTS=*`, les origines CORS/CSRF génériques, une absence de `DATABASE_URL` ou un mot de passe administrateur trop court. Il vérifie également la connexion à la base et exécute `django check --deploy`.
+Depuis `backend/`, injecter les secrets du gestionnaire de secrets de l’hébergeur puis lancer `python scripts/verify_production.py`. Le contrôle refuse `DEBUG=True`, une clé Django trop courte, `ALLOWED_HOSTS=*`, les origines CORS/CSRF génériques, une absence de `DATABASE_URL`, Cloudinary incomplet ou un mot de passe administrateur trop court. Les garde-fous ne s’exécutent plus à l’import pendant le build Render ; ils restent obligatoires avant le démarrage/staging via ce script, ce qui évite un échec de compilation lorsque Render injecte les secrets uniquement au runtime.
 
 Lancer ensuite `python manage.py migrate`, `python manage.py collectstatic --noinput`, `pytest -q` et une requête HTTPS vers `/api/v1/health/`. Contrôler dans les en-têtes la présence de `X-Request-ID`, `Strict-Transport-Security`, `X-Content-Type-Options` et `X-Frame-Options`.
+
+Définir également `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` et `CLOUDINARY_API_SECRET` dans Render. Les courbes du registre sont rendues côté navigateur avec Recharts à partir de `/checkins/stats/` ; aucune donnée graphique supplémentaire n’est persistée.
 
 ## Sauvegarde et restauration
 

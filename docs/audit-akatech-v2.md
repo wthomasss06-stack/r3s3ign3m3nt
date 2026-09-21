@@ -108,3 +108,9 @@ Le champ URL du logo a été remplacé par un composant de dépôt d’image ave
 Chaque formulaire dispose maintenant d’un bouton **Modifier** qui ouvre le constructeur dans une modale dédiée. Les suppressions de formulaires et de QR codes affichent une confirmation navigateur explicite avant l’appel API ; les suppressions d’entreprise, de membres et les actions équivalentes conservent le même garde-fou. L’espace Administration plateforme reste séparé, accessible via `/admin`, avec ses onglets desktop et mobile et les variables `PLATFORM_ADMIN_EMAIL` / `PLATFORM_ADMIN_PASSWORD` injectées dans Render.
 
 La validation de cette itération donne **27 tests backend passants**, un type-check et un build frontend réussis. La génération OpenAPI passe avec les erreurs de déduction déjà connues des APIViews non typées ; elles n’empêchent pas la génération et doivent être traitées séparément pour obtenir une documentation complète sans fallback.
+
+## Correctifs du 21 septembre 2026 — Render et Recharts
+
+Le build Render échouait pendant l’import de Django lorsque `DEBUG=False` et que `SECRET_KEY` n’était pas encore injectée dans l’environnement de build. Les validations bloquantes ont été sorties de l’import de `settings.py` et centralisées dans `scripts/verify_production.py`, qui reste le contrôle obligatoire avant staging et démarrage production. Le comportement a été reproduit avec un secret court : `django check`, migrations et tests passent désormais sans masquer le contrôle de sécurité dédié.
+
+Le registre utilise désormais Recharts v3.10.1 pour rendre une courbe réactive des visites par heure et un histogramme horizontal des motifs fréquents. Les graphiques se recalculent automatiquement avec les données de `/checkins/stats/`, sont responsive et disposent d’un tooltip accessible visuellement. Validation finale : 27 tests backend passants, build/type-check frontend passants et 0 vulnérabilité npm.
