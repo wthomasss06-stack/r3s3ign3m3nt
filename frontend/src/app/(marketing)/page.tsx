@@ -111,14 +111,14 @@ export default function LandingPage() {
   }, { scope: heroRef });
 
   return (
-    <div ref={heroRef}>
+    <div ref={heroRef} className="min-w-0 max-w-full overflow-x-hidden">
       {/* Hero */}
-      <section className="relative grid min-h-[100svh] items-center gap-12 overflow-hidden px-5 pb-16 pt-28 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-24">
-        <div>
+      <section className="relative grid min-h-[calc(100svh-72px)] w-full max-w-full items-center gap-10 overflow-hidden px-5 pb-12 pt-24 sm:px-10 sm:pb-16 sm:pt-28 lg:min-h-[calc(100svh-72px)] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-24">
+        <div className="min-w-0 max-w-full">
           <div className="hero-kicker flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Registre d&apos;accueil sans papier
           </div>
-          <h1 className="hero-h1 mt-6 max-w-full break-all text-[clamp(2.45rem,9vw,7rem)] font-bold leading-[0.9] tracking-[-0.07em]">
+          <h1 className="hero-h1 mt-6 max-w-full break-words text-[clamp(2.45rem,9vw,7rem)] font-bold leading-[0.9] tracking-[-0.07em]">
             R3NS3IGN3M3NT
           </h1>
           <p className="hero-lead mt-6 max-w-md text-[1.05rem] leading-relaxed text-mk-ink/70">
@@ -145,7 +145,7 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="hero-visual relative">
+        <div className="hero-visual relative min-w-0 max-w-full">
           <div className="overflow-hidden rounded-[1.4rem] shadow-[0_30px_70px_rgba(23,52,38,0.18)]">
             <Image
               src="/landing-images/hero.webp"
@@ -156,9 +156,9 @@ export default function LandingPage() {
               priority
             />
           </div>
-          <div className="mt-4 flex justify-between px-2 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-ink">
-            <span>Une prise en main immédiate.</span>
-            <span>Un accueil qui reste fluide.</span>
+          <div className="mt-4 flex flex-wrap justify-between gap-x-4 gap-y-1 px-2 font-mk-mono text-[10px] uppercase tracking-[0.08em] text-mk-ink">
+            <span className="min-w-0">Une prise en main immédiate.</span>
+            <span className="min-w-0">Un accueil qui reste fluide.</span>
           </div>
         </div>
       </section>

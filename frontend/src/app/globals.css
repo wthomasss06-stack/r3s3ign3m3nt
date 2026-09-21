@@ -58,6 +58,7 @@ body {
   @apply bg-canvas text-ink font-sans antialiased;
   line-height: 1.6;
   transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: hidden;
 }
 
 /* Garde-fou explicite : tout texte qui n'a pas sa propre couleur (héritage) doit
@@ -130,7 +131,7 @@ h1, h2, h3, h4 {
 .qr-staggered-menu {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 1000;
   display: flex;
   min-height: 100svh;
   min-height: 100dvh;
@@ -154,7 +155,8 @@ h1, h2, h3, h4 {
 .qr-staggered-menu__entry:hover, .qr-staggered-menu__entry:focus-visible { color: rgb(var(--c-cta)); outline: none; }
 .qr-staggered-menu__index { width: 26px; color: rgb(var(--c-cta)); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; letter-spacing: 0; }
 .qr-staggered-menu__entry > span:nth-child(2) { flex: 1; }
-.qr-staggered-menu__cta { display: inline-flex; width: max-content; min-height: 48px; align-items: center; gap: 12px; margin-top: 24px; background: rgb(var(--c-cta)); padding: 0 18px; color: rgb(var(--c-cta-ink)); font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-decoration: none; text-transform: uppercase; }
+.qr-staggered-menu__cta { display: inline-flex; width: max-content; min-height: 48px; align-items: center; gap: 12px; margin-top: 24px; border-radius: 999px; background: rgb(var(--c-cta)); padding: 0 18px; color: rgb(var(--c-cta-ink)); font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-decoration: none; text-transform: uppercase; transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.qr-staggered-menu__cta:hover, .qr-staggered-menu__cta:focus-visible { transform: translateY(-2px); background: rgb(var(--c-cta-hover)); box-shadow: 0 10px 20px rgb(var(--c-cta) / 0.16); outline: none; }
 .qr-staggered-menu__footer { margin: auto 20px 0; border-top: 1px solid rgb(var(--c-ink) / 0.1); padding: 20px 0 max(24px, env(safe-area-inset-bottom)); color: rgb(var(--c-ink-soft)); font-size: 12px; line-height: 1.5; }
 @media (min-width: 768px) { .qr-staggered-menu, .qr-staggered-trigger { display: none; } }
 @media (prefers-reduced-motion: reduce) { .qr-staggered-menu { transition: none; } }
