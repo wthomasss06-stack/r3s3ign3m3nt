@@ -1,81 +1,53 @@
-"""Logique metier du moteur de formulaires : validation contre le schema dynamique
-et ingestion offline-first idempotente. Separee des views (Niveau A)."""
+"""Validation et ingestion offline-first idempotente pour plusieurs points d'accueil."""
 from dataclasses import dataclass, field
 
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from apps.organizations.models import Organization
 
-from .models import CheckIn, FormTemplate
+from .models import AccessPoint, CheckIn, FormTemplate
 
 
 @dataclass
 class SyncOutcome:
     idempotency_key: str
-    status: str  # created | already_exists | unknown_organization | missing_required_fields | invalid
+    status: str
     missing_fields: list = field(default_factory=list)
 
     def as_dict(self) -> dict:
         payload = {"idempotency_key": self.idempotency_key, "status": self.status}
-        if self.missing_fields:
-            payload["fields"] = self.missing_fields
+        if self.missing_fields: payload["fields"] = self.missing_fields
         return payload
 
 
 def missing_required_fields(template: FormTemplate | None, responses: dict, signature_blob: str = "") -> list[str]:
-    """Le client (PWA) valide deja les champs obligatoires pour l'UX, mais le serveur
-    revalide toujours : un client peut etre contourne (senior-dev-guardrails).
-
-    Le champ de type "signature" n'a pas de valeur dans `responses` : le dessin est
-    transmis a part, dans `signature_blob` (cf. CheckIn.signature_blob). Le traiter
-    comme les autres champs revenait a rejeter toute soumission valide comportant
-    une signature obligatoire."""
-    if not template:
-        return []
-
+    if not template: return []
     missing = []
     for f in template.fields_schema:
-        if not f.get("required"):
-            continue
-        has_value = bool(signature_blob) if f["type"] == "signature" else bool(responses.get(f["id"]))
-        if not has_value:
-            missing.append(f["id"])
+        if f.get("required") and not (bool(signature_blob) if f["type"] == "signature" else bool(responses.get(f["id"]))): missing.append(f["id"])
     return missing
 
 
+def resolve_target(token):
+    point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=token, is_active=True).first()
+    if point: return point.organization, point.form_template, point
+    organization = Organization.objects.filter(qr_secure_token=token).first()
+    if not organization: return None, None, None
+    template = organization.form_templates.filter(is_default=True).first() or organization.form_templates.filter(is_active=True).first()
+    return organization, template, None
+
+
 def sync_single_checkin(item: dict) -> SyncOutcome:
-    """Traite une soumission de la file offline. Ne leve jamais d'exception : chaque
-    cas (org inconnue, champs manquants, doublon) devient un statut explicite que le
-    frontend peut afficher ou ignorer silencieusement (doublon = succes du point de
-    vue du visiteur, sa donnee est bien arrivee)."""
     key = str(item["idempotency_key"])
-
-    organization = (
-        Organization.objects.select_related("form_template")
-        .filter(qr_secure_token=item["qr_token"])
-        .first()
-    )
-    if not organization:
-        return SyncOutcome(idempotency_key=key, status="unknown_organization")
-
-    template = getattr(organization, "form_template", None)
+    organization, template, access_point = resolve_target(item["qr_token"])
+    if not organization: return SyncOutcome(key, "unknown_organization")
     missing = missing_required_fields(template, item["responses"], item.get("signature_blob", ""))
-    if missing:
-        return SyncOutcome(idempotency_key=key, status="missing_required_fields", missing_fields=missing)
-
+    if missing: return SyncOutcome(key, "missing_required_fields", missing)
     try:
         with transaction.atomic():
-            CheckIn.objects.create(
-                organization=organization,
-                form_template=template,
-                idempotency_key=item["idempotency_key"],
-                responses=item["responses"],
-                signature_blob=item.get("signature_blob", ""),
-                created_at_client=item["created_at_client"],
-            )
-        return SyncOutcome(idempotency_key=key, status="created")
+            CheckIn.objects.create(organization=organization, form_template=template, access_point=access_point, idempotency_key=item["idempotency_key"], responses=item["responses"], signature_blob=item.get("signature_blob", ""), created_at_client=item["created_at_client"])
+            if access_point: AccessPoint.objects.filter(id=access_point.id).update(last_seen_at=timezone.now())
+        return SyncOutcome(key, "created")
     except IntegrityError:
-        # La cle existe deja : la PWA a renvoye une soumission deja recue (reseau
-        # instable ayant coupe avant reception de la reponse). Cote visiteur c'est
-        # un succes, pas une erreur.
-        return SyncOutcome(idempotency_key=key, status="already_exists")
+        return SyncOutcome(key, "already_exists")

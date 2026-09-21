@@ -1,49 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
-
 import Loader from "@/components/Loader";
 import QRCodeManager from "@/components/QRCodeManager";
 import { apiClient } from "@/lib/api";
-import type { Organization } from "@/types";
+import type { AccessPoint, FormTemplate, Organization } from "@/types";
 
 type ViewState = "loading" | "error" | "ready";
-
 export default function QRCodePage() {
-  const [org, setOrg] = useState<Organization | null>(null);
-  const [state, setState] = useState<ViewState>("loading");
-
-  const load = () => {
-    setState("loading");
-    apiClient
-      .get<Organization>("/org/me/")
-      .then((res) => {
-        setOrg(res.data);
-        setState("ready");
-      })
-      .catch(() => setState("error"));
-  };
-
+  const [org, setOrg] = useState<Organization | null>(null); const [points, setPoints] = useState<AccessPoint[]>([]); const [forms, setForms] = useState<FormTemplate[]>([]); const [state, setState] = useState<ViewState>("loading"); const [name, setName] = useState(""); const [device, setDevice] = useState(""); const [formId, setFormId] = useState("");
+  const load = () => { setState("loading"); Promise.all([apiClient.get<Organization>("/org/me/"), apiClient.get<AccessPoint[]>("/access-points/"), apiClient.get<FormTemplate[]>("/form-templates/")]).then(([organization, access, templates]) => { setOrg(organization.data); setPoints(access.data); setForms(templates.data); setFormId((current) => current || templates.data.find((item) => item.is_default)?.id || templates.data[0]?.id || ""); setState("ready"); }).catch(() => setState("error")); };
   useEffect(load, []);
-
+  const create = async (event: React.FormEvent) => { event.preventDefault(); if (!name.trim() || !formId) return; await apiClient.post("/access-points/", { name: name.trim(), device_label: device.trim(), form_template: formId, is_active: true }); setName(""); setDevice(""); load(); };
+  const remove = async (point: AccessPoint) => { if (!window.confirm(`Supprimer le point « ${point.name} » ?`)) return; await apiClient.delete(`/access-points/${point.id}/`); load(); };
   if (state === "loading") return <Loader fullScreen={false} />;
-  if (state === "error" || !org) {
-    return (
-      <div className="flex flex-col items-start gap-3">
-        <p className="text-ink-soft">Impossible de charger le QR Code.</p>
-        <button
-          onClick={load}
-          className="rounded-full bg-cta px-4 py-2 text-sm font-medium text-cta-ink transition duration-200 ease-quiet hover:-translate-y-0.5 hover:bg-cta-hover"
-        >
-          Réessayer
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-ink">QR Code</h1>
-      <QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} />
-    </div>
-  );
+  if (state === "error" || !org) return <div className="space-y-3"><p className="text-ink-soft">Impossible de charger les points d’accueil.</p><button onClick={load} className="rounded-full bg-cta px-4 py-2 text-sm text-white">Réessayer</button></div>;
+  return <div className="space-y-7"><div><h1 className="text-2xl font-bold text-ink">QR et points d’accueil</h1><p className="text-sm text-ink-soft">Un QR différent par entrée, tablette ou comptoir, chacun relié au formulaire adapté.</p></div><form onSubmit={create} className="grid gap-2 rounded-xl border border-border bg-surface p-4 md:grid-cols-[1fr_1fr_1fr_auto]"><input required value={name} onChange={(e)=>setName(e.target.value)} placeholder="Nom du point (Accueil, Entrée…)" className="rounded-lg border border-border bg-canvas px-3 py-2.5 text-sm" /><input value={device} onChange={(e)=>setDevice(e.target.value)} placeholder="Tablette T1 (facultatif)" className="rounded-lg border border-border bg-canvas px-3 py-2.5 text-sm" /><select required value={formId} onChange={(e)=>setFormId(e.target.value)} className="rounded-lg border border-border bg-canvas px-3 py-2.5 text-sm">{forms.map(form=><option key={form.id} value={form.id}>{form.title}</option>)}</select><button className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white">Ajouter</button></form><div className="grid gap-5 lg:grid-cols-2">{points.map(point=><div key={point.id} className="rounded-xl border border-border bg-surface p-5"><div className="mb-4 flex items-start justify-between"><div><h2 className="font-semibold text-ink">{point.name}</h2><p className="text-xs text-ink-soft">{point.device_label || "Appareil non nommé"} · {point.form_title}</p><p className="mt-1 text-xs text-ink-soft">{point.last_seen_at ? `Dernière activité : ${new Date(point.last_seen_at).toLocaleString("fr-FR")}` : "Pas encore de synchronisation"}</p></div><button onClick={()=>remove(point)} className="text-xs text-error-text hover:underline">Supprimer</button></div><QRCodeManager qrToken={point.secure_token} orgName={`${org.name}-${point.name}`} logoUrl={org.logo_url} canRegenerate={false} size={240} /></div>)}</div></div>;
 }

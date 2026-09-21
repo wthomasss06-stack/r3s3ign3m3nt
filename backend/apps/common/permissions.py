@@ -12,9 +12,9 @@ class IsBoss(BasePermission):
 
 
 class IsBossOrGerant(BasePermission):
-    """Autorise BOSS et GERANT — actions de gestion courante deleguees par le patron
-    (formulaire, export, invitation de STAFF), mais pas les actions sensibles
-    (regeneration du QR, suppression de l'organisation) reservees a IsBoss."""
+    """Autorise BOSS et GERANT pour la gestion courante : formulaires multiples,
+    points d'accueil, export et exploitation. Les suppressions sensibles,
+    invitations, identité et régénération du QR principal restent au BOSS."""
     message = "Cette action est reservee au patron ou au gerant."
 
     def has_permission(self, request, view):
@@ -24,7 +24,7 @@ class IsBossOrGerant(BasePermission):
 
 
 class IsOrgMember(BasePermission):
-    """Autorise BOSS et STAFF, tous deux membres d'une organisation."""
+    """Autorise tout membre rattaché : BOSS, GERANT ou STAFF."""
     message = "Compte non rattache a un etablissement."
 
     def has_permission(self, request, view):

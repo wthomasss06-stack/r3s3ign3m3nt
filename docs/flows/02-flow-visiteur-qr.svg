@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760">
+<defs><style>.bg{fill:#fbfbfa}.box{fill:#fff;stroke:#d8d8d2;stroke-width:2}.accent{fill:#171717}.green{fill:#edf3ec;stroke:#93b294;stroke-width:2}.text{font-family:Arial,sans-serif;fill:#2f3437}.muted{font-family:Arial,sans-serif;fill:#787774}.title{font:bold 34px Arial}.h{font:bold 20px Arial}.p{font:16px Arial}.small{font:14px Arial}.arrow{stroke:#171717;stroke-width:3;fill:none;marker-end:url(#m)}</style><marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#171717"/></marker></defs>
+<rect width="1400" height="760" class="bg"/><text x="70" y="70" class="text title">Flow 2 — Visiteur via QR code</text><text x="70" y="105" class="muted p">Un parcours sans compte, rapide et compatible avec une connexion instable</text>
+<rect x="70" y="220" width="230" height="190" rx="16" class="box"/><text x="105" y="265" class="text h">1. Scanner</text><text x="105" y="305" class="text p">Le visiteur scanne le QR</text><text x="105" y="333" class="muted small">Lien opaque /v/[qr_token]</text><text x="105" y="365" class="muted small">Logo de l’établissement visible</text>
+<path d="M300 315 H375" class="arrow"/>
+<rect x="375" y="220" width="250" height="190" rx="16" class="green"/><text x="410" y="265" class="text h">2. Charger</text><text x="410" y="305" class="text p">Formulaire public</text><text x="410" y="333" class="muted small">Motifs récupérés du serveur</text><text x="410" y="365" class="muted small">ou depuis le cache offline</text>
+<path d="M625 315 H700" class="arrow"/>
+<rect x="700" y="220" width="250" height="190" rx="16" class="box"/><text x="735" y="265" class="text h">3. Remplir</text><text x="735" y="305" class="text p">Informations personnelles</text><text x="735" y="333" class="muted small">Motif de visite</text><text x="735" y="365" class="muted small">« Autre » → précision libre</text>
+<path d="M950 315 H1025" class="arrow"/>
+<rect x="1025" y="220" width="260" height="190" rx="16" class="box"/><text x="1060" y="265" class="text h">4. Signer</text><text x="1060" y="305" class="text p">Signature au doigt</text><text x="1060" y="333" class="muted small">Convertie et enregistrée en SVG</text><text x="1060" y="365" class="muted small">Validation du formulaire</text>
+<path d="M1155 410 V485" class="arrow"/>
+<rect x="970" y="485" width="315" height="160" rx="16" class="accent"/><text x="1010" y="530" fill="white" class="h">5. Enregistrer</text><text x="1010" y="570" fill="white" class="p">Stockage local immédiat</text><text x="1010" y="598" fill="#d8d8d2" class="small">Envoi réseau si disponible</text>
+<path d="M970 565 H890" class="arrow"/>
+<rect x="610" y="485" width="280" height="160" rx="16" class="green"/><text x="650" y="530" class="text h">6. Confirmation</text><text x="650" y="570" class="text p">Merci, c’est enregistré</text><text x="650" y="598" class="muted small">Fermeture automatique sur téléphone</text>
+<path d="M610 565 H530" class="arrow"/>
+<rect x="270" y="485" width="260" height="160" rx="16" class="box"/><text x="310" y="530" class="text h">7. Dashboard</text><text x="310" y="570" class="text p">Signature et réponses visibles</text><text x="310" y="598" class="muted small">Après synchronisation</text>
+<text x="70" y="705" class="muted p">La fiche reste fiable même en cas de coupure : elle est synchronisée automatiquement dès que le réseau revient.</text></svg>

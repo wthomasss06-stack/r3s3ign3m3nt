@@ -44,7 +44,7 @@ export default function QRCodePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-ink">QR Code</h1>
-      <QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} canRegenerate={canRegenerate} />
+          <QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} logoUrl={org.logo_url} canRegenerate={canRegenerate} />
     </div>
   );
 }

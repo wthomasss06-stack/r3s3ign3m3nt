@@ -3,8 +3,8 @@
 | | |
 |---|---|
 | **Porteur** | AKATech Studio (Elvis) |
-| **Statut** | V1.0 — Scope figé, développé et testé. Site vitrine + pages légales livrés. |
-| **Version du document** | 1.1 |
+| **Statut** | V1.2 — Formulaires multiples, QR par point d’accueil et gestion multi-tablettes livrés. Recette production maintenue comme étape de contrôle. |
+| **Version du document** | 1.3 |
 
 > Nom commercial retenu : **R3S3IGN3M3NT**. `qr-register-saas` reste le nom de code utilisé dans le code et les dossiers du projet.
 
@@ -39,7 +39,7 @@ Visiteur → scanne le QR (ou l'appareil est déjà ouvert dessus)
          → remplit le formulaire, signe du doigt
          → 💾 stocké localement sur l'appareil (IndexedDB), instantanément
          → dès que CET appareil a du réseau → envoi silencieux au serveur
-         → le patron voit la donnée au prochain chargement de son dashboard
+         → le patron voit la donnée après synchronisation, avec rafraîchissement automatique du registre toutes les 30 secondes
 ```
 
 Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (authentification Google) et consulter leur dashboard — comme n'importe quelle application web classique.
@@ -55,15 +55,27 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 - [x] Page visiteur "kiosque" : fonctionne hors-ligne indéfiniment après un premier chargement, signature au doigt
 - [x] Synchronisation automatique et idempotente (aucun doublon même en cas de coupure réseau)
 - [x] Invitation d'un agent par email (rattachement automatique à la connexion Google de l'invité)
-- [x] Dashboard : registre en temps réel, export CSV, régénération du QR
+- [x] Dashboard : registre, export CSV, régénération du QR
+- [x] Onboarding en 4 étapes : rôle/profil, établissement, formulaire, QR + invitation avec possibilité de passer
+- [x] Marque établissement : nom, logo, motifs de visite et avatar utilisateur
+- [x] QR personnalisé avec logo centré
+- [x] Mode Accueil / Mode staff : QR grand format et ouverture directe du formulaire visiteur
+- [x] Signatures visiteur enregistrées en data URI SVG et visibles dans le registre
+- [x] Rafraîchissement automatique du registre sans rechargement de page (polling toutes les 30 secondes)
+- [x] Statistiques : volume total, volume du jour, heures de pointe et motifs fréquents
+- [x] Plusieurs formulaires par établissement, avec formulaire par défaut et suppression protégée du dernier formulaire
+- [x] Plusieurs points d’accueil par établissement, chacun relié à un formulaire et à un QR opaque dédié
+- [x] Identification facultative de la tablette/appareil et date de dernière activité du point d’accueil
+- [x] Synchronisation offline résolue par le QR du point d’accueil, avec conservation du formulaire et de l’appareil d’origine
 
 ### Prévu ensuite (SHOULD HAVE — V1.1/V1.2)
 
 - [ ] Notification WhatsApp au patron à chaque nouvelle arrivée (temps réel)
-- [ ] Rafraîchissement automatique (polling) du registre pendant qu'il est ouvert
+- [x] Rafraîchissement automatique (polling) du registre pendant qu'il est ouvert
 - [ ] Impression de badge visiteur
-- [ ] Statistiques (heures de pointe, motifs fréquents)
-- [ ] Renommer/gérer plusieurs formulaires par établissement (aujourd'hui : un seul formulaire actif par organisation)
+- [x] Statistiques (heures de pointe, motifs fréquents, volume de visites)
+- [x] Renommer/gérer plusieurs formulaires par établissement
+- [x] Gérer plusieurs tablettes et points d’accueil par établissement
 
 ### Hors périmètre (OUT OF SCOPE)
 
@@ -109,11 +121,12 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 
 | Entité | Champs clés | Notes |
 |---|---|---|
-| `Organization` | `qr_secure_token` (unique) | Le token est *opaque* : jamais d'ID de base de données exposé au client public |
+| `Organization` | `qr_secure_token` (unique), `logo_url`, `visit_reasons` | Le token est *opaque* : jamais d'ID de base de données exposé au client public ; la marque et les motifs sont propagés au formulaire public |
 | `User` | `email`, `role` (BOSS/STAFF), `organization` | Auth Google uniquement (`set_unusable_password`) |
 | `StaffInvitation` | `email`, `token`, `accepted_at` | Rattachement réel par correspondance d'email à la connexion Google, pas par le token seul |
-| `FormTemplate` | `fields_schema` (JSON), `version` | Un schéma JSON par organisation ; versionné à chaque modification |
-| `CheckIn` | `idempotency_key` (unique), `responses` (JSON), `signature_blob` | La clé d'idempotence est générée côté client *avant* tout envoi |
+| `FormTemplate` | `organization`, `fields_schema` (JSON), `version`, `is_default` | Plusieurs schémas JSON par organisation ; un formulaire par défaut ; versionné à chaque modification |
+| `AccessPoint` | `organization`, `form_template`, `secure_token`, `name`, `device_label`, `last_seen_at` | Un QR opaque et un appareil/lieu par point d’accueil ; le point choisit le formulaire servi |
+| `CheckIn` | `organization`, `form_template`, `access_point`, `idempotency_key`, `responses` (JSON), `signature_blob` | La fiche conserve le formulaire et le point d’origine ; la clé d'idempotence est générée côté client |
 
 ## 7. Sécurité — corrections apportées en cours de conception
 
@@ -150,24 +163,29 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 | POST | `/api/v1/auth/google/` | Public | Connexion/inscription, pose le cookie de refresh |
 | POST | `/api/v1/auth/token/refresh/` | Public (cookie) | Renouvelle l'access token |
 | POST | `/api/v1/auth/invite/` | BOSS | Invite un agent |
-| GET/PUT | `/api/v1/form-template/` | BOSS/STAFF | Consulter/modifier le formulaire actif |
+| `GET/PUT` | `/api/v1/form-template/` | BOSS/STAFF | Consulter/modifier le formulaire actif |
+| `GET/POST` | `/api/v1/form-templates/` | BOSS/GERANT | Lister ou créer un formulaire |
+| `PATCH/DELETE` | `/api/v1/form-templates/<id>/` | BOSS/GERANT ou BOSS | Modifier, activer, définir par défaut ou supprimer un formulaire |
+| `GET/POST` | `/api/v1/access-points/` | BOSS/GERANT | Lister ou créer un point d’accueil/tablette |
+| `PATCH/DELETE` | `/api/v1/access-points/<id>/` | BOSS/GERANT ou BOSS | Modifier, désactiver ou supprimer un point d’accueil |
 | GET | `/api/v1/public/forms/<qr_token>/` | Public | Formulaire à afficher au scan |
 | POST | `/api/v1/checkins/sync/` | Public | Envoi (groupé, idempotent) des fiches visiteurs |
 | GET | `/api/v1/checkins/` | BOSS/STAFF | Registre paginé |
+| GET | `/api/v1/checkins/stats/` | BOSS/GERANT/STAFF | Volume, volume du jour, heures de pointe et motifs fréquents |
 | GET | `/api/v1/checkins/export/` | BOSS | Export CSV |
 | POST | `/api/v1/org/me/regenerate-qr/` | BOSS | Invalide l'ancien QR |
 | GET | `/api/v1/health/` | Public | Sonde de disponibilité |
 
 ## 10. Tests automatisés
 
-7 tests d'intégration couvrent les flows critiques (voir `backend/apps/checkins/tests/`) : idempotence anti-doublon, rejet d'un champ obligatoire manquant, non-exploitation d'un `organization_id` fourni par le client, et RBAC (un agent STAFF ne peut pas modifier le formulaire). Tous passent. La couverture n'est pas exhaustive (pas de tests sur l'auth Google, mockée en pratique) : à étoffer en V1.1.
+21 tests d'intégration couvrent les flows critiques (voir `backend/apps/checkins/tests/`) : idempotence anti-doublon, rejet d'un champ obligatoire manquant, non-exploitation d'un `organization_id` fourni par le client, RBAC, agrégation des statistiques, feedback et administration. La migration multi-formulaires et les tests frontend passent en environnement local. La couverture n'est pas exhaustive : l'auth Google réelle, les navigateurs mobiles, plusieurs tablettes offline et la recette production restent des contrôles complémentaires.
 
 ## 12. Site vitrine & pages légales (livrés)
 
 - Landing page (`/`) : palette et polices reprises d'une référence fournie (Playfair Display, Manrope, DM Mono ; vert forêt/crème), animée en GSAP (entrée hero, révélations au scroll, orbite continue).
 - Header + footer partagés sur les pages publiques, avec bouton d'installation PWA natif (`beforeinstallprompt`) dans le footer.
 - Connexion déplacée sur `/connexion` (la racine est maintenant la vitrine).
-- Pages légales : `/aide`, `/cgu`, `/confidentialite`, `/mentions-legales` — rédigées à partir de l'implémentation réelle (aucune information juridique inventée : identité de l'éditeur, hébergeur définitif, coordonnées de contact et durée de conservation restent à compléter par le porteur du projet, marqués `[À COMPLÉTER PAR LE CLIENT]`).
+- Pages légales : `/aide`, `/cgu`, `/confidentialite`, `/mentions-legales` — rédigées à partir de l'implémentation réelle, avec les formulaires multiples, les points d’accueil et les tablettes. La forme juridique, le RCCM et l’adresse physique complète d’AKATech Studio restent à ajouter dès formalisation.
 
 **Validation juridique recommandée avant mise en ligne commerciale**, en particulier sur les CGU (tarification, disponibilité) et la confidentialité (déclaration éventuelle auprès de l'ARTCI pour la collecte de données visiteurs).
 

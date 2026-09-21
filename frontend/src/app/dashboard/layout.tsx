@@ -6,6 +6,7 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import { useSilentSession } from "@/hooks/useAuth";
 import { apiClient } from "@/lib/api";
 import type { Organization, UserProfile } from "@/types";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter(); const { loading: sessionLoading, isAuthenticated } = useSilentSession();
@@ -14,5 +15,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (sessionLoading || (isAuthenticated && !user && !error)) return <Loader />;
   if (error) return <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-center"><p className="text-ink-soft">{error}</p><button onClick={() => location.reload()} className="rounded-full bg-cta px-4 py-2 text-sm font-medium text-white">Réessayer</button></div>;
   if (!user) return null;
-  return <div className="min-h-screen bg-canvas"><Sidebar orgName={org?.name || user.organization_name} orgLogo={org?.logo_url} userName={user.full_name || user.email} userAvatar={user.avatar_url} /><main className="p-6 pb-28 md:ml-[72px] md:p-10 md:pb-10">{children}</main></div>;
+  return <div className="min-h-screen bg-canvas"><Sidebar orgName={org?.name || user.organization_name} orgLogo={org?.logo_url} userName={user.full_name || user.email} userAvatar={user.avatar_url} role={user.role} /><main className="p-6 pb-28 md:ml-[72px] md:p-10 md:pb-10">{children}</main><FeedbackWidget /></div>;
 }

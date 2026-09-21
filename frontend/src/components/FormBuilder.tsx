@@ -26,13 +26,18 @@ function newFieldId(): string {
 
 export default function FormBuilder({
   initialSchema,
+  formId,
+  initialTitle = "Registre d'accès",
   onSaved,
 }: {
   initialSchema: FormField[];
+  formId?: string;
+  initialTitle?: string;
   /** Optionnel — utilisé par l'onboarding pour savoir quand proposer de continuer. */
   onSaved?: () => void;
 }) {
   const [fields, setFields] = useState<FormField[]>(initialSchema);
+  const [title, setTitle] = useState(initialTitle);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -67,7 +72,9 @@ export default function FormBuilder({
     setSaving(true);
     setSaveError(null);
     try {
-      await apiClient.put("/form-template/", { fields_schema: fields });
+      const payload = { title, fields_schema: fields };
+      if (formId) await apiClient.patch(`/form-templates/${formId}/`, payload);
+      else await apiClient.put("/form-template/", payload);
       setSaved(true);
       onSaved?.();
     } catch {
@@ -80,6 +87,8 @@ export default function FormBuilder({
   return (
     <div className="space-y-6">
       <section>
+        <label className="mb-2 block text-sm font-medium text-ink-soft">Nom du formulaire</label>
+        <input value={title} onChange={(e) => { setTitle(e.target.value); setSaved(false); }} className="mb-5 w-full rounded-md border border-border bg-surface p-2.5 text-sm text-ink outline-none focus:border-ink" />
         <h2 className="mb-3 text-sm font-medium text-ink-soft">Repartir d&apos;un modèle</h2>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-5">
           {FORM_PRESETS.map((preset) => (

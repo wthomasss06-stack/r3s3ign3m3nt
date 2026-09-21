@@ -43,12 +43,12 @@ export default function Header() {
   return (
     <header
       ref={navRef}
-      className={`fixed inset-x-0 top-0 z-30 flex h-[72px] items-center justify-between bg-transparent px-5 transition-transform duration-300 sm:px-10 ${
+      className={`fixed inset-x-0 top-0 z-30 flex h-[84px] items-center justify-between bg-transparent px-5 transition-transform duration-300 sm:px-10 ${
         hidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
       <Link href="/" className="flex items-center">
-        <Logo size={44} />
+        <Logo size={60} />
       </Link>
 
       <nav className="hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[0.06em] md:flex" aria-label="Navigation principale">
@@ -76,7 +76,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="absolute inset-x-0 top-[72px] flex flex-col gap-5 border-b border-mk-ink/10 bg-mk-paper p-6 text-sm font-bold uppercase tracking-wide md:hidden">
+        <div className="absolute inset-x-0 top-[84px] flex flex-col gap-5 border-b border-mk-ink/10 bg-mk-paper p-6 text-sm font-bold uppercase tracking-wide md:hidden">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
               {link.label}

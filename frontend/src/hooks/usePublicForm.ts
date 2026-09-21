@@ -59,6 +59,10 @@ export function usePublicForm(qrToken: string) {
           organization_logo_url: "",
           visit_reasons: [],
           fields_schema: cached.fields_schema as PublicFormData["fields_schema"],
+          form_id: "cached",
+          form_title: "Formulaire visiteur",
+          access_point_id: null,
+          access_point_name: "Point d’accueil hors ligne",
         });
         setFromCache(true);
         setStatus("ready");

@@ -23,7 +23,7 @@ export default function LoginPage() {
             priority
           />
           <div className="relative z-10">
-            <Logo size={48} back />
+            <Logo size={68} back />
           </div>
           <div className="relative z-10 space-y-3">
             <h2 className="font-heading text-3xl font-bold leading-tight">
@@ -39,7 +39,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center justify-center p-6 sm:p-12">
           <div className="w-full max-w-md space-y-8 text-center">
             <div className="flex flex-col items-center">
-              <Logo size={64} back />
+              <Logo size={88} back />
               <h1 className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-ink font-heading">
                 Se connecter
               </h1>

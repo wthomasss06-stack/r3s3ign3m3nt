@@ -82,11 +82,12 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
         organization=organization,
     )
     # Import local : evite un cycle apps.accounts <-> apps.checkins au chargement.
-    from apps.checkins.models import FormTemplate
+    from apps.checkins.models import AccessPoint, FormTemplate
 
-    FormTemplate.objects.create(
-        organization=organization, title="Registre d'accès", fields_schema=DEFAULT_FORM_SCHEMA
+    template = FormTemplate.objects.create(
+        organization=organization, title="Registre d'accès", fields_schema=DEFAULT_FORM_SCHEMA, is_default=True
     )
+    AccessPoint.objects.create(organization=organization, form_template=template, name="Accueil principal", secure_token=organization.qr_secure_token)
     return user, True
 
 

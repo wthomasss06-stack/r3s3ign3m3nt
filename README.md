@@ -1,146 +1,317 @@
 # R3S3IGN3M3NT
 
-R3S3IGN3M3NT est une solution de registre d’accès sans contact pour les établissements : un visiteur scanne un QR code, remplit un formulaire, et les données sont centralisées dans un tableau de bord dédié au patron et à son équipe.
+<div align="center">
+  <img src="frontend/public/brand/logo-mark.png" alt="Logo R3S3IGN3M3NT" width="120" />
+  <h3>Le registre digital des établissements</h3>
+  <p>QR Code, tablette d’accueil, formulaire visiteur, signatures et dashboard par rôles.</p>
+  <p><a href="https://akatech.vercel.app/">Conçu par AKATech Studio</a></p>
+</div>
 
-Le projet est composé d’un backend Django REST API et d’un frontend Next.js PWA avec un accueil marketing, un dashboard interne et un mode kiosque/offline-first.
+> **Note logo AKATech Studio :** le footer utilise `/akatech-studio-logo.webp` pour révéler le logo au survol de « Conçu par AKATech Studio ». Déposer le fichier fourni dans `frontend/public/akatech-studio-logo.webp` avant le déploiement si le fichier n’est pas déjà présent dans l’arborescence.
 
-## Stack
+## Présentation
 
-- Backend: Django + DRF + PostgreSQL (Neon)
-- Frontend: Next.js + Tailwind CSS + PWA
-- Auth: Google OAuth + JWT
-- Stockage local: Dexie / IndexedDB
+R3S3IGN3M3NT est une solution SaaS de registre d’accueil sans contact conçue par **AKATech Studio**, entreprise digitale basée à Abidjan, Côte d’Ivoire. Un établissement configure plusieurs formulaires, crée plusieurs points d’accueil avec leurs QR Codes et tablettes, puis consulte les arrivées dans un dashboard sécurisé.
+
+Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne offline-first : après un premier chargement avec Internet, chaque appareil conserve le formulaire de son point d’accueil et les soumissions en attente dans IndexedDB, puis synchronise automatiquement dès que le réseau revient.
+
+## Identité du produit
+
+| Élément | Information |
+|---|---|
+| Produit | R3S3IGN3M3NT |
+| Concepteur et éditeur du produit | AKATech Studio |
+| Site AKATech Studio | [akatech.vercel.app](https://akatech.vercel.app/) |
+| Contact | wthomasss06@gmail.com · +225 01 42 50 77 50 |
+| Localisation déclarée | Abidjan, Côte d’Ivoire |
+| Statut | V1.1 fonctionnelle, recette production à maintenir |
+
+## Fonctionnalités livrées
+
+### Accès et onboarding
+
+- Authentification Google uniquement pour les membres de l’établissement.
+- Onboarding en quatre étapes : rôle, établissement, formulaire, QR Code et invitation.
+- Rattachement d’un invité à une organisation par correspondance avec l’email Google invité.
+- Avatar Google ou avatar utilisateur et logo de l’établissement.
+
+### Rôles et permissions
+
+- **Patron :** configuration complète, invitations, export CSV, régénération du QR, gestion de l’identité de l’établissement.
+- **Gérant :** gestion opérationnelle du registre et du formulaire, consultation/export et affichage du QR, sans actions de sécurité critiques.
+- **Staff :** consultation du registre, accueil des visiteurs et utilisation de l’interface tablette, sans modification de configuration.
+- **Mode staff :** le Patron ou le Gérant peut prendre le relais en cas d’absence de Staff.
+
+### Parcours visiteur
+
+- Scan d’un QR Code opaque ou ouverture directe du lien public.
+- Logo de l’établissement au centre du QR.
+- Formulaire dynamique : texte, téléphone, email, nombre, date, liste, case à cocher et signature.
+- Motifs de visite configurables, bouton d’actualisation et champ libre « Autre ».
+- Plusieurs formulaires par établissement, avec formulaire par défaut et affectation par point d’accueil.
+- Signature enregistrée en data URI SVG et affichée dans le registre.
+- Remise à zéro après enregistrement ; fermeture automatique tentée sur téléphone.
+
+### Accueil et kiosque
+
+- Onglet **Accueil** pour le Staff.
+- Onglet **Mode staff** pour le Patron et le Gérant.
+- Affichage du QR en grand format pour les visiteurs équipés d’un téléphone.
+- Bouton d’ouverture directe du formulaire pour une tablette ou un téléphone d’accueil.
+- Plusieurs points d’accueil : nom du lieu, tablette identifiée, QR dédié, formulaire associé et dernière activité.
+- Fonctionnement offline-first avec file locale et synchronisation idempotente.
+
+### Dashboard et statistiques
+
+- Registre paginé des visiteurs.
+- Rafraîchissement automatique toutes les 30 secondes sans rechargement de page.
+- Volume total et volume du jour.
+- Heure de pointe et histogramme des visites par heure.
+- Motifs de visite les plus fréquents.
+- Export CSV.
+
+### Vitrine et conformité
+
+- Landing page marketing responsive et PWA.
+- Header/footer avec logo R3S3IGN3M3NT.
+- Logo AKATech Studio révélé au survol du crédit concepteur dans le footer.
+- Pages Aide, CGU, Confidentialité et Mentions légales.
+- Les informations encore en formalisation juridique sont indiquées dans les pages légales sans être inventées.
+
+### Feedback et administration plateforme
+
+- Widget Feedback flottant sur la landing page et dans l’espace connecté.
+- Catégories : amélioration, erreur, observation et autre.
+- Association automatique au compte et à l’entreprise lorsque l’utilisateur est connecté.
+- Espace `/admin` séparé du dashboard établissement, protégé par `PLATFORM_ADMIN_EMAIL` et `PLATFORM_ADMIN_PASSWORD`.
+- Vue globale : nombre d’entreprises, comptes, visites, flux des 30 derniers jours et feedbacks nouveaux.
+- Gestion des entreprises : création, modification, suppression et statistiques par entreprise.
+- Gestion du personnel : rattachement à une entreprise, rôle, activation/désactivation et suppression.
+- Gestion des feedbacks : lecture, classement par statut et suivi des retours utilisateurs.
 
 ## Architecture
 
 ```text
-backend/   Django REST API
-frontend/  Next.js app + dashboard + landing page
-docs/      Cahier des charges et documents de référence
+qr-register-saas/
+├── backend/                         # API Django REST Framework
+│   ├── apps/accounts/               # Utilisateurs, Google OAuth, invitations, rôles
+│   ├── apps/organizations/          # Établissements, branding, QR et membres
+│   ├── apps/checkins/               # Formulaires multiples, points d’accueil, sync, registre
+│   ├── apps/feedback/                # Feedback public, admin plateforme et métriques
+│   ├── core/                        # Settings, URLs, WSGI
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── requirements-dev.txt
+├── frontend/                        # Next.js 14 App Router + Tailwind + PWA
+│   ├── src/app/                     # Vitrine, auth, dashboard et page visiteur
+│   ├── src/components/              # Logo, loader, navigation, QR, formulaires
+│   ├── src/hooks/                   # Auth, cache public, sync offline
+│   ├── src/lib/                     # API, IndexedDB/Dexie, export CSV, presets
+│   └── public/                      # Logo, images landing, manifest et service worker
+├── docs/                            # Cahier des charges, audit et flows SVG
+└── README.md
 ```
 
-## Prérequis
+## Stack technique
 
-- Python 3.12+
-- Node.js 18+
-- PostgreSQL / Neon project
-- Compte Google Cloud avec un OAuth Client ID
+| Couche | Technologie |
+|---|---|
+| Frontend | Next.js 14, React, TypeScript, Tailwind CSS |
+| PWA/offline | next-pwa, Dexie/IndexedDB, service worker |
+| Backend | Python, Django, Django REST Framework |
+| Authentification | Google OAuth, JWT, refresh token httpOnly |
+| Base de données | PostgreSQL sur Neon en production, SQLite possible en local |
+| Infrastructure | GitHub, Vercel pour le frontend, Render pour le backend, Neon pour PostgreSQL |
+| Design | Logo officiel R3S3IGN3M3NT, Phosphor Icons, Plus Jakarta Sans/Geist et tokens de marque |
 
-## 1) Backend
+## Routes frontend principales
+
+| Route | Usage |
+|---|---|
+| `/` | Landing page marketing |
+| `/connexion` | Connexion Google |
+| `/onboarding` | Onboarding public / première configuration |
+| `/dashboard` | Registre et statistiques |
+| `/dashboard/accueil` | Accueil Staff ou Mode staff Patron/Gérant |
+| `/dashboard/qr-code` | Gestion du QR Code |
+| `/dashboard/parametres` | Paramètres du compte et de l’établissement |
+| `/dashboard/parametres/formulaire` | Configuration du formulaire |
+| `/dashboard/parametres/qr-code` | Gestion des QR et points d’accueil/tablettes |
+| `/dashboard/parametres/equipe` | Gestion des invitations et de l’équipe |
+| `/v/<qr_token>` | Formulaire public visiteur |
+| `/aide` | Aide produit |
+| `/cgu` | Conditions générales |
+| `/confidentialite` | Politique de confidentialité |
+| `/mentions-legales` | Mentions légales |
+| `/admin` | Administration AKATech Studio : métriques, entreprises, personnel et feedbacks |
+
+## API principale
+
+Toutes les routes API sont préfixées par `/api/v1`.
+
+| Méthode | Route | Accès | Fonction |
+|---|---|---|---|
+| `POST` | `/auth/google/` | Public | Connexion ou création via Google |
+| `POST` | `/auth/token/refresh/` | Cookie | Renouvellement JWT |
+| `POST` | `/auth/logout/` | Membre | Déconnexion |
+| `GET/PUT` | `/org/me/` | Membre | Lire/modifier l’organisation selon rôle |
+| `POST` | `/auth/invite/` | Patron/Gérant selon règle | Inviter un membre |
+| `GET/PUT` | `/form-template/` | Membre avec permission | Lire ou modifier le formulaire |
+| `GET/POST` | `/form-templates/` | Patron/Gérant | Lister ou créer plusieurs formulaires |
+| `PATCH/DELETE` | `/form-templates/<id>/` | Patron/Gérant ou Patron | Modifier, activer, définir par défaut ou supprimer |
+| `GET/POST` | `/access-points/` | Patron/Gérant | Lister ou créer un point d’accueil/tablette |
+| `PATCH/DELETE` | `/access-points/<id>/` | Patron/Gérant ou Patron | Modifier, désactiver ou supprimer un point |
+| `GET` | `/public/forms/<qr_token>/` | Public | Charger le formulaire public |
+| `POST` | `/checkins/sync/` | Public | Synchroniser les fiches offline, idempotence |
+| `POST` | `/feedback/` | Public/authentifié | Envoyer un retour utilisateur |
+| `GET` | `/checkins/` | Membre | Registre paginé |
+| `GET` | `/checkins/stats/` | Membre | Volume, heures et motifs fréquents |
+| `GET` | `/checkins/export/` | Selon permission | Export CSV |
+| `POST` | `/org/me/regenerate-qr/` | Patron | Invalider l’ancien QR |
+| `GET` | `/health/` | Public | Vérifier la disponibilité backend |
+| `POST` | `/admin/login/` | Public avec identifiants Render | Ouvrir une session admin plateforme |
+| `GET` | `/admin/overview/` | Admin plateforme | Métriques globales |
+| `GET/POST` | `/admin/organizations/` | Admin plateforme | Lister ou créer une entreprise |
+| `PATCH/DELETE` | `/admin/organizations/<id>/` | Admin plateforme | Modifier ou supprimer une entreprise |
+| `GET` | `/admin/members/` | Admin plateforme | Lister tous les comptes |
+| `PATCH/DELETE` | `/admin/members/<id>/` | Admin plateforme | Modifier ou supprimer un membre |
+| `GET` | `/admin/feedback/` | Admin plateforme | Lister les retours utilisateurs |
+| `PATCH/DELETE` | `/admin/feedback/<id>/` | Admin plateforme | Suivre ou supprimer un feedback |
+
+## Installation locale
+
+### Prérequis
+
+- Python 3.11+ ou 3.12+
+- Node.js 18+ (Node 22 recommandé)
+- npm
+- PostgreSQL/Neon pour reproduire la production, SQLite pour un démarrage local rapide
+- Client OAuth Google configuré
+
+### Backend
 
 ```bash
 cd backend
-python -m venv venv
-./venv/Scripts/Activate.ps1   # PowerShell
-# ou : source venv/bin/activate  # macOS/Linux
+python -m venv .venv
+source .venv/bin/activate       # macOS/Linux
+# Windows PowerShell : .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-Créer le fichier `.env` à partir de l’exemple fourni :
-
-```bash
-copy .env.example .env
-```
-
-Puis renseigner les variables nécessaires :
-
-- `DATABASE_URL` : chaîne de connexion Neon
-- `GOOGLE_CLIENT_ID` : Client ID OAuth Google
-- `FRONTEND_URL` : `http://localhost:3000`
-- `CORS_ALLOWED_ORIGINS` : `http://localhost:3000`
-
-Lancer les migrations et le serveur :
-
-```bash
+cp .env.example .env
 python manage.py migrate
 python manage.py runserver
 ```
 
-Optionnel : créer un superutilisateur Django :
+Variables backend importantes :
 
-```bash
-python manage.py createsuperuser
+```env
+SECRET_KEY=une-cle-secrete-longue
+DEBUG=True
+DATABASE_URL=sqlite:///... ou postgres://...
+GOOGLE_CLIENT_ID=votre-client-id.apps.googleusercontent.com
+FRONTEND_URL=http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000
+CSRF_TRUSTED_ORIGINS=http://localhost:3000
+PLATFORM_ADMIN_EMAIL=admin@example.com
+PLATFORM_ADMIN_PASSWORD=mot-de-passe-aleatoire-de-20-caracteres-minimum
 ```
 
-L’API est accessible sur :
-
-```text
-http://localhost:8000
-```
-
-## 2) Frontend
+### Frontend
 
 ```bash
 cd frontend
 npm install
-copy .env.local.example .env.local
-```
-
-Compléter le fichier `.env.local` avec :
-
-- `NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1`
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID=<votre_client_id_google>`
-
-Puis démarrer le projet :
-
-```bash
+cp .env.local.example .env.local
 npm run dev
 ```
 
-Le site est accessible sur :
+Variables frontend :
 
-```text
-http://localhost:3000
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=votre-client-id.apps.googleusercontent.com
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=votre-cloud-name
 ```
 
-## Routes principales
+Le frontend est disponible sur `http://localhost:3000` et l’API sur `http://localhost:8000`.
 
-- `/` : landing page / vitrine
-- `/connexion` : page de connexion Google
-- `/dashboard` : tableau de bord
-- `/dashboard/parametres` : formulaire, QR Code et équipe (onglets, filtrés selon le rôle)
-- `/v/<qr_token>` : formulaire visiteur
+## Mode tablette / offline
 
-## Kiosque / hors ligne
+1. Ouvrir `/v/<qr_token>` une première fois avec Internet.
+2. Vérifier le logo et les motifs affichés.
+3. Ajouter la page à l’écran d’accueil ou activer le mode kiosque du navigateur.
+4. Créer un point d’accueil dans Paramètres > QR Code, choisir son formulaire et nommer sa tablette.
+5. Laisser la tablette sur le formulaire de son QR.
+6. Les visiteurs remplissent et signent sans compte.
+7. Les données sont enregistrées localement si le réseau est indisponible.
+8. La synchronisation reprend automatiquement dès le retour du réseau, avec le point d’accueil et le formulaire d’origine.
 
-1. Ouvrir une première fois le lien visiteur avec internet.
-2. Ajouter la page à l’écran d’accueil du navigateur.
-3. Utiliser ensuite le mode kiosk hors ligne.
-4. Les données sont synchronisées automatiquement dès qu’une connexion revient.
+Chaque point d’accueil possède un QR opaque indépendant. Sa désactivation ou sa suppression coupe son parcours. Un appareil complètement offline peut conserver temporairement son ancien cache jusqu’à sa reconnexion.
 
-## Déploiement
+## Tests et validation
 
-- Frontend : Vercel
-- Backend : Render ou Railway
-- Les variables d’environnement doivent être configurées en production avec `DEBUG=False`
-- Pour la prod, utiliser une `SECRET_KEY` longue et fixe
-
-## Sécurité
-
-- Ne jamais committer les fichiers `.env` ou `.env.local`
-- Ne jamais publier de clés secrètes ni de tokens dans le dépôt
-- Les variables sensibles doivent rester locales ou côté serveur de déploiement
-
-## Tests
-
-Backend :
+### Backend
 
 ```bash
 cd backend
 pip install -r requirements-dev.txt
-pytest apps/checkins/tests/ -v
+pytest -q
 ```
 
-## Dépannage
+Les tests couvrent notamment l’idempotence, la validation des champs obligatoires, la protection contre l’IDOR, les invitations, le RBAC et les statistiques.
 
-[#dépannage](#dépannage)
+### Frontend
 
-**`Conflicting migrations detected; multiple leaf nodes`** (Render) : deux fichiers de migration différents ont été générés séparément pour le même changement (ex. deux sessions Claude qui touchent le projet en parallèle). Solution la plus sûre tant qu'il n'y a pas de données réelles à conserver : supprimer tous les fichiers dans `backend/apps/accounts/migrations/` sauf `__init__.py`, ne garder que ceux de ce dépôt, réinitialiser la base (Neon : recréer la branche ou `DROP SCHEMA public CASCADE; CREATE SCHEMA public;`), puis `python manage.py migrate`. Sinon (données à garder) : `python manage.py makemigrations --merge`.
+```bash
+cd frontend
+npm run type-check
+npm run build
+```
 
-**`You cannot have two parallel pages that resolve to the same path`** (Vercel) : deux dossiers de routes différents pointent vers la même URL (ex. `(auth)/connexion` et `(marketing)/connexion`). Supprimer le dossier en trop — la version de référence est `frontend/src/app/(marketing)/connexion/page.tsx`.
+État de la dernière validation : **21 tests backend passants, type-check frontend OK et build Next.js OK**.
 
-Cause commune aux deux : plusieurs sessions IA (ce chat + Claude Code en local) modifient le même dépôt sans se synchroniser. Avant de fusionner un changement local avec une livraison de ce chat, comparer les deux plutôt que de tout copier.
+## Déploiement production
+
+- **GitHub :** dépôt et historique du code.
+- **Vercel :** déploiement du frontend Next.js.
+- **Render :** déploiement de l’API Django.
+- **Neon :** base PostgreSQL de production.
+
+Avant chaque mise en production :
+
+1. configurer les variables d’environnement sans les committer ;
+2. utiliser une `SECRET_KEY` longue et stable ;
+3. positionner `DEBUG=False` côté backend ;
+4. vérifier `ALLOWED_HOSTS`, CORS et CSRF ;
+5. appliquer les migrations Django sur la base de production ;
+6. vérifier le login Google, l’invitation, le QR, le mode offline et les permissions par rôle ;
+7. tester le formulaire sur plusieurs téléphones et sur la tablette d’accueil.
+8. tester plusieurs formulaires, plusieurs QR et la reprise offline de chaque tablette.
+8. définir dans Render `PLATFORM_ADMIN_EMAIL` et un `PLATFORM_ADMIN_PASSWORD` aléatoire d’au moins 20 caractères ; ne jamais les mettre dans Git.
+
+## Sécurité et données
+
+- Le QR public utilise un token opaque, jamais un identifiant de base de données.
+- Les données sont isolées par organisation côté backend.
+- Les permissions sont vérifiées côté API, pas uniquement dans le frontend.
+- Le refresh JWT est conservé dans un cookie httpOnly.
+- Les routes publiques sont limitées par throttling.
+- Les soumissions offline utilisent une clé d’idempotence client.
+- Chaque check-in conserve son formulaire et son point d’accueil d’origine pour les statistiques et l’export.
+- L’administration plateforme exige un utilisateur marqué superuser par le login contrôlé côté serveur ; un Patron d’entreprise ne peut pas accéder à `/admin`.
+- Ne jamais committer `.env`, `.env.local`, tokens, clés OAuth privées ou secrets de déploiement.
+
+## Documentation complémentaire
+
+- [`docs/cahier-des-charges.md`](docs/cahier-des-charges.md) — périmètre et décisions produit.
+- [`docs/audit-etat-projet.md`](docs/audit-etat-projet.md) — audit des implémentations et contrôles production.
+- [`docs/flow-tablette-employe.md`](docs/flow-tablette-employe.md) — parcours tablette/kiosque.
+- [`docs/flows/`](docs/flows/) — six diagrammes SVG des parcours et permissions.
+- [`docs/modele-economique.md`](docs/modele-economique.md) — stratégie gratuit, offres payantes et indicateurs de lancement.
+
+## Limitations et prochaines évolutions
+
+Les fonctions actuellement prévues mais non intégrées dans le périmètre courant sont l’agrégateur de paiement, la facturation récurrente, la notification WhatsApp, l’impression de badges et la gestion avancée de supervision temps réel des tablettes. Les formulaires multiples et les points d’accueil multi-tablettes sont désormais livrés. La forme juridique, le RCCM et l’adresse physique complète d’AKATech Studio seront ajoutés aux pages légales dès finalisation des documents de l’entreprise.
 
 ## Licence
 
-Projet interne / SaaS de démonstration. À adapter selon le besoin du client ou du dépôt public final.
+Projet propriétaire / SaaS conçu par AKATech Studio. Les conditions d’utilisation et de réutilisation du code doivent être définies avant toute distribution publique.
