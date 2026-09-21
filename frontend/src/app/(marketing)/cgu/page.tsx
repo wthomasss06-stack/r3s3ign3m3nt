@@ -20,11 +20,17 @@ export default function CguPage() {
         <li>
           Le <strong>Patron</strong> crée son espace (« Organisation ») en se connectant avec un compte
           Google. Cette première connexion crée automatiquement son espace, un QR Code et un formulaire par
-          défaut.
+          défaut. Il n&apos;y a toujours qu&apos;un seul Patron par Organisation.
         </li>
         <li>
-          Le Patron peut inviter un ou plusieurs <strong>Agents</strong> par adresse email. Le rattachement
-          se fait automatiquement à la première connexion Google de l&apos;agent invité avec cette adresse.
+          Le Patron peut inviter un <strong>Gérant</strong> (gestion du formulaire et des exports, sans accès
+          aux paramètres sensibles) ou un <strong>Agent</strong> (consultation du registre) par adresse email.
+          Un Gérant peut à son tour inviter des Agents, mais jamais un autre Gérant. Chaque Organisation est
+          limitée à 5 Gérants et 5 Agents.
+        </li>
+        <li>
+          Le rattachement d&apos;un compte à une Organisation se fait uniquement par invitation : il n&apos;existe
+          aucun moyen de s&apos;attribuer soi-même un rôle.
         </li>
         <li>Le Service n&apos;utilise aucun mot de passe : l&apos;authentification repose exclusivement sur Google.</li>
       </ul>

@@ -98,9 +98,7 @@ http://localhost:3000
 - `/` : landing page / vitrine
 - `/connexion` : page de connexion Google
 - `/dashboard` : tableau de bord
-- `/dashboard/formulaire` : personnalisation du formulaire
-- `/dashboard/qr-code` : gestion des QR codes
-- `/dashboard/equipe` : gestion des agents
+- `/dashboard/parametres` : formulaire, QR Code et équipe (onglets, filtrés selon le rôle)
 - `/v/<qr_token>` : formulaire visiteur
 
 ## Kiosque / hors ligne
@@ -132,6 +130,16 @@ cd backend
 pip install -r requirements-dev.txt
 pytest apps/checkins/tests/ -v
 ```
+
+## Dépannage
+
+[#dépannage](#dépannage)
+
+**`Conflicting migrations detected; multiple leaf nodes`** (Render) : deux fichiers de migration différents ont été générés séparément pour le même changement (ex. deux sessions Claude qui touchent le projet en parallèle). Solution la plus sûre tant qu'il n'y a pas de données réelles à conserver : supprimer tous les fichiers dans `backend/apps/accounts/migrations/` sauf `__init__.py`, ne garder que ceux de ce dépôt, réinitialiser la base (Neon : recréer la branche ou `DROP SCHEMA public CASCADE; CREATE SCHEMA public;`), puis `python manage.py migrate`. Sinon (données à garder) : `python manage.py makemigrations --merge`.
+
+**`You cannot have two parallel pages that resolve to the same path`** (Vercel) : deux dossiers de routes différents pointent vers la même URL (ex. `(auth)/connexion` et `(marketing)/connexion`). Supprimer le dossier en trop — la version de référence est `frontend/src/app/(marketing)/connexion/page.tsx`.
+
+Cause commune aux deux : plusieurs sessions IA (ce chat + Claude Code en local) modifient le même dépôt sans se synchroniser. Avant de fusionner un changement local avec une livraison de ce chat, comparer les deux plutôt que de tout copier.
 
 ## Licence
 

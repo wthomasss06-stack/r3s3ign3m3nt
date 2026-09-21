@@ -62,6 +62,7 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
         user = User.objects.create_user(
             email=email,
             full_name=google_profile.get("name", ""),
+            avatar_url=google_profile.get("picture", ""),
             role=invitation.role,
             organization=invitation.organization,
         )
@@ -76,6 +77,7 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     user = User.objects.create_user(
         email=email,
         full_name=google_profile.get("name", ""),
+        avatar_url=google_profile.get("picture", ""),
         role=User.Role.BOSS,
         organization=organization,
     )
@@ -86,6 +88,22 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
         organization=organization, title="Registre d'accès", fields_schema=DEFAULT_FORM_SCHEMA
     )
     return user, True
+
+
+MAX_GERANT_PER_ORG = 5
+MAX_STAFF_PER_ORG = 5
+ROLE_CAPS = {User.Role.GERANT: MAX_GERANT_PER_ORG, User.Role.STAFF: MAX_STAFF_PER_ORG}
+
+
+def count_role_usage(organization, role: str) -> int:
+    """Compte les membres deja actifs + les invitations encore en attente pour ce
+    role, pour ne pas laisser une avalanche d'invitations depasser le plafond une
+    fois toutes acceptees."""
+    accepted = User.objects.filter(organization=organization, role=role).count()
+    pending = StaffInvitation.objects.filter(
+        organization=organization, role=role, accepted_at__isnull=True
+    ).count()
+    return accepted + pending
 
 
 def create_staff_invitation(organization, email: str, invited_by: User, role: str = User.Role.STAFF) -> StaffInvitation:

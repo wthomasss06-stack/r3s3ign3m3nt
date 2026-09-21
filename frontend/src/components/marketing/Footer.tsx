@@ -32,9 +32,8 @@ export default function Footer() {
     <footer className="border-t border-mk-ink/10 bg-mk-paper px-5 pb-8 pt-16 sm:px-10">
       <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
-            <Logo size={34} />
-            <span>R3S3IGN3M3NT</span>
+          <Link href="/" className="flex items-center">
+            <Logo size={48} />
           </Link>
           <p className="mt-4 max-w-[220px] text-sm leading-relaxed text-mk-moss">
             Le registre d&apos;accueil qui remplace le cahier — sans compte pour le visiteur, même hors-ligne.
@@ -47,7 +46,7 @@ export default function Footer() {
             <h3 className="font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-moss">{column.title}</h3>
             <nav className="mt-4 flex flex-col gap-3 text-sm text-mk-ink" aria-label={column.title}>
               {column.links.map(([label, href]) => (
-                <Link key={href} href={href} className="w-fit opacity-80 transition-opacity hover:opacity-100">
+                <Link key={href} href={href} className="w-fit text-mk-moss transition-colors hover:text-mk-ink">
                   {label}
                 </Link>
               ))}
@@ -62,11 +61,11 @@ export default function Footer() {
           href="https://akatech.vercel.app/"
           target="_blank"
           rel="noreferrer"
-          className="opacity-80 transition-opacity hover:opacity-100"
+          className="text-mk-moss transition-colors hover:text-mk-ink"
         >
           Conçu par AKATech Studio
         </a>
-        <button onClick={scrollTop} className="flex items-center gap-2 opacity-80 transition-opacity hover:opacity-100">
+        <button onClick={scrollTop} className="flex items-center gap-2 text-mk-moss transition-colors hover:text-mk-ink">
           Retour en haut <ArrowUp size={13} />
         </button>
       </div>

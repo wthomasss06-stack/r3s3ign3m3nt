@@ -33,7 +33,8 @@ const config: Config = {
         // Alias "mk-" (memes variables) pour les fichiers de la zone marketing déjà
         // écrits avec ces noms explicites.
         "mk-ink": "rgb(var(--c-ink) / <alpha-value>)",
-        "mk-deep": "rgb(var(--c-cta) / <alpha-value>)",
+        "mk-deep": "rgb(var(--c-deep) / <alpha-value>)",
+        "deep-ink": "rgb(var(--c-deep-ink) / <alpha-value>)",
         "mk-moss": "rgb(var(--c-ink-soft) / <alpha-value>)",
         "mk-sage": "rgb(var(--c-sage) / <alpha-value>)",
         "mk-lime": "rgb(var(--c-lime) / <alpha-value>)",

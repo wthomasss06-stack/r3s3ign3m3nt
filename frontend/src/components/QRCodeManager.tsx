@@ -5,15 +5,7 @@ import { ArrowsClockwise, DownloadSimple } from "@phosphor-icons/react";
 
 import { apiClient } from "@/lib/api";
 
-export default function QRCodeManager({
-  qrToken,
-  orgName,
-  canRegenerate = false,
-}: {
-  qrToken: string;
-  orgName: string;
-  canRegenerate?: boolean;
-}) {
+export default function QRCodeManager({ qrToken, orgName }: { qrToken: string; orgName: string }) {
   const [token, setToken] = useState(qrToken);
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,15 +60,13 @@ export default function QRCodeManager({
         >
           <DownloadSimple size={16} weight="bold" /> Télécharger
         </button>
-        {canRegenerate && (
-          <button
-            onClick={regenerate}
-            disabled={regenerating}
-            className="flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium text-ink transition hover:border-ink disabled:opacity-50"
-          >
-            <ArrowsClockwise size={16} weight="bold" /> {regenerating ? "..." : "Régénérer"}
-          </button>
-        )}
+        <button
+          onClick={regenerate}
+          disabled={regenerating}
+          className="flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium text-ink transition hover:border-ink disabled:opacity-50"
+        >
+          <ArrowsClockwise size={16} weight="bold" /> {regenerating ? "..." : "Régénérer"}
+        </button>
       </div>
       {error && <p className="text-sm text-error-text">{error}</p>}
     </div>

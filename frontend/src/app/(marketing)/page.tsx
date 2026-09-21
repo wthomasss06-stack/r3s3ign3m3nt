@@ -16,25 +16,25 @@ const FEATURES = [
     n: "01",
     title: "Aucune connexion pour le visiteur",
     body: "Il scanne le QR affiché à l'accueil, remplit le formulaire, signe du doigt. Aucun compte, aucune donnée mobile à lui demander.",
-    image: "/landing-images/05-qr-accueil.webp",
+    image: "/landing-images/kiosque-wide.webp",
   },
   {
     n: "02",
     title: "Hors-ligne, vraiment",
     body: "La tablette d'accueil continue d'enregistrer même sans réseau pendant plusieurs jours. Tout part vers le dashboard dès que la connexion revient.",
-    image: "/landing-images/02-sans-reseau.webp",
+    image: "/landing-images/offline.webp",
   },
   {
     n: "03",
     title: "Un formulaire par métier",
     body: "Bureau, restaurant, hôtel, accès chantier — un modèle de départ pour chaque secteur, entièrement modifiable ensuite.",
-    image: "/landing-images/07-pour-tous-les-etablissements.webp",
+    image: "/landing-images/secteurs.webp",
   },
   {
     n: "04",
     title: "Un dashboard qui s'adapte",
     body: "Le tableau de bord affiche automatiquement les champs choisis. Export CSV et régénération du QR en un clic.",
-    image: "/landing-images/06-patron-dashboard.webp",
+    image: "/landing-images/dashboard.webp",
   },
 ];
 
@@ -95,7 +95,7 @@ export default function LandingPage() {
   return (
     <div ref={heroRef}>
       {/* Hero */}
-      <section className="grid min-h-[720px] items-center gap-12 px-5 pb-20 pt-16 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-24 lg:pt-24">
+      <section className="grid min-h-screen items-center gap-12 px-5 pb-20 pt-24 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-24">
         <div>
           <div className="hero-kicker flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Registre d&apos;accueil sans papier
@@ -111,7 +111,7 @@ export default function LandingPage() {
           <div className="hero-actions mt-9 flex flex-wrap items-center gap-5">
             <Link
               href="/connexion"
-              className="inline-flex items-center gap-3 rounded-full bg-mk-deep px-6 py-4 text-xs font-extrabold uppercase tracking-[0.05em] text-mk-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(23,52,38,0.15)]"
+              className="inline-flex items-center gap-3 rounded-full bg-cta px-6 py-4 text-xs font-extrabold uppercase tracking-[0.05em] text-cta-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-cta-hover hover:shadow-[0_10px_20px_rgba(23,52,38,0.15)]"
             >
               Se connecter <ArrowUpRight />
             </Link>
@@ -131,10 +131,10 @@ export default function LandingPage() {
         <div className="hero-visual relative">
           <div className="overflow-hidden rounded-[1.4rem] shadow-[0_30px_70px_rgba(23,52,38,0.18)]">
             <Image
-              src="/landing-images/01-hero-landing.webp"
-              alt="Visiteur signant sur une tablette à l'accueil, formulaire R3S3IGN3M3NT"
-              width={1280}
-              height={720}
+              src="/landing-images/hero.webp"
+              alt="Formulaire R3S3IGN3M3NT sur tablette, badge visiteur avec QR Code"
+              width={1200}
+              height={1200}
               className="h-auto w-full"
               priority
             />
@@ -147,7 +147,7 @@ export default function LandingPage() {
       </section>
 
       {/* Manifesto */}
-      <section className="manifesto grid gap-12 bg-mk-deep px-5 py-24 text-mk-paper sm:px-10 lg:grid-cols-[1fr_3fr] lg:py-36">
+      <section className="manifesto grid gap-12 bg-mk-deep px-5 py-24 text-deep-ink sm:px-10 lg:grid-cols-[1fr_3fr] lg:py-36">
         <div className="flex items-start justify-between font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-sage lg:flex-col lg:gap-4">
           <span>D&apos;où ça vient</span>
         </div>
@@ -155,29 +155,18 @@ export default function LandingPage() {
           <p className="big-statement max-w-3xl text-[2.4rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[3.5rem] lg:text-[4.2rem]">
             Un cahier à 1000 FCFA reste imbattable sur le terrain. <em className="font-mk-serif font-semibold not-italic text-mk-lime italic">Jusqu&apos;à ce qu&apos;il faille relire l&apos;écriture de quelqu&apos;un.</em>
           </p>
-          <div className="mt-16 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-            <div className="border-t border-mk-paper/15 pt-6">
-              <p className="max-w-sm text-sm leading-relaxed text-mk-sage">
-                Le papier ne tombe jamais en panne, ne demande pas de réseau. Mais il se perd, s&apos;abîme, et
-                personne ne peut le consulter à distance. R3S3IGN3M3NT garde la simplicité du cahier et ajoute
-                ce qu&apos;il ne pourra jamais faire.
-              </p>
-              <div className="mt-8 flex items-center gap-4 font-mk-mono text-[10px] leading-relaxed text-mk-sage">
-                <Logo size={40} className="rounded-full border border-mk-sage/40 bg-mk-paper/5 p-1.5" />
-                <span>
-                  Conçu pour le terrain
-                  <br />à Abidjan
-                </span>
-              </div>
-            </div>
-            <div className="overflow-hidden rounded-[1.4rem]">
-              <Image
-                src="/landing-images/04-papier-vers-digital.webp"
-                alt="Du registre papier au formulaire digital R3S3IGN3M3NT"
-                width={900}
-                height={1120}
-                className="h-auto w-full"
-              />
+          <div className="mt-16 max-w-sm border-t border-deep-ink/15 pt-6">
+            <p className="text-sm leading-relaxed text-mk-sage">
+              Le papier ne tombe jamais en panne, ne demande pas de réseau. Mais il se perd, s&apos;abîme, et
+              personne ne peut le consulter à distance. R3S3IGN3M3NT garde la simplicité du cahier et ajoute
+              ce qu&apos;il ne pourra jamais faire.
+            </p>
+            <div className="mt-8 flex items-center gap-4 font-mk-mono text-[10px] leading-relaxed text-mk-sage">
+              <Logo size={40} className="rounded-full border border-mk-sage/40 bg-deep-ink/5 p-1.5" />
+              <span>
+                Conçu pour le terrain
+                <br />à Abidjan
+              </span>
             </div>
           </div>
         </div>
@@ -216,6 +205,19 @@ export default function LandingPage() {
       </section>
 
       {/* Méthode / Comment ça marche */}
+      {/* Sécurité & rôles */}
+      <section className="px-5 py-20 sm:px-10 lg:py-28">
+        <div className="overflow-hidden rounded-[1.4rem]">
+          <Image
+            src="/landing-images/securite-wide.webp"
+            alt="Rôles Patron et Agent d'accueil, données protégées"
+            width={2000}
+            height={860}
+            className="h-auto w-full"
+          />
+        </div>
+      </section>
+
       <section id="comment-ca-marche" className="grid gap-12 px-5 py-24 sm:px-10 lg:grid-cols-[1fr_1.4fr] lg:py-36">
         <div>
           <div className="flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
@@ -278,7 +280,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/connexion"
-            className="mt-8 inline-flex items-center gap-3 rounded-full bg-mk-deep px-7 py-4 text-xs font-extrabold uppercase tracking-[0.05em] text-mk-paper transition-all duration-200 hover:-translate-y-0.5"
+            className="mt-8 inline-flex items-center gap-3 rounded-full bg-cta px-7 py-4 text-xs font-extrabold uppercase tracking-[0.05em] text-cta-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-cta-hover"
           >
             Se connecter <ArrowUpRight />
           </Link>

@@ -11,7 +11,9 @@ from apps.common.responses import error_response
 from .cookies import clear_refresh_cookie, set_refresh_cookie
 from .serializers import GoogleAuthSerializer, InviteStaffSerializer, UserProfileUpdateSerializer, UserSerializer
 from .services import (
+    ROLE_CAPS,
     InvalidGoogleTokenError,
+    count_role_usage,
     create_staff_invitation,
     resolve_or_create_user,
     verify_google_credential,
@@ -115,6 +117,14 @@ class InviteStaffView(APIView):
         if requested_role == "GERANT" and request.user.role != "BOSS":
             return error_response(
                 "Seul le patron peut inviter un gérant.", status.HTTP_403_FORBIDDEN
+            )
+
+        cap = ROLE_CAPS.get(requested_role)
+        if cap and count_role_usage(request.user.organization, requested_role) >= cap:
+            label = "gérants" if requested_role == "GERANT" else "agents"
+            return error_response(
+                f"Limite atteinte : {cap} {label} maximum (invitations en attente comprises).",
+                status.HTTP_400_BAD_REQUEST,
             )
 
         invitation = create_staff_invitation(

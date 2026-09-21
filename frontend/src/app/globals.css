@@ -8,8 +8,6 @@
    <html> (voir useTheme) — jamais de flash au chargement grace au script inline
    dans layout.tsx qui l'applique avant le premier rendu. */
 :root {
-  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-serif: Georgia, "Times New Roman", Times, serif;
   --c-canvas: 238 238 226;
   --c-surface: 255 255 255;
   --c-border: 214 216 201;
@@ -18,6 +16,8 @@
   --c-cta: 23 52 38;
   --c-cta-hover: 83 108 87;
   --c-cta-ink: 238 238 226;
+  --c-deep: 23 52 38;
+  --c-deep-ink: 238 238 226;
   --c-success-bg: 237 243 236;
   --c-success-text: 52 101 56;
   --c-error-bg: 253 235 236;
@@ -37,6 +37,13 @@
   --c-cta: 27 201 142;
   --c-cta-hover: 61 219 163;
   --c-cta-ink: 13 26 19;
+  /* "deep" reste sombre dans les deux themes : sert de fond de grande section,
+     jamais de bouton — contrairement a --c-cta qui doit devenir vif en sombre
+     pour rester visible, --c-deep changerait le sens meme d'une section "sombre"
+     s'il s'eclaircissait (bug corrige : la section manifesto devenait vert vif
+     avec du texte clair illisible dessus). */
+  --c-deep: 8 16 12;
+  --c-deep-ink: 238 238 226;
   --c-success-bg: 20 48 31;
   --c-success-text: 111 207 135;
   --c-error-bg: 58 22 22;
@@ -51,6 +58,16 @@ body {
   @apply bg-canvas text-ink font-sans antialiased;
   line-height: 1.6;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Garde-fou explicite : tout texte qui n'a pas sa propre couleur (héritage) doit
+   rester clair en mode sombre, même si un composant retombe sur une couleur
+   Tailwind figée (ex: text-black) au lieu d'un token. */
+.dark {
+  color-scheme: dark;
+}
+.dark body {
+  color: rgb(var(--c-ink));
 }
 
 h1, h2, h3, h4 {

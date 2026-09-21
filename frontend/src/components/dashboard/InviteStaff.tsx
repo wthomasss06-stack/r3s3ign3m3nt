@@ -6,7 +6,7 @@ import { apiClient } from "@/lib/api";
 
 type InviteRole = "GERANT" | "STAFF";
 
-export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOSS" | "GERANT" }) {
+export default function InviteStaff({ viewerRole }: { viewerRole: "BOSS" | "GERANT" }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("STAFF");
   const [link, setLink] = useState<string | null>(null);
@@ -25,6 +25,8 @@ export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOS
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 403) {
         setError("Cette action est réservée au patron.");
+      } else if (axios.isAxiosError(err) && err.response?.status === 400) {
+        setError(err.response.data?.error?.message ?? "Requête invalide.");
       } else {
         setError("Impossible d'envoyer l'invitation. Réessaie.");
       }

@@ -97,12 +97,22 @@ export default function OnboardingPage() {
 
       {step === 1 && (
         <section className="space-y-8">
-          <div>
-            <h1 className="text-2xl font-bold text-ink">Bienvenue, {user.full_name || user.email}</h1>
-            <p className="mt-2 text-sm text-ink-soft">
-              Ton espace « {org.name} » vient d&apos;être créé. Tu es le <strong>Patron</strong> : tu as tous
-              les droits. Voici ce que tu pourras déléguer plus tard à ton équipe.
-            </p>
+          <div className="flex items-center gap-4">
+            {user.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- avatar externe (Google), pas un asset local optimisable par next/image
+              <img src={user.avatar_url} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-cta text-lg font-bold text-cta-ink">
+                {(user.full_name || user.email).slice(0, 1).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-ink">Bienvenue, {user.full_name || user.email}</h1>
+              <p className="mt-1 text-sm text-ink-soft">
+                Ton espace « {org.name} » vient d&apos;être créé. Tu es le <strong>Patron</strong> : tu as tous
+                les droits. Voici ce que tu pourras déléguer plus tard à ton équipe.
+              </p>
+            </div>
           </div>
           <div className="space-y-3">
             {ROLE_CARDS.map(({ icon: Icon, title, body }) => (

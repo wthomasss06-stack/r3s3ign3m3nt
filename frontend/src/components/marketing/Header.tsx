@@ -47,23 +47,18 @@ export default function Header() {
         hidden ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <Link href="/" className="flex items-center gap-2.5 font-mk-sans font-extrabold tracking-[-0.04em] text-mk-ink">
-        <Logo size={30} />
-        <span className="text-[15px]">
-          R3S3IGN3M3NT <em className="font-mk-serif text-[14px] font-normal not-italic sm:italic">registre digital</em>
-        </span>
+      <Link href="/" className="flex items-center">
+        <Logo size={44} />
       </Link>
 
       <nav className="hidden items-center gap-8 text-[11px] font-bold uppercase tracking-[0.06em] md:flex" aria-label="Navigation principale">
         {NAV_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="opacity-75 transition-opacity hover:opacity-100">
-            {link.label}
-          </Link>
+          <Link key={link.href} href={link.href} className="text-mk-moss transition-colors hover:text-mk-ink">{link.label}</Link>
         ))}
         <ThemeToggle />
         <Link
           href="/connexion"
-          className="inline-flex items-center gap-1.5 rounded-full bg-mk-deep px-[18px] py-3 text-cta-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-mk-moss"
+          className="inline-flex items-center gap-1.5 rounded-full bg-cta px-[18px] py-3 text-cta-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-cta-hover"
         >
           Se connecter <ArrowUpRight size={14} />
         </Link>
@@ -90,7 +85,7 @@ export default function Header() {
           <Link
             href="/connexion"
             onClick={() => setMenuOpen(false)}
-            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-mk-deep px-[18px] py-3 text-cta-ink"
+            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-cta px-[18px] py-3 text-cta-ink"
           >
             Se connecter <ArrowUpRight size={14} />
           </Link>

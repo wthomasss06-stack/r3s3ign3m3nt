@@ -48,7 +48,7 @@ export default function PwaInstallButton() {
   return (
     <button
       onClick={install}
-      className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-mk-deep px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.05em] text-mk-paper transition-all duration-200 hover:-translate-y-0.5 hover:bg-mk-moss"
+      className="mt-5 inline-flex items-center gap-2.5 rounded-full bg-cta px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.05em] text-cta-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-cta-hover"
     >
       Installer l&apos;application
       <DownloadIcon size={14} />

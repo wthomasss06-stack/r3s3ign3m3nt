@@ -37,9 +37,9 @@ export default function ConfidentialitePage() {
 
       <h2>Destinataires</h2>
       <p>
-        Google (authentification uniquement — aucune autre donnée n&apos;est partagée avec Google) et{" "}
-        <strong>[À COMPLÉTER PAR LE CLIENT — hébergeur(s) technique(s) retenu(s)]</strong>. Aucun autre
-        tiers, aucun service publicitaire ou de mesure d&apos;audience n&apos;est utilisé à ce jour.
+        Google (authentification uniquement — aucune autre donnée n&apos;est partagée avec Google), et les
+        hébergeurs techniques Vercel (site), Render (application) et Neon (base de données PostgreSQL).
+        Aucun autre tiers, aucun service publicitaire ou de mesure d&apos;audience n&apos;est utilisé à ce jour.
       </p>
 
       <h2>Cookies</h2>

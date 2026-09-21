@@ -58,3 +58,18 @@ def test_invite_defaults_to_staff_role(db, boss_user, organization):
 
     assert response.status_code == 201
     assert StaffInvitation.objects.get(email="sans-role@example.com").role == "STAFF"
+
+
+def test_invite_blocked_once_role_cap_reached(db, boss_user, organization):
+    """5 agents max par organisation (invitations en attente comprises) — la 6e
+    est refusee avant meme d'etre creee."""
+    client = auth_client(boss_user)
+    for i in range(5):
+        resp = client.post("/api/v1/auth/invite/", {"email": f"agent{i}@example.com"}, format="json")
+        assert resp.status_code == 201
+
+    response = client.post("/api/v1/auth/invite/", {"email": "agent-en-trop@example.com"}, format="json")
+
+    assert response.status_code == 400
+    assert not StaffInvitation.objects.filter(email="agent-en-trop@example.com").exists()
+    assert StaffInvitation.objects.filter(organization=organization, role="STAFF").count() == 5

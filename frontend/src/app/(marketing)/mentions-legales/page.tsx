@@ -20,10 +20,11 @@ export default function MentionsLegalesPage() {
 
       <h2>Hébergement</h2>
       <p>
-        Hébergeur du site (frontend) : <strong>[À COMPLÉTER — ex. Vercel Inc.]</strong>
+        Hébergeur du site (frontend) : Vercel Inc.
         <br />
-        Hébergeur de l&apos;application et de la base de données (backend) :{" "}
-        <strong>[À COMPLÉTER — ex. Render / Railway, base de données Neon]</strong>
+        Hébergeur de l&apos;application (backend) : Render.
+        <br />
+        Base de données : Neon (PostgreSQL).
       </p>
 
       <h2>Propriété intellectuelle</h2>
