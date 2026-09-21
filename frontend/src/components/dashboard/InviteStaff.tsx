@@ -6,7 +6,7 @@ import { apiClient } from "@/lib/api";
 
 type InviteRole = "GERANT" | "STAFF";
 
-export default function InviteStaff({ viewerRole }: { viewerRole: "BOSS" | "GERANT" }) {
+export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOSS" | "GERANT" }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("STAFF");
   const [link, setLink] = useState<string | null>(null);

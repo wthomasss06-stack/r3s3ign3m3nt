@@ -10,9 +10,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='user',
-            name='avatar_url',
-            field=models.TextField(blank=True),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunSQL(
+                    sql="ALTER TABLE accounts_user ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT '';",
+                    reverse_sql="ALTER TABLE accounts_user DROP COLUMN IF EXISTS avatar_url;",
+                ),
+            ],
+            state_operations=[
+                migrations.AddField(
+                    model_name='user',
+                    name='avatar_url',
+                    field=models.TextField(blank=True),
+                ),
+            ],
         ),
     ]
+
