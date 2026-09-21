@@ -102,6 +102,19 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
+class DeactivateMeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role == "BOSS":
+            return error_response("Le patron doit d’abord transférer ou supprimer l’entreprise.", status.HTTP_400_BAD_REQUEST)
+        request.user.is_active = False
+        request.user.save(update_fields=["is_active"])
+        response = Response({"detail": "Compte désactivé."})
+        clear_refresh_cookie(response)
+        return response
+
+
 class InviteStaffView(APIView):
     """BOSS et GERANT peuvent tous deux inviter — mais seul BOSS peut accorder le
     role GERANT (un GERANT ne peut inviter que des STAFF, jamais un pair)."""

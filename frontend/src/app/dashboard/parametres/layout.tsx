@@ -11,6 +11,7 @@ const ALL_TABS = [
   { href: "/dashboard/parametres/formulaire", label: "Formulaire", staffCanSee: false },
   { href: "/dashboard/parametres/qr-code", label: "QR Code", staffCanSee: true },
   { href: "/dashboard/parametres/equipe", label: "Équipe", staffCanSee: false },
+  { href: "/dashboard/parametres/entreprise", label: "Entreprise", staffCanSee: true },
 ];
 
 export default function ParametresLayout({ children }: { children: React.ReactNode }) {

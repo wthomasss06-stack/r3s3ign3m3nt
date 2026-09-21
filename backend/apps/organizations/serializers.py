@@ -6,7 +6,7 @@ from .models import Organization
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ["id", "name", "logo_url", "visit_reasons", "qr_secure_token", "created_at"]
+        fields = ["id", "name", "logo_url", "visit_reasons", "qr_secure_token", "created_at", "is_suspended"]
         read_only_fields = ["id", "qr_secure_token", "created_at"]
 
 

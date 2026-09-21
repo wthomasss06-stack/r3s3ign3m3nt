@@ -195,3 +195,13 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 - Frontend Next.js complet (`/frontend`) — flow visiteur + dashboard patron/agent
 - Ce cahier des charges
 - `README.md` — installation et déploiement
+
+## 14. Simplification UX livrée — septembre 2026
+
+La création d’un formulaire ou d’un QR code ne s’impose plus dans le parcours initial. L’utilisateur commence avec un formulaire simple, puis déclenche **Nouveau formulaire** ou **Nouveau QR** depuis les paramètres. Une modale demande le nom, propose un modèle de champs pour le formulaire ou le formulaire cible pour le QR, puis laisse l’utilisateur personnaliser avant déploiement. Le même principe s’applique à chaque ajout successif.
+
+Un onglet **Entreprise** est désormais disponible dans les paramètres. Le patron peut modifier le nom et le logo de l’entreprise, suspendre l’espace ou le supprimer après confirmation. Le gérant et le staff peuvent quitter volontairement leur espace et désactiver leur compte. La suppression d’un membre ou d’une invitation doit rester une action contrôlée par le patron, avec un message d’accès retiré lors d’une prochaine connexion si le compte est désactivé.
+
+Les états de connexion et de déconnexion sont présentés dans des modales contextualisées : bienvenue pour une première connexion, bon retour pour une connexion existante, et formule de départ adaptée à l’heure. La session repose sur le cookie httpOnly de renouvellement et une erreur réseau transitoire ne provoque pas de déconnexion artificielle après actualisation.
+
+Sur mobile, le feedback est accessible par une icône ronde flottante afin de préserver l’espace de navigation. L’administration plateforme expose ses onglets sur desktop et mobile ; le dashboard établissement affiche également le lien d’administration pour le rôle patron lorsque l’accès plateforme est autorisé côté serveur.

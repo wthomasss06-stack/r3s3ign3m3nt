@@ -138,6 +138,7 @@ qr-register-saas/
 | `/dashboard/parametres/formulaire` | Configuration du formulaire |
 | `/dashboard/parametres/qr-code` | Gestion des QR et points d’accueil/tablettes |
 | `/dashboard/parametres/equipe` | Gestion des invitations et de l’équipe |
+| `/dashboard/parametres/entreprise` | Branding, suspension et actions de compte |
 | `/v/<qr_token>` | Formulaire public visiteur |
 | `/aide` | Aide produit |
 | `/cgu` | Conditions générales |
@@ -313,5 +314,13 @@ Avant chaque mise en production :
 Les fonctions actuellement prévues mais non intégrées dans le périmètre courant sont l’agrégateur de paiement, la facturation récurrente, la notification WhatsApp, l’impression de badges et la gestion avancée de supervision temps réel des tablettes. Les formulaires multiples et les points d’accueil multi-tablettes sont désormais livrés. La forme juridique, le RCCM et l’adresse physique complète d’AKATech Studio seront ajoutés aux pages légales dès finalisation des documents de l’entreprise.
 
 ## Licence
+
+## Mise à jour UX — septembre 2026
+
+L’expérience recommande désormais un parcours simple : un seul formulaire est présenté au départ, puis **Paramètres > Formulaire** et **Paramètres > QR Code** proposent chacun une modale d’ajout. La modale permet de nommer le nouveau parcours, de repartir d’un modèle et de visualiser les types de champs inclus avant personnalisation. Chaque QR peut être relié à un formulaire différent et à un point d’accueil identifié.
+
+L’onglet **Entreprise** centralise le nom et le logo de l’établissement. Seul le patron peut modifier le branding, suspendre ou supprimer l’entreprise. Les gérants et membres du staff disposent d’une action de départ volontaire qui désactive leur compte. Les connexions affichent un accueil personnalisé ; la déconnexion est confirmée dans une modale avec une formule adaptée à l’heure. Le rafraîchissement de session utilise le cookie httpOnly de renouvellement et ne déconnecte pas l’utilisateur lors d’une erreur réseau transitoire.
+
+Le logo de référence du projet est [`frontend/public/akatech-studio-logo.webp`](frontend/public/akatech-studio-logo.webp).
 
 Projet propriétaire / SaaS conçu par AKATech Studio. Les conditions d’utilisation et de réutilisation du code doivent être définies avant toute distribution publique.

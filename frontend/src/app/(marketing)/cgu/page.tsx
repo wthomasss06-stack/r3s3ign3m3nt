@@ -28,7 +28,10 @@ export default function CguPage() {
     <h2>7. Responsabilité</h2>
     <p>AKATech Studio fournit l’outil technique. L’établissement utilisateur reste responsable de ses obligations légales, de ses formulaires, de ses visiteurs et de la conservation des données. L’éditeur ne saurait être responsable d’une utilisation contraire à la réglementation applicable.</p>
 
-    <h2>8. Droit applicable et contact</h2>
+    <h2>8. Paramètres, départ et suspension</h2>
+    <p>La création d’un formulaire ou d’un QR supplémentaire se fait depuis les paramètres, au moyen d’une modale de création. Le Patron peut modifier le nom et le logo de l’entreprise, suspendre l’espace ou le supprimer après confirmation. Un Gérant ou un membre du Staff peut quitter l’équipe et désactiver son compte. Les droits restent contrôlés par le serveur selon le rôle attribué.</p>
+
+    <h2>9. Droit applicable et contact</h2>
     <p>Les présentes CGU sont soumises au droit ivoirien, sous réserve des règles impératives applicables. Pour toute question relative au service : <a href="mailto:wthomasss06@gmail.com">wthomasss06@gmail.com</a> ou <a href="tel:+2250142507750">+225 01 42 50 77 50</a>.</p>
     <div className="legal-warning">La forme juridique, le numéro RCCM et l’adresse physique complète d’AKATech Studio sont en cours de formalisation et seront ajoutés dès leur disponibilité. Les présentes CGU devront être validées juridiquement avant une commercialisation payante.</div>
   </LegalLayout>;

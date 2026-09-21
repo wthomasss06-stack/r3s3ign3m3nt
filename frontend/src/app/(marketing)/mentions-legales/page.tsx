@@ -12,7 +12,7 @@ export default function MentionsLegalesPage() {
     <p>La forme juridique, le numéro RCCM et l’adresse physique complète de l’entreprise sont en cours de formalisation et seront ajoutés dès leur disponibilité.</p>
 
     <h2>Objet du service</h2>
-    <p>R3S3IGN3M3NT est un produit conçu par AKATech Studio pour digitaliser le registre d’accueil des établissements. Le service permet de configurer plusieurs formulaires, de les diffuser par QR Code sur plusieurs points d’accueil ou tablettes, puis de consulter les entrées, signatures et statistiques selon le rôle des membres.</p>
+    <p>R3S3IGN3M3NT est un produit conçu par AKATech Studio pour digitaliser le registre d’accueil des établissements. Le service permet de configurer plusieurs formulaires, de les diffuser par QR Code sur plusieurs points d’accueil ou tablettes, puis de consulter les entrées, signatures et statistiques selon le rôle des membres. Les parcours de création sont guidés par modale ; le branding de l’entreprise est réservé au Patron et les comptes peuvent être désactivés selon leur rôle.</p>
 
     <h2>Hébergement et infrastructure</h2>
     <p>Le projet est versionné et déployé depuis GitHub. L’hébergement technique est réparti comme suit :</p>

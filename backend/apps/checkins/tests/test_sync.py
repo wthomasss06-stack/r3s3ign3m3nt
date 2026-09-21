@@ -47,3 +47,19 @@ def test_sync_never_trusts_client_supplied_organization_id(db, api_client, organ
 
     assert response.data["processed"][0]["status"] == "unknown_organization"
     assert CheckIn.objects.count() == 0
+
+
+def test_suspended_organization_cannot_receive_public_or_offline_checkins(db, api_client, organization, form_template):
+    organization.is_suspended = True
+    organization.save(update_fields=["is_suspended"])
+
+    public_response = api_client.get(f"/api/v1/public/forms/{organization.qr_secure_token}/")
+    sync_response = api_client.post(
+        "/api/v1/checkins/sync/",
+        {"checkins": [valid_checkin_payload(organization.qr_secure_token)]},
+        format="json",
+    )
+
+    assert public_response.status_code == 404
+    assert sync_response.data["processed"][0]["status"] == "unknown_organization"
+    assert CheckIn.objects.count() == 0

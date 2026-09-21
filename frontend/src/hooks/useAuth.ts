@@ -20,6 +20,7 @@ export function useGoogleAuthLogin() {
       try {
         const { data } = await axios.post(`${API_URL}/auth/google/`, { credential }, { withCredentials: true });
         setAccessToken(data.access);
+        if (typeof window !== "undefined") sessionStorage.setItem("qr_login_greeting", JSON.stringify({ isNew: Boolean(data.is_new), name: data.user?.full_name || data.user?.email || "" }));
         router.push("/dashboard");
       } catch {
         setError("Connexion impossible. Réessaie.");

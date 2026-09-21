@@ -17,7 +17,7 @@ class MyOrganizationView(APIView):
 
     def patch(self, request):
         self.check_object_permissions(request, request.user.organization)
-        if request.user.role not in ("BOSS", "GERANT"):
+        if request.user.role != "BOSS":
             self.permission_denied(request, message=IsBoss.message)
 
         serializer = OrganizationUpdateSerializer(data=request.data, partial=True)
@@ -38,3 +38,17 @@ class RegenerateQRTokenView(APIView):
         organization.qr_secure_token = secrets.token_urlsafe(16)
         organization.save(update_fields=["qr_secure_token"])
         return Response(OrganizationSerializer(organization).data)
+
+
+class OrganizationLifecycleView(APIView):
+    permission_classes = [IsAuthenticated, IsBoss]
+
+    def patch(self, request):
+        organization = request.user.organization
+        organization.is_suspended = bool(request.data.get("is_suspended", not organization.is_suspended))
+        organization.save(update_fields=["is_suspended"])
+        return Response(OrganizationSerializer(organization).data)
+
+    def delete(self, request):
+        request.user.organization.delete()
+        return Response(status=204)

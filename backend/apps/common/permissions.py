@@ -19,7 +19,11 @@ class IsBossOrGerant(BasePermission):
 
     def has_permission(self, request, view):
         return bool(
-            request.user and request.user.is_authenticated and request.user.role in ("BOSS", "GERANT")
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in ("BOSS", "GERANT")
+            and request.user.organization_id
+            and not request.user.organization.is_suspended
         )
 
 
@@ -28,4 +32,9 @@ class IsOrgMember(BasePermission):
     message = "Compte non rattache a un etablissement."
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.organization_id)
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.organization_id
+            and not request.user.organization.is_suspended
+        )

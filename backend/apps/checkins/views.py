@@ -25,10 +25,10 @@ def default_template(organization):
 
 
 def resolve_public_target(qr_token):
-    access_point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=qr_token, is_active=True).first()
+    access_point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=qr_token, is_active=True, organization__is_suspended=False).first()
     if access_point:
         return access_point.organization, access_point.form_template, access_point
-    organization = Organization.objects.filter(qr_secure_token=qr_token).first()
+    organization = Organization.objects.filter(qr_secure_token=qr_token, is_suspended=False).first()
     if not organization:
         return None, None, None
     return organization, default_template(organization), None

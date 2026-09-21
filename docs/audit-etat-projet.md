@@ -20,3 +20,7 @@
 Les éléments suivants ne bloquent pas la V1.1 fonctionnelle, mais doivent être traités avant une ouverture commerciale large : recette navigateur mobile réelle, vérification des variables de production, contrôle de la migration distante, tests multi-tablettes, stratégie de stockage long terme des signatures et logos, validation juridique des pages légales et définition d’une durée de conservation des données visiteurs.
 
 Les améliorations produit encore prévues sont la notification WhatsApp, l’impression de badge visiteur et la gestion de plusieurs formulaires par établissement. Elles restent hors de l’implémentation courante.
+
+## Mise à jour de l’audit — 21 septembre 2026
+
+La gestion de plusieurs formulaires et QR codes est maintenant présentée par des modales d’ajout guidé. Le branding de l’entreprise est réservé au patron côté API ; des endpoints dédiés permettent la suspension/suppression contrôlée de l’entreprise et la désactivation volontaire d’un gérant ou d’un membre du staff. L’onglet Entreprise, les confirmations d’actions sensibles et les états de connexion/déconnexion sont intégrés au frontend. Le feedback mobile est réduit à une pastille icône. Une migration Django ajoute `Organization.is_suspended`.

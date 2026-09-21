@@ -30,9 +30,9 @@ def missing_required_fields(template: FormTemplate | None, responses: dict, sign
 
 
 def resolve_target(token):
-    point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=token, is_active=True).first()
+    point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=token, is_active=True, organization__is_suspended=False).first()
     if point: return point.organization, point.form_template, point
-    organization = Organization.objects.filter(qr_secure_token=token).first()
+    organization = Organization.objects.filter(qr_secure_token=token, is_suspended=False).first()
     if not organization: return None, None, None
     template = organization.form_templates.filter(is_default=True).first() or organization.form_templates.filter(is_active=True).first()
     return organization, template, None
