@@ -109,7 +109,7 @@ export default function LandingPage() {
           <div className="hero-kicker flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-ink">
             <span className="h-px w-7 bg-current" /> Registre d&apos;accueil sans papier
           </div>
-          <h1 className="hero-h1 mt-6 max-w-4xl text-[3.2rem] font-bold leading-[0.9] tracking-[-0.05em] sm:text-[5.5rem] lg:text-[7rem]">
+          <h1 className="hero-h1 mt-6 max-w-full break-all text-[clamp(2.45rem,9vw,7rem)] font-bold leading-[0.9] tracking-[-0.07em]">
             R3NS3IGN3M3NT
           </h1>
           <p className="hero-lead mt-6 max-w-md text-[1.05rem] leading-relaxed text-mk-ink/70">

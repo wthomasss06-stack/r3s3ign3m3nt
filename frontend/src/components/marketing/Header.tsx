@@ -20,21 +20,27 @@ export default function Header() {
   const navRef = useRef<HTMLElement>(null);
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
       const scrollingDown = y > lastY && y > 80;
-      setHidden(scrollingDown && !menuOpen);
+      setHidden(footerVisible || (scrollingDown && !menuOpen));
       lastY = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [footerVisible, menuOpen]);
+
+  useEffect(() => {
     const footer = document.querySelector<HTMLElement>("[data-footer-zone]");
-    const footerObserver = footer ? new IntersectionObserver(([entry]) => { if (entry) setHidden(entry.isIntersecting && !menuOpen); }, { threshold: 0.12 }) : null;
-    if (footer) footerObserver?.observe(footer);
-    return () => { window.removeEventListener("scroll", onScroll); footerObserver?.disconnect(); };
-  }, [menuOpen]);
+    if (!footer) return;
+    const observer = new IntersectionObserver(([entry]) => setFooterVisible(Boolean(entry?.isIntersecting)), { threshold: 0.12 });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   useGSAP(
     () => {
@@ -47,7 +53,7 @@ export default function Header() {
     <header
       ref={navRef}
       className={`fixed inset-x-0 top-0 z-30 flex h-[84px] items-center justify-between bg-transparent px-5 transition-transform duration-300 sm:px-10 ${
-        hidden ? "-translate-y-full" : "translate-y-0"
+        hidden || footerVisible ? "-translate-y-full" : "translate-y-0"
       }`}
     >
       <Link href="/" className="flex items-center">
