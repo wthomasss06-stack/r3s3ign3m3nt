@@ -45,9 +45,18 @@ const STEPS = [
   { n: "04", title: "Synchroniser", body: "Envoi automatique dès que l'appareil retrouve une connexion. Le patron voit tout depuis son dashboard." },
 ];
 
+const FAQS = [
+  { question: "Le visiteur doit-il créer un compte ?", answer: "Non. Il scanne simplement le QR Code, remplit le formulaire depuis son téléphone ou la tablette d’accueil, puis signe. Aucune application ni inscription n’est nécessaire." },
+  { question: "Est-ce que R3NS3IGN3M3NT fonctionne sans connexion ?", answer: "Oui. Le formulaire continue d’enregistrer les visites hors-ligne sur l’appareil. Les données se synchronisent automatiquement dès que la connexion revient." },
+  { question: "Puis-je adapter le formulaire à mon activité ?", answer: "Oui. Tu peux choisir les champs utiles à ton établissement — bureau, restaurant, hôtel, chantier ou autre — puis les modifier à tout moment depuis les paramètres." },
+  { question: "Qui peut consulter les visites enregistrées ?", answer: "Tu contrôles les accès depuis ton espace. Le patron peut gérer l’ensemble du registre et inviter un gérant ou un membre du staff avec des permissions adaptées à son rôle." },
+  { question: "Que deviennent les données des visiteurs ?", answer: "Elles sont enregistrées dans l’espace sécurisé de ton établissement et restent accessibles depuis ton dashboard. Tu peux consulter le registre, suivre les motifs de visite et exporter les données en CSV." },
+  { question: "Combien de temps faut-il pour commencer ?", answer: "Quelques minutes suffisent. Connecte-toi avec Google, renseigne ton établissement, choisis ton formulaire et affiche le QR Code à l’accueil. Tu peux compléter la configuration plus tard." },
+];
+
 export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
-  const [answers, setAnswers] = useState({ sector: "", volume: "", priority: "" });
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useGSAP(() => {
     const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -92,8 +101,8 @@ export default function LandingPage() {
       stagger: 0.1,
     });
 
-    gsap.from(".questionnaire-card", {
-      scrollTrigger: { trigger: ".questionnaire", start: "top 78%" },
+    gsap.from(".faq-card", {
+      scrollTrigger: { trigger: ".faq-section", start: "top 78%" },
       y: 36,
       opacity: 0,
       duration: 0.8,
@@ -218,7 +227,7 @@ export default function LandingPage() {
         <div className="overflow-hidden rounded-[1.4rem]">
           <Image
             src="/landing-images/securite-wide.webp"
-            alt="Rôles Patron et Agent d'accueil, données protégées"
+            alt="Rôles Patron, Gérant et Staff, données protégées"
             width={2000}
             height={860}
             className="h-auto w-full"
@@ -277,14 +286,29 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Questionnaire de qualification */}
-      <section className="questionnaire px-5 py-20 sm:px-10 lg:py-28">
-        <div className="questionnaire-card mx-auto max-w-5xl rounded-[1.6rem] border border-mk-ink/10 bg-mk-stone p-7 sm:p-10 lg:p-14">
-          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <div><div className="flex items-center gap-2.5 font-mk-mono text-[10px] font-bold uppercase tracking-[0.12em] text-mk-ink"><span className="h-px w-7 bg-current" /> En 30 secondes</div><h2 className="mt-5 text-3xl font-bold leading-[0.98] tracking-[-0.03em] sm:text-4xl">Quel accueil veux-tu simplifier ?</h2><p className="mt-4 text-sm leading-relaxed text-mk-ink/70">Réponds à trois questions. On te montrera le parcours le plus adapté avant la création de ton espace.</p></div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {[{ key: "sector", label: "Ton activité", options: ["Bureau", "Restaurant", "Hôtel", "Chantier"] }, { key: "volume", label: "Visiteurs par jour", options: ["Moins de 20", "20 à 100", "Plus de 100"] }, { key: "priority", label: "Ta priorité", options: ["Éviter le papier", "Rester opérationnel hors-ligne", "Mieux suivre les arrivées"] }].map((question) => <label key={question.key} className="text-xs font-bold text-mk-ink">{question.label}<select value={answers[question.key as keyof typeof answers]} onChange={(event) => setAnswers((current) => ({ ...current, [question.key]: event.target.value }))} className="mt-2 w-full rounded-xl border border-mk-ink/10 bg-mk-paper px-3 py-3 text-sm font-bold text-mk-ink outline-none focus:border-mk-ink"><option value="">Choisir</option>{question.options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>)}
-              <div className="sm:col-span-3 flex flex-wrap items-center justify-between gap-4 border-t border-mk-ink/10 pt-5"><p className="max-w-md text-sm font-bold text-mk-ink">{answers.sector && answers.volume && answers.priority ? `Pour un ${answers.sector.toLowerCase()} avec ${answers.volume.toLowerCase()}, commence par un QR et un formulaire ${answers.priority.toLowerCase()}.` : "Choisis tes réponses pour recevoir une recommandation simple."}</p><Link href="/connexion" className="inline-flex items-center gap-3 rounded-full bg-cta px-6 py-3.5 text-xs font-bold uppercase tracking-[0.05em] text-cta-ink transition hover:-translate-y-0.5 hover:bg-cta-hover">Créer mon espace <ArrowUpRight /></Link></div>
+      {/* FAQ */}
+      <section className="faq-section px-5 py-20 sm:px-10 lg:py-28">
+        <div className="faq-card mx-auto max-w-5xl rounded-[1.6rem] border border-mk-ink/10 bg-mk-stone p-7 sm:p-10 lg:p-14">
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
+            <div>
+              <div className="flex items-center gap-2.5 font-mk-mono text-[10px] font-bold uppercase tracking-[0.12em] text-mk-ink"><span className="h-px w-7 bg-current" /> Questions fréquentes</div>
+              <h2 className="mt-5 text-3xl font-bold leading-[0.98] tracking-[-0.03em] sm:text-4xl">Tout savoir avant de commencer.</h2>
+              <p className="mt-4 text-sm leading-relaxed text-mk-ink/70">Les réponses aux questions que se posent les équipes d’accueil avant de remplacer leur registre papier.</p>
+              <Link href="/connexion" className="mt-7 inline-flex items-center gap-3 rounded-full bg-cta px-6 py-3.5 text-xs font-bold uppercase tracking-[0.05em] text-cta-ink transition hover:-translate-y-0.5 hover:bg-cta-hover">Créer mon espace <ArrowUpRight /></Link>
+            </div>
+            <div className="divide-y divide-mk-ink/10 border-y border-mk-ink/10">
+              {FAQS.map((faq, index) => {
+                const isOpen = openFaq === index;
+                return (
+                  <div key={faq.question}>
+                    <button type="button" aria-expanded={isOpen} onClick={() => setOpenFaq(isOpen ? null : index)} className="flex w-full items-center justify-between gap-6 py-5 text-left text-sm font-bold text-mk-ink transition-opacity hover:opacity-70">
+                      <span>{faq.question}</span>
+                      <span aria-hidden="true" className={`relative h-5 w-5 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}><span className="absolute left-1/2 top-1/2 h-px w-4 -translate-x-1/2 bg-current" /><span className="absolute left-1/2 top-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-current" /></span>
+                    </button>
+                    <div className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}><div className="overflow-hidden"><p className="pb-5 pr-10 text-sm leading-relaxed text-mk-ink/70">{faq.answer}</p></div></div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

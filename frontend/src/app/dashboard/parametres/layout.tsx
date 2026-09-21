@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import Loader from "@/components/Loader";
+import FeedbackWidget from "@/components/FeedbackWidget";
 import { apiClient } from "@/lib/api";
 import type { UserProfile } from "@/types";
 
@@ -50,6 +51,7 @@ export default function ParametresLayout({ children }: { children: React.ReactNo
       </div>
 
       {children}
+      <FeedbackWidget />
     </div>
   );
 }

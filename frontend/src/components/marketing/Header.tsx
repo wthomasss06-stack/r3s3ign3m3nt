@@ -4,9 +4,10 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-import { ArrowUpRight, CloseIcon, MenuIcon } from "@/components/icons";
+import { ArrowUpRight } from "@/components/icons";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
+import StaggeredMenu, { StaggeredMenuTrigger } from "@/components/marketing/StaggeredMenu";
 
 gsap.registerPlugin(useGSAP);
 
@@ -50,7 +51,8 @@ export default function Header() {
   );
 
   return (
-    <header
+    <>
+      <header
       ref={navRef}
       className={`fixed inset-x-0 top-0 z-30 flex h-[84px] items-center justify-between bg-transparent px-5 transition-transform duration-300 sm:px-10 ${
         hidden || footerVisible ? "-translate-y-full" : "translate-y-0"
@@ -73,33 +75,9 @@ export default function Header() {
         </Link>
       </nav>
 
-      <div className="flex items-center gap-3 md:hidden">
-        <ThemeToggle />
-        <button
-          onClick={() => setMenuOpen((v) => !v)}
-          className="text-mk-ink"
-          aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-        >
-          {menuOpen ? <CloseIcon /> : <MenuIcon />}
-        </button>
-      </div>
-
-      {menuOpen && (
-        <div className="absolute inset-x-0 top-[84px] flex flex-col gap-5 border-b border-mk-ink/10 bg-mk-paper p-6 text-sm font-bold uppercase tracking-wide md:hidden">
-          {NAV_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}>
-              {link.label}
-            </Link>
-          ))}
-          <Link
-            href="/connexion"
-            onClick={() => setMenuOpen(false)}
-            className="inline-flex w-fit items-center gap-1.5 rounded-full bg-cta px-[18px] py-3 text-cta-ink"
-          >
-            Se connecter <ArrowUpRight size={14} />
-          </Link>
-        </div>
-      )}
-    </header>
+      <div className="md:hidden"><StaggeredMenuTrigger open={menuOpen} onClick={() => setMenuOpen((v) => !v)} /></div>
+      </header>
+      <StaggeredMenu open={menuOpen} onClose={() => setMenuOpen(false)} items={NAV_LINKS} />
+    </>
   );
 }

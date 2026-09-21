@@ -11,7 +11,18 @@ export default function LoginPage() {
   const { login, error, loading } = useGoogleAuthLogin();
 
   return (
-    <div className="flex min-h-[100dvh] w-full bg-canvas">
+    <>
+      {loading && (
+        <div className="qr-login-loader" role="status" aria-live="polite" aria-label="Connexion en cours">
+          <div className="qr-login-loader__content">
+            <div className="qr-login-loader__brand"><Logo size={52} /><span className="font-heading text-lg font-bold">R3NS3IGN3M3NT</span></div>
+            <div className="qr-login-loader__head"><span>Connexion sécurisée</span><strong>—</strong></div>
+            <div className="qr-login-loader__track"><span /></div>
+            <p className="qr-login-loader__label">Connexion en cours… Préparation de ton espace.</p>
+          </div>
+        </div>
+      )}
+      <div className="flex min-h-[100dvh] w-full bg-canvas">
       <div className="grid min-h-[100dvh] w-full lg:grid-cols-2">
         {/* Visual Cover Column (Desktop) */}
         <div className="relative hidden flex-col justify-between overflow-hidden bg-mk-deep p-12 text-deep-ink lg:flex">
@@ -80,6 +91,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

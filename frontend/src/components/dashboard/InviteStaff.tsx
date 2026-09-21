@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from "react";
 import axios from "axios";
 
+import { Info } from "@phosphor-icons/react";
 import { apiClient } from "@/lib/api";
 
 type InviteRole = "GERANT" | "STAFF";
@@ -47,7 +48,7 @@ export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOS
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="agent@exemple.com"
+          placeholder="staff@exemple.com"
           className="w-full rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
         />
 
@@ -55,15 +56,17 @@ export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOS
           <div className="flex gap-4 text-sm text-ink">
             <label className="flex items-center gap-1.5">
               <input type="radio" checked={role === "STAFF"} onChange={() => setRole("STAFF")} className="accent-cta" />
-              Agent (consulte le registre)
+              Staff (registre et accueil)
+              <span title="Le Staff peut consulter le registre et utiliser le mode Accueil, mais ne peut pas modifier les formulaires ni gérer l’établissement."><Info size={15} weight="bold" className="text-ink-soft" aria-label="Permissions du Staff" /></span>
             </label>
             <label className="flex items-center gap-1.5">
               <input type="radio" checked={role === "GERANT"} onChange={() => setRole("GERANT")} className="accent-cta" />
-              Gérant (gère aussi le formulaire)
+              Gérant (formulaires et accueil)
+              <span title="Le Gérant peut gérer les opérations courantes, les formulaires et les points d’accueil, mais ne peut pas supprimer ces ressources, inviter des membres, renommer l’établissement ou régénérer le QR principal."><Info size={15} weight="bold" className="text-ink-soft" aria-label="Permissions du Gérant" /></span>
             </label>
           </div>
         ) : (
-          <p className="text-xs text-ink-soft">Invité en tant qu&apos;agent — seul le patron peut désigner un gérant.</p>
+          <p className="flex items-center gap-1.5 text-xs text-ink-soft">Invité en tant que Staff — seul le Patron peut désigner un Gérant. <span title="Le Staff dispose d’un accès consultation et accueil uniquement."><Info size={15} weight="bold" aria-label="Permissions du Staff" /></span></p>
         )}
 
         <button

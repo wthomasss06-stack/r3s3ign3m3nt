@@ -44,10 +44,9 @@ export default function EquipePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">Équipe</h1>
-        <p className="text-sm text-ink-soft">Invite les agents qui pourront consulter le registre.</p>
+        <p className="text-sm text-ink-soft">Invite un Gérant ou un Staff selon les permissions nécessaires.</p>
       </div>
       <InviteStaff viewerRole={user.role === "BOSS" ? "BOSS" : "GERANT"} />
     </div>
   );
 }
-

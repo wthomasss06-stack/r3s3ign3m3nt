@@ -52,14 +52,14 @@ export default function EquipePage() {
   const isBoss = user.role === "BOSS";
   return (
     <div className="space-y-8">
-      <div><h1 className="text-2xl font-bold text-ink">Équipe</h1><p className="text-sm text-ink-soft">Invite, consulte et révoque les accès de l’établissement.</p></div>
+      <div><h1 className="text-2xl font-bold text-ink">Équipe</h1><p className="text-sm text-ink-soft">Invite, consulte et révoque les accès de l’établissement. Les permissions sont expliquées par le bouton info à côté de chaque rôle.</p></div>
       <InviteStaff viewerRole={isBoss ? "BOSS" : "GERANT"} />
       {actionError && <p className="text-sm text-error-text">{actionError}</p>}
 
       <section className="rounded-xl border border-border bg-surface p-5">
         <h2 className="font-semibold text-ink">Membres</h2>
         <div className="mt-4 divide-y divide-border">
-          {team.members.map((member) => <div key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="font-medium text-ink">{member.full_name || member.email}</p><p className="text-xs text-ink-soft">{member.email} · {member.role === "GERANT" ? "Gérant" : member.role === "STAFF" ? "Agent" : "Patron"}{!member.is_active ? " · accès révoqué" : ""}</p></div>{isBoss && member.role !== "BOSS" && member.is_active && <button onClick={() => revoke(`/auth/team/members/${member.id}/revoke/`, `Révoquer ${member.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}
+          {team.members.map((member) => <div key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="font-medium text-ink">{member.full_name || member.email}</p><p className="text-xs text-ink-soft">{member.email} · {member.role === "GERANT" ? "Gérant" : member.role === "STAFF" ? "Staff" : "Patron"}{!member.is_active ? " · accès révoqué" : ""}</p></div>{isBoss && member.role !== "BOSS" && member.is_active && <button onClick={() => revoke(`/auth/team/members/${member.id}/revoke/`, `Révoquer ${member.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}
         </div>
       </section>
 
@@ -67,7 +67,7 @@ export default function EquipePage() {
         <h2 className="font-semibold text-ink">Invitations</h2>
         <div className="mt-4 divide-y divide-border">
           {team.invitations.length === 0 && <p className="py-3 text-sm text-ink-soft">Aucune invitation.</p>}
-          {team.invitations.map((invitation) => <div key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="font-medium text-ink">{invitation.email}</p><p className="text-xs text-ink-soft">{invitation.role === "GERANT" ? "Gérant" : "Agent"} · {invitation.accepted_at ? "acceptée" : invitation.revoked_at ? "révoquée" : "en attente"}</p></div>{isBoss && !invitation.accepted_at && !invitation.revoked_at && <button onClick={() => revoke(`/auth/team/invitations/${invitation.id}/revoke/`, `Révoquer l’invitation ${invitation.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}
+          {team.invitations.map((invitation) => <div key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="font-medium text-ink">{invitation.email}</p><p className="text-xs text-ink-soft">{invitation.role === "GERANT" ? "Gérant" : "Staff"} · {invitation.accepted_at ? "acceptée" : invitation.revoked_at ? "révoquée" : "en attente"}</p></div>{isBoss && !invitation.accepted_at && !invitation.revoked_at && <button onClick={() => revoke(`/auth/team/invitations/${invitation.id}/revoke/`, `Révoquer l’invitation ${invitation.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}
         </div>
       </section>
 
