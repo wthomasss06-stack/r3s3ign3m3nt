@@ -94,7 +94,7 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 pb-16">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">Première connexion Google</p>
+        
         <h1 className="mt-2 font-heading text-3xl font-bold text-ink">Bienvenue dans ton espace</h1>
         <p className="mt-2 text-sm text-ink-soft">
           {role === "BOSS" ? "Définissons ton profil, ton entreprise et ton premier parcours visiteur en quatre étapes." : "Ton invitation est confirmée. Vérifie ton profil puis accède à ton espace dédié."}
