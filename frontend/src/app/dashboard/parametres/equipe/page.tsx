@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import InviteStaff from "@/components/dashboard/InviteStaff";
 import Loader from "@/components/Loader";
+import PermissionMatrixModal from "@/components/dashboard/PermissionMatrixModal";
 import { apiClient } from "@/lib/api";
 import type { AuditEvent, TeamAccess, UserProfile } from "@/types";
 
@@ -52,7 +53,7 @@ export default function EquipePage() {
   const isBoss = user.role === "BOSS";
   return (
     <div className="space-y-8">
-      <div><h1 className="text-2xl font-bold text-ink">Équipe</h1><p className="text-sm text-ink-soft">Invite, consulte et révoque les accès de l’établissement. Les permissions sont expliquées par le bouton info à côté de chaque rôle.</p></div>
+      <div className="flex items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-ink">Équipe</h1><p className="text-sm text-ink-soft">Invite, consulte et révoque les accès de l’établissement.</p></div><PermissionMatrixModal /></div>
       <InviteStaff viewerRole={isBoss ? "BOSS" : "GERANT"} />
       {actionError && <p className="text-sm text-error-text">{actionError}</p>}
 

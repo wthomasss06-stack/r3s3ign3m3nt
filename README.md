@@ -31,16 +31,17 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 ### Accès et onboarding
 
 - Authentification Google uniquement pour les membres de l’établissement.
-- Onboarding en quatre étapes : rôle, établissement, formulaire, QR Code et invitation.
+- Onboarding avec connexion, rattachement au rôle et configuration de l’établissement ; le premier formulaire est créé simplement, puis les nouveaux formulaires, QR et invitations sont gérés depuis les paramètres.
 - Rattachement d’un invité à une organisation par correspondance avec l’email Google invité.
 - Avatar Google ou avatar utilisateur et logo de l’établissement.
 - Logo sélectionné par glisser-déposer ou sélecteur fichier, uploadé en direct vers Cloudinary via une signature serveur ; aucune image n’est conservée en base64 dans l’application.
 
 ### Rôles et permissions
 
-- **Patron :** configuration complète, invitations, export CSV, régénération du QR, gestion de l’identité de l’établissement.
-- **Gérant :** gestion opérationnelle du registre et du formulaire, consultation/export et affichage du QR, sans actions de sécurité critiques.
+- **Patron :** configuration complète, invitation des Gérants et du Staff, export CSV, régénération du QR et gestion de l’identité de l’établissement.
+- **Gérant :** gestion opérationnelle du registre, des formulaires, des points d’accueil et export/QR ; il peut inviter un Staff, sans actions de sécurité critiques.
 - **Staff :** consultation du registre, accueil des visiteurs et utilisation de l’interface tablette, sans modification de configuration.
+- **Matrice d’équipe :** un seul bouton **i** dans l’onglet **Paramètres > Équipe** ouvre la matrice complète Patron/Gérant/Staff, y compris pour le Patron ; les aides individuelles par rôle ont été retirées.
 - **Mode staff :** le Patron ou le Gérant peut prendre le relais en cas d’absence de Staff.
 
 ### Parcours visiteur
@@ -327,5 +328,7 @@ L’expérience recommande désormais un parcours simple : un seul formulaire es
 L’onglet **Entreprise** centralise le nom et le logo de l’établissement. Seul le patron peut modifier le branding, suspendre ou supprimer l’entreprise. Les gérants et membres du staff disposent d’une action de départ volontaire qui désactive leur compte. Les connexions affichent un accueil personnalisé ; la déconnexion est confirmée dans une modale avec une formule adaptée à l’heure. Le rafraîchissement de session utilise le cookie httpOnly de renouvellement et ne déconnecte pas l’utilisateur lors d’une erreur réseau transitoire.
 
 Le logo de référence du projet est [`frontend/public/akatech-studio-logo.webp`](frontend/public/akatech-studio-logo.webp).
+
+La mise à jour de septembre 2026 centralise aussi la lecture des droits : l’onglet **Équipe** présente une seule icône d’information qui ouvre la matrice des permissions pour les trois rôles. Le frontend reste informatif ; le backend applique le RBAC réel, notamment la règle « Gérant → Staff » et « Patron → Gérant ou Staff ».
 
 Projet propriétaire / SaaS conçu par AKATech Studio. Les conditions d’utilisation et de réutilisation du code doivent être définies avant toute distribution publique.

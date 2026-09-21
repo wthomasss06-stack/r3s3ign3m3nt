@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import InviteStaff from "@/components/dashboard/InviteStaff";
 import Loader from "@/components/Loader";
+import PermissionMatrixModal from "@/components/dashboard/PermissionMatrixModal";
 import { apiClient } from "@/lib/api";
 import type { UserProfile } from "@/types";
 
@@ -42,9 +43,12 @@ export default function EquipePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-ink">Équipe</h1>
-        <p className="text-sm text-ink-soft">Invite un Gérant ou un Staff selon les permissions nécessaires.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-ink">Équipe</h1>
+          <p className="text-sm text-ink-soft">Invite un Gérant ou un Staff selon les permissions nécessaires.</p>
+        </div>
+        <PermissionMatrixModal />
       </div>
       <InviteStaff viewerRole={user.role === "BOSS" ? "BOSS" : "GERANT"} />
     </div>

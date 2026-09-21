@@ -31,7 +31,8 @@
 | Régénérer le QR principal historique | Oui | Non | Non |
 | Modifier le nom/logo de l’établissement | Oui | Non | Non |
 | Modifier les motifs de visite | Oui | Oui | Non |
-| Inviter un Gérant ou un Staff | Oui | Non | Non |
+| Inviter un Gérant | Oui | Non | Non |
+| Inviter un Staff | Oui | Oui | Non |
 | Utiliser le mode Accueil / Staff | Oui | Oui | Oui |
 | Remplir une fiche visiteur sur tablette | Indirectement | Indirectement | Oui au quotidien |
 
@@ -44,7 +45,7 @@ La matrice frontend sert à afficher ou masquer les actions. La sécurité réel
 - **Staff** : rôle `STAFF`, consultation et accueil uniquement ;
 - **Visiteur** : aucun compte, accès uniquement au formulaire public via un QR actif.
 
-Un Staff ne peut pas contourner l’interface pour modifier un formulaire ou créer un point d’accueil. Un Gérant peut gérer les formulaires et les points d’accueil, mais ne peut pas supprimer ces ressources, inviter des membres, renommer l’établissement ou régénérer le QR principal.
+Un Staff ne peut pas contourner l’interface pour modifier un formulaire ou créer un point d’accueil. Un Gérant peut gérer les formulaires et les points d’accueil, inviter un Staff, mais ne peut pas supprimer ces ressources, inviter un Gérant, renommer l’établissement ou régénérer le QR principal.
 
 ## Correspondance avec les SVG
 
@@ -57,4 +58,4 @@ Les six diagrammes SVG existants correspondent à cette séquence :
 5. `05-role-gerant-permissions.svg`
 6. `06-role-staff-permissions.svg`
 
-Les trois premiers représentent les parcours produit. Les trois derniers représentent les parcours d’accès et les permissions par rôle.
+Les trois premiers représentent les parcours produit. Les trois derniers représentent les parcours d’accès et les permissions par rôle. Dans l’interface, ces droits sont consultables depuis l’unique icône **i** de l’onglet **Équipe**, qui ouvre la matrice complète pour les trois rôles.

@@ -4,7 +4,7 @@
 |---|---|
 | **Porteur** | AKATech Studio (Elvis) |
 | **Statut** | V1.2 — Formulaires multiples, QR par point d’accueil et gestion multi-tablettes livrés. Recette production maintenue comme étape de contrôle. |
-| **Version du document** | 1.3 |
+| **Version du document** | 1.4 |
 
 > Nom commercial retenu : **R3NS3IGN3M3NT**. `qr-register-saas` reste le nom de code utilisé dans le code et les dossiers du projet.
 
@@ -54,10 +54,10 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 - [x] **5 modèles de formulaire suggérés** (Bureau/Cabinet, Restaurant, Hôtel, Accès salle/Chantier, Vierge) — le patron part d'un modèle ou construit en freestyle, et peut tout modifier ensuite
 - [x] Page visiteur "kiosque" : fonctionne hors-ligne indéfiniment après un premier chargement, signature au doigt
 - [x] Synchronisation automatique et idempotente (aucun doublon même en cas de coupure réseau)
-- [x] Invitation d'un agent par email (rattachement automatique à la connexion Google de l'invité)
+- [x] Invitations par email : le Patron peut inviter un Gérant ou un Staff ; le Gérant peut inviter un Staff (rattachement automatique à la connexion Google de l'invité)
 - [x] Dashboard : registre, export CSV, régénération du QR
 - [x] Pagination responsive du registre : 20 visiteurs par page sur ordinateur et 10 sur mobile
-- [x] Onboarding en 4 étapes : rôle/profil, établissement, formulaire, QR + invitation avec possibilité de passer
+- [x] Onboarding simplifié : connexion, rôle/profil, établissement et formulaire initial ; les ajouts de formulaires, QR et invitations se font ensuite depuis les paramètres
 - [x] Marque établissement : nom, logo, motifs de visite et avatar utilisateur
 - [x] QR personnalisé avec logo centré
 - [x] Mode Accueil / Mode staff : QR grand format et ouverture directe du formulaire visiteur
@@ -123,7 +123,7 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 | Entité | Champs clés | Notes |
 |---|---|---|
 | `Organization` | `qr_secure_token` (unique), `logo_url`, `visit_reasons` | Le token est *opaque* : jamais d'ID de base de données exposé au client public ; la marque et les motifs sont propagés au formulaire public |
-| `User` | `email`, `role` (BOSS/STAFF), `organization` | Auth Google uniquement (`set_unusable_password`) |
+| `User` | `email`, `role` (BOSS/GERANT/STAFF), `organization` | Auth Google uniquement (`set_unusable_password`) |
 | `StaffInvitation` | `email`, `token`, `accepted_at` | Rattachement réel par correspondance d'email à la connexion Google, pas par le token seul |
 | `FormTemplate` | `organization`, `fields_schema` (JSON), `version`, `is_default` | Plusieurs schémas JSON par organisation ; un formulaire par défaut ; versionné à chaque modification |
 | `AccessPoint` | `organization`, `form_template`, `secure_token`, `name`, `device_label`, `last_seen_at` | Un QR opaque et un appareil/lieu par point d’accueil ; le point choisit le formulaire servi |
@@ -163,7 +163,7 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 |---|---|---|---|
 | POST | `/api/v1/auth/google/` | Public | Connexion/inscription, pose le cookie de refresh |
 | POST | `/api/v1/auth/token/refresh/` | Public (cookie) | Renouvelle l'access token |
-| POST | `/api/v1/auth/invite/` | BOSS | Invite un agent |
+| POST | `/api/v1/auth/invite/` | BOSS/GERANT selon le rôle demandé | Le Patron invite un Gérant ou un Staff ; le Gérant invite uniquement un Staff |
 | `GET/PUT` | `/api/v1/form-template/` | BOSS/STAFF | Consulter/modifier le formulaire actif |
 | `GET/POST` | `/api/v1/form-templates/` | BOSS/GERANT | Lister ou créer un formulaire |
 | `PATCH/DELETE` | `/api/v1/form-templates/<id>/` | BOSS/GERANT ou BOSS | Modifier, activer, définir par défaut ou supprimer un formulaire |
@@ -206,3 +206,9 @@ Un onglet **Entreprise** est désormais disponible dans les paramètres. Le patr
 Les états de connexion et de déconnexion sont présentés dans des modales contextualisées : bienvenue pour une première connexion, bon retour pour une connexion existante, et formule de départ adaptée à l’heure. La session repose sur le cookie httpOnly de renouvellement et une erreur réseau transitoire ne provoque pas de déconnexion artificielle après actualisation.
 
 Sur mobile, le feedback est accessible par une icône ronde flottante afin de préserver l’espace de navigation. Le registre du dashboard affiche 10 visiteurs par page sur mobile et 20 par page sur ordinateur ; la navigation de page reste accessible au clavier et s’adapte au changement de largeur d’écran. L’administration plateforme reste séparée du dashboard établissement et n’est pas affichée dans sa sidebar.
+
+## 15. Matrice de permissions et onglet Équipe — septembre 2026
+
+L’onglet **Paramètres > Équipe** utilise un seul bouton d’information placé à côté du titre. Ce bouton ouvre une modale large qui présente la matrice complète des permissions des rôles **Patron**, **Gérant** et **Staff** ; le Patron peut donc consulter ses propres permissions au même endroit que celles des autres rôles. Les panneaux individuels affichés à côté des boutons de choix de rôle dans l’invitation ont été supprimés pour éviter la duplication et les divergences de contenu.
+
+La matrice reflète le RBAC réellement appliqué par l’API : le Patron conserve les actions sensibles, le Gérant gère les opérations courantes et peut inviter un Staff, tandis que seul le Patron peut inviter un Gérant. La matrice reste une aide de compréhension et ne remplace pas les contrôles serveur. Les six flows et leurs diagrammes SVG ont été réalignés sur ce parcours, sur l’onboarding simplifié, sur l’onglet Entreprise, sur les formulaires/QR ajoutés depuis les paramètres et sur le mode offline de la tablette.
