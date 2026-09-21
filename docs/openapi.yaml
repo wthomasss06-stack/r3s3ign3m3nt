@@ -1,0 +1,642 @@
+openapi: 3.0.3
+info:
+  title: QR Register SaaS API
+  version: 1.0.0
+  description: Contrat API versionné pour le registre visiteurs et ses espaces d’équipe.
+paths:
+  /api/v1/access-points/:
+    get:
+      operationId: v1_access_points_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_access_points_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/access-points/{point_id}/:
+    patch:
+      operationId: v1_access_points_partial_update
+      parameters:
+      - in: path
+        name: point_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_access_points_destroy
+      parameters:
+      - in: path
+        name: point_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/feedback/:
+    get:
+      operationId: v1_admin_feedback_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/feedback/{feedback_id}/:
+    patch:
+      operationId: v1_admin_feedback_partial_update
+      parameters:
+      - in: path
+        name: feedback_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_admin_feedback_destroy
+      parameters:
+      - in: path
+        name: feedback_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/login/:
+    post:
+      operationId: v1_admin_login_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/members/:
+    get:
+      operationId: v1_admin_members_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_admin_members_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/members/{user_id}/:
+    patch:
+      operationId: v1_admin_members_partial_update
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_admin_members_destroy
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/organizations/:
+    get:
+      operationId: v1_admin_organizations_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_admin_organizations_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/organizations/{organization_id}/:
+    patch:
+      operationId: v1_admin_organizations_partial_update
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_admin_organizations_destroy
+      parameters:
+      - in: path
+        name: organization_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/overview/:
+    get:
+      operationId: v1_admin_overview_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/audit/:
+    get:
+      operationId: v1_auth_audit_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/google/:
+    post:
+      operationId: v1_auth_google_create
+      description: |-
+        Point d'entree unique de connexion. Aucun mot de passe : l'identite Google
+        fait foi. Cree l'espace du patron a la premiere connexion, ou rattache un
+        agent invite (voir accounts.services.resolve_or_create_user).
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/invite/:
+    post:
+      operationId: v1_auth_invite_create
+      description: |-
+        BOSS et GERANT peuvent tous deux inviter — mais seul BOSS peut accorder le
+        role GERANT (un GERANT ne peut inviter que des STAFF, jamais un pair).
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      description: 'AllowAny : un access token deja expire ne doit jamais bloquer
+        la deconnexion.'
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: v1_auth_me_partial_update
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/me/deactivate/:
+    post:
+      operationId: v1_auth_me_deactivate_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/team/:
+    get:
+      operationId: v1_auth_team_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/team/invitations/{invitation_id}/revoke/:
+    post:
+      operationId: v1_auth_team_invitations_revoke_create
+      parameters:
+      - in: path
+        name: invitation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/team/members/{user_id}/revoke/:
+    post:
+      operationId: v1_auth_team_members_revoke_create
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: v1_auth_token_refresh_create
+      description: |-
+        Renouvelle l'access token a partir du refresh token lu dans le cookie httpOnly
+        (jamais depuis le corps de la requete). Distinguer 401 (cookie mort -> logout
+        legitime) de toute autre erreur reste la responsabilite du frontend
+        (skill jwt-auth-resilience) ; ce endpoint ne renvoie que du 200 ou du 401.
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/checkins/:
+    get:
+      operationId: v1_checkins_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCheckInList'
+          description: ''
+  /api/v1/checkins/export/:
+    get:
+      operationId: v1_checkins_export_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/checkins/stats/:
+    get:
+      operationId: v1_checkins_stats_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/checkins/sync/:
+    post:
+      operationId: v1_checkins_sync_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/feedback/:
+    post:
+      operationId: v1_feedback_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/form-template/:
+    get:
+      operationId: v1_form_template_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: v1_form_template_update
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/form-templates/:
+    get:
+      operationId: v1_form_templates_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: v1_form_templates_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/form-templates/{form_id}/:
+    patch:
+      operationId: v1_form_templates_partial_update
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_form_templates_destroy
+      parameters:
+      - in: path
+        name: form_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/health/:
+    get:
+      operationId: v1_health_retrieve
+      description: |-
+        Sonde de disponibilite — verifie que l'API et la base de donnees repondent.
+        Utilisee par le monitoring de la plateforme d'hebergement (Render/Railway).
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/org/me/:
+    get:
+      operationId: v1_org_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: v1_org_me_partial_update
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/org/me/lifecycle/:
+    patch:
+      operationId: v1_org_me_lifecycle_partial_update
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: v1_org_me_lifecycle_destroy
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/org/me/regenerate-qr/:
+    post:
+      operationId: v1_org_me_regenerate_qr_create
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/org/uploads/cloudinary-signature/:
+    post:
+      operationId: v1_org_uploads_cloudinary_signature_create
+      description: Signe un upload image côté serveur sans exposer le secret Cloudinary.
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/public/forms/{qr_token}/:
+    get:
+      operationId: v1_public_forms_retrieve
+      parameters:
+      - in: path
+        name: qr_token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    CheckIn:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        responses: {}
+        signature_blob:
+          type: string
+          nullable: true
+        created_at_client:
+          type: string
+          format: date-time
+        synced_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at_client
+      - id
+      - synced_at
+    PaginatedCheckInList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckIn'
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

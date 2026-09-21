@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User
+from .models import AuditEvent, StaffInvitation, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -9,7 +9,25 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "full_name", "avatar_url", "role", "organization_id", "organization_name"]
+        fields = ["id", "email", "full_name", "avatar_url", "role", "organization_id", "organization_name", "is_active", "access_revoked_at", "access_revoked_reason"]
+        read_only_fields = fields
+
+
+class StaffInvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffInvitation
+        fields = ["id", "email", "role", "accepted_at", "revoked_at", "revoked_reason", "created_at"]
+        read_only_fields = fields
+
+
+class AuditEventSerializer(serializers.ModelSerializer):
+    actor_email = serializers.EmailField(source="actor.email", read_only=True)
+    target_email = serializers.EmailField(source="target_user.email", read_only=True, allow_null=True)
+
+    class Meta:
+        model = AuditEvent
+        fields = ["id", "action", "actor_email", "target_email", "metadata", "created_at"]
+        read_only_fields = fields
 
 
 class UserProfileUpdateSerializer(serializers.Serializer):

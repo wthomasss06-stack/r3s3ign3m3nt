@@ -1,29 +1,16 @@
-import withPWAInit from "next-pwa";
+import withSerwistInit from "@serwist/next";
 
-const withPWA = withPWAInit({
-  dest: "public",
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      // Kiosque/reception : la page visiteur doit re-servir depuis le cache si le
-      // reseau de l'etablissement flanche apres le premier chargement.
-      urlPattern: /^\/v\/.*/,
-      handler: "NetworkFirst",
-      options: { cacheName: "visitor-form-pages", networkTimeoutSeconds: 4 },
-    },
-    {
-      urlPattern: /\.(?:woff2?|ttf|eot)$/,
-      handler: "CacheFirst",
-      options: { cacheName: "fonts" },
-    },
-  ],
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: process.cwd(),
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
 };
 
-export default withPWA(nextConfig);
+export default withSerwist(nextConfig);

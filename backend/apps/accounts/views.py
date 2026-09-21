@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status, throttling
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -5,14 +6,16 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.common.permissions import IsBossOrGerant
+from apps.common.permissions import IsBoss, IsBossOrGerant
 from apps.common.responses import error_response
 
 from .cookies import clear_refresh_cookie, set_refresh_cookie
-from .serializers import GoogleAuthSerializer, InviteStaffSerializer, UserProfileUpdateSerializer, UserSerializer
+from .models import AuditEvent, StaffInvitation, User
+from .serializers import AuditEventSerializer, GoogleAuthSerializer, InviteStaffSerializer, StaffInvitationSerializer, UserProfileUpdateSerializer, UserSerializer
 from .services import (
     ROLE_CAPS,
     InvalidGoogleTokenError,
+    RevokedAccessError,
     count_role_usage,
     create_staff_invitation,
     resolve_or_create_user,
@@ -37,7 +40,13 @@ class GoogleAuthView(APIView):
         except InvalidGoogleTokenError:
             return error_response("Jeton Google invalide ou expiré. Reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
 
-        user, created = resolve_or_create_user(google_profile)
+        try:
+            user, created = resolve_or_create_user(google_profile)
+        except RevokedAccessError as exc:
+            return Response({"error": {"message": str(exc), "code": "access_revoked", "retryable": False}}, status=status.HTTP_403_FORBIDDEN)
+        if not user.is_active:
+            message = user.access_revoked_reason or "Votre compte n’est plus actif dans cet établissement."
+            return Response({"error": {"message": message, "code": "access_revoked", "retryable": False}}, status=status.HTTP_403_FORBIDDEN)
         refresh = RefreshToken.for_user(user)
 
         response = Response(
@@ -151,3 +160,53 @@ class InviteStaffView(APIView):
             {"invite_link": invite_link, "email": invitation.email, "role": invitation.role},
             status=status.HTTP_201_CREATED,
         )
+
+
+class TeamAccessView(APIView):
+    permission_classes = [IsAuthenticated, IsBossOrGerant]
+
+    def get(self, request):
+        organization = request.user.organization
+        return Response({
+            "members": UserSerializer(organization.members.filter(is_superuser=False).order_by("email"), many=True).data,
+            "invitations": StaffInvitationSerializer(organization.invitations.order_by("-created_at"), many=True).data,
+        })
+
+
+class RevokeInvitationView(APIView):
+    permission_classes = [IsAuthenticated, IsBoss]
+
+    def post(self, request, invitation_id):
+        invitation = StaffInvitation.objects.filter(id=invitation_id, organization=request.user.organization, accepted_at__isnull=True, revoked_at__isnull=True).first()
+        if not invitation:
+            return error_response("Invitation introuvable ou déjà traitée.", status.HTTP_404_NOT_FOUND)
+        reason = str(request.data.get("reason") or "Invitation révoquée par le patron")[:255]
+        invitation.revoked_at = timezone.now()
+        invitation.revoked_reason = reason
+        invitation.save(update_fields=["revoked_at", "revoked_reason"])
+        AuditEvent.objects.create(organization=request.user.organization, actor=request.user, action="invitation.revoked", target_invitation=invitation, metadata={"email": invitation.email, "reason": reason})
+        return Response(StaffInvitationSerializer(invitation).data)
+
+
+class RevokeMemberView(APIView):
+    permission_classes = [IsAuthenticated, IsBoss]
+
+    def post(self, request, user_id):
+        member = User.objects.filter(id=user_id, organization=request.user.organization, is_superuser=False).first()
+        if not member or member.role == User.Role.BOSS:
+            return error_response("Membre introuvable ou non révocable.", status.HTTP_404_NOT_FOUND)
+        reason = str(request.data.get("reason") or "Vous ne faites plus partie du staff ou de la gestion de cet établissement.")[:255]
+        member.is_active = False
+        member.access_revoked_at = timezone.now()
+        member.access_revoked_reason = reason
+        member.save(update_fields=["is_active", "access_revoked_at", "access_revoked_reason"])
+        AuditEvent.objects.create(organization=request.user.organization, actor=request.user, action="member.revoked", target_user=member, metadata={"role": member.role, "reason": reason})
+        return Response(UserSerializer(member).data)
+
+
+class AuditEventListView(APIView):
+    permission_classes = [IsAuthenticated, IsBossOrGerant]
+
+    def get(self, request):
+        events = AuditEvent.objects.filter(organization=request.user.organization).select_related("actor", "target_user")[:100]
+        return Response(AuditEventSerializer(events, many=True).data)

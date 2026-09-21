@@ -1,10 +1,16 @@
+import hashlib
 import secrets
+import time
+from urllib.parse import urlencode
 
+from django.conf import settings
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common.permissions import IsBoss, IsOrgMember
+from apps.common.responses import error_response
 
 from .serializers import OrganizationSerializer, OrganizationUpdateSerializer
 
@@ -38,6 +44,24 @@ class RegenerateQRTokenView(APIView):
         organization.qr_secure_token = secrets.token_urlsafe(16)
         organization.save(update_fields=["qr_secure_token"])
         return Response(OrganizationSerializer(organization).data)
+
+
+class CloudinarySignatureView(APIView):
+    """Signe un upload image côté serveur sans exposer le secret Cloudinary."""
+
+    permission_classes = [IsAuthenticated, IsBoss]
+
+    def post(self, request):
+        cloud_name = getattr(settings, "CLOUDINARY_CLOUD_NAME", "").strip()
+        api_key = getattr(settings, "CLOUDINARY_API_KEY", "").strip()
+        api_secret = getattr(settings, "CLOUDINARY_API_SECRET", "").strip()
+        if not cloud_name or not api_key or not api_secret:
+            return error_response("Cloudinary n’est pas configuré sur le serveur.", status.HTTP_503_SERVICE_UNAVAILABLE)
+        timestamp = int(time.time())
+        folder = f"qr-register/{request.user.organization_id}"
+        params = {"folder": folder, "timestamp": timestamp}
+        signature = hashlib.sha1(f"{urlencode(sorted(params.items()))}{api_secret}".encode("utf-8")).hexdigest()
+        return Response({"cloud_name": cloud_name, "api_key": api_key, "timestamp": timestamp, "folder": folder, "signature": signature})
 
 
 class OrganizationLifecycleView(APIView):

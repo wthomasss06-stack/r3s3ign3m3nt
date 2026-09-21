@@ -34,6 +34,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 - Onboarding en quatre étapes : rôle, établissement, formulaire, QR Code et invitation.
 - Rattachement d’un invité à une organisation par correspondance avec l’email Google invité.
 - Avatar Google ou avatar utilisateur et logo de l’établissement.
+- Logo sélectionné par glisser-déposer ou sélecteur fichier, uploadé en direct vers Cloudinary via une signature serveur ; aucune image n’est conservée en base64 dans l’application.
 
 ### Rôles et permissions
 
@@ -88,6 +89,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 - Gestion des entreprises : création, modification, suppression et statistiques par entreprise.
 - Gestion du personnel : rattachement à une entreprise, rôle, activation/désactivation et suppression.
 - Gestion des feedbacks : lecture, classement par statut et suivi des retours utilisateurs.
+- Lien **Administration plateforme** visible dans la navigation Patron, y compris sur mobile ; l’espace `/admin` possède sa propre connexion avec les identifiants Render.
 
 ## Architecture
 
@@ -116,8 +118,8 @@ qr-register-saas/
 
 | Couche | Technologie |
 |---|---|
-| Frontend | Next.js 14, React, TypeScript, Tailwind CSS |
-| PWA/offline | next-pwa, Dexie/IndexedDB, service worker |
+| Frontend | Next.js 16, React, TypeScript, Tailwind CSS |
+| PWA/offline | Serwist, Dexie/IndexedDB, service worker |
 | Backend | Python, Django, Django REST Framework |
 | Authentification | Google OAuth, JWT, refresh token httpOnly |
 | Base de données | PostgreSQL sur Neon en production, SQLite possible en local |
@@ -160,6 +162,7 @@ Toutes les routes API sont préfixées par `/api/v1`.
 | `GET/PUT` | `/form-template/` | Membre avec permission | Lire ou modifier le formulaire |
 | `GET/POST` | `/form-templates/` | Patron/Gérant | Lister ou créer plusieurs formulaires |
 | `PATCH/DELETE` | `/form-templates/<id>/` | Patron/Gérant ou Patron | Modifier, activer, définir par défaut ou supprimer |
+| `POST` | `/org/uploads/cloudinary-signature/` | Patron | Obtenir une signature courte pour envoyer une image à Cloudinary |
 | `GET/POST` | `/access-points/` | Patron/Gérant | Lister ou créer un point d’accueil/tablette |
 | `PATCH/DELETE` | `/access-points/<id>/` | Patron/Gérant ou Patron | Modifier, désactiver ou supprimer un point |
 | `GET` | `/public/forms/<qr_token>/` | Public | Charger le formulaire public |
@@ -214,6 +217,9 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000
 CSRF_TRUSTED_ORIGINS=http://localhost:3000
 PLATFORM_ADMIN_EMAIL=admin@example.com
 PLATFORM_ADMIN_PASSWORD=mot-de-passe-aleatoire-de-20-caracteres-minimum
+CLOUDINARY_CLOUD_NAME=votre-cloud-name
+CLOUDINARY_API_KEY=votre-api-key
+CLOUDINARY_API_SECRET=votre-api-secret
 ```
 
 ### Frontend
@@ -230,7 +236,6 @@ Variables frontend :
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=votre-client-id.apps.googleusercontent.com
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=votre-cloud-name
 ```
 
 Le frontend est disponible sur `http://localhost:3000` et l’API sur `http://localhost:8000`.

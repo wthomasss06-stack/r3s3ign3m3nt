@@ -1,7 +1,7 @@
 """Un GERANT peut inviter du STAFF au quotidien, mais ne peut jamais s'octroyer
 ou octroyer un pair GERANT — seul le BOSS accorde ce niveau (cf. cahier des charges,
 matrice de permissions patron > gerant > staff)."""
-from apps.accounts.models import StaffInvitation
+from apps.accounts.models import AuditEvent, StaffInvitation
 
 from apps.testing_utils import auth_client
 
@@ -73,3 +73,21 @@ def test_invite_blocked_once_role_cap_reached(db, boss_user, organization):
     assert response.status_code == 400
     assert not StaffInvitation.objects.filter(email="agent-en-trop@example.com").exists()
     assert StaffInvitation.objects.filter(organization=organization, role="STAFF").count() == 5
+
+
+def test_boss_can_revoke_pending_invitation(db, boss_user, organization):
+    invitation = StaffInvitation.objects.create(organization=organization, email="a-revoquer@example.com", role="STAFF", token="token-revocation", invited_by=boss_user)
+    response = auth_client(boss_user).post(f"/api/v1/auth/team/invitations/{invitation.id}/revoke/", {"reason": "Départ du recrutement"}, format="json")
+    invitation.refresh_from_db()
+    assert response.status_code == 200
+    assert invitation.revoked_at is not None
+    assert AuditEvent.objects.filter(action="invitation.revoked", target_invitation=invitation).exists()
+
+
+def test_boss_can_revoke_member_and_next_login_is_blocked(db, boss_user, staff_user, organization):
+    response = auth_client(boss_user).post(f"/api/v1/auth/team/members/{staff_user.id}/revoke/", {"reason": "Vous ne faites plus partie du staff."}, format="json")
+    staff_user.refresh_from_db()
+    assert response.status_code == 200
+    assert staff_user.is_active is False
+    assert staff_user.access_revoked_reason == "Vous ne faites plus partie du staff."
+    assert AuditEvent.objects.filter(action="member.revoked", target_user=staff_user).exists()

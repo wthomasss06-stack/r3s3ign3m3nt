@@ -1,16 +1,47 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api";
+
+import CloudinaryImageUploader from "@/components/CloudinaryImageUploader";
 import Modal from "@/components/ui/Modal";
 import Loader from "@/components/Loader";
+import { apiClient } from "@/lib/api";
 import type { Organization, UserProfile } from "@/types";
+
 export default function EntreprisePage() {
-  const router = useRouter(); const [user, setUser] = useState<UserProfile | null>(null); const [org, setOrg] = useState<Organization | null>(null); const [name, setName] = useState(""); const [logo, setLogo] = useState(""); const [saved, setSaved] = useState(false); const [modal, setModal] = useState<"suspend" | "delete" | "leave" | null>(null); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const router = useRouter();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [name, setName] = useState("");
+  const [logo, setLogo] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [modal, setModal] = useState<"suspend" | "delete" | "leave" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => { Promise.all([apiClient.get<UserProfile>("/auth/me/"), apiClient.get<Organization>("/org/me/")]).then(([u, o]) => { setUser(u.data); setOrg(o.data); setName(o.data.name); setLogo(o.data.logo_url || ""); }).catch(() => setError("Impossible de charger les réglages.")); }, []);
-  const save = async (event: React.FormEvent) => { event.preventDefault(); setBusy(true); setError(""); try { const { data } = await apiClient.patch<Organization>("/org/me/", { name, logo_url: logo }); setOrg(data); setSaved(true); setTimeout(() => setSaved(false), 1800); } catch { setError("Seul le patron peut modifier le nom et le logo."); } finally { setBusy(false); } };
-  const lifecycle = async () => { setBusy(true); setError(""); try { if (modal === "leave") await apiClient.post("/auth/me/deactivate/"); else if (modal === "suspend") await apiClient.patch("/org/me/lifecycle/", { is_suspended: true }); else if (modal === "delete") await apiClient.delete("/org/me/lifecycle/"); setModal(null); if (modal === "leave" || modal === "delete") router.push("/"); else { const { data } = await apiClient.get<Organization>("/org/me/"); setOrg(data); } } catch { setError("Cette action n’a pas pu être effectuée."); } finally { setBusy(false); } };
+
+  const save = async (event: React.FormEvent) => {
+    event.preventDefault(); setBusy(true); setError("");
+    try { const { data } = await apiClient.patch<Organization>("/org/me/", { name, logo_url: logo }); setOrg(data); setSaved(true); setTimeout(() => setSaved(false), 1800); }
+    catch { setError("Seul le patron peut modifier le nom et le logo."); }
+    finally { setBusy(false); }
+  };
+
+  const lifecycle = async () => {
+    setBusy(true); setError("");
+    try {
+      if (modal === "leave") await apiClient.post("/auth/me/deactivate/");
+      else if (modal === "suspend") await apiClient.patch("/org/me/lifecycle/", { is_suspended: true });
+      else if (modal === "delete") await apiClient.delete("/org/me/lifecycle/");
+      setModal(null);
+      if (modal === "leave" || modal === "delete") router.push("/");
+      else { const { data } = await apiClient.get<Organization>("/org/me/"); setOrg(data); }
+    } catch { setError("Cette action n’a pas pu être effectuée."); }
+    finally { setBusy(false); }
+  };
+
   if (!user || !org) return error ? <p className="text-sm text-error-text">{error}</p> : <Loader fullScreen={false} />;
   const boss = user.role === "BOSS";
-  return <div className="max-w-2xl space-y-6"><div><h2 className="font-heading text-xl font-bold text-ink">Entreprise</h2><p className="mt-1 text-sm text-ink-soft">Identité de l’établissement et actions liées à ton compte.</p></div><form onSubmit={save} className="space-y-4 rounded-2xl border border-border bg-surface p-5"><div><label className="mb-1.5 block text-sm font-medium text-ink">Nom de l’entreprise</label><input disabled={!boss} value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-border bg-canvas px-3 py-3 text-sm text-ink disabled:opacity-60" /></div><div><label className="mb-1.5 block text-sm font-medium text-ink">Logo <span className="font-normal text-ink-soft">(URL d’image)</span></label><input disabled={!boss} value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://…" className="w-full rounded-lg border border-border bg-canvas px-3 py-3 text-sm text-ink disabled:opacity-60" /></div>{boss ? <button disabled={busy} className="rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{saved ? "Enregistré" : busy ? "Enregistrement…" : "Enregistrer les changements"}</button> : <p className="rounded-lg bg-canvas p-3 text-xs text-ink-soft">Seul le patron peut changer le nom et le logo de l’entreprise.</p>}</form><section className="rounded-2xl border border-border bg-surface p-5"><h3 className="font-semibold text-ink">Zone sensible</h3><p className="mt-1 text-sm text-ink-soft">Ces actions sont irréversibles ou coupent l’accès de l’équipe.</p><div className="mt-4 flex flex-wrap gap-3">{boss && <><button onClick={() => setModal("suspend")} className="rounded-full border border-border px-4 py-2.5 text-sm text-ink">Suspendre l’entreprise</button><button onClick={() => setModal("delete")} className="rounded-full border border-error-text px-4 py-2.5 text-sm text-error-text">Supprimer l’entreprise</button></>}{!boss && <button onClick={() => setModal("leave")} className="rounded-full border border-error-text px-4 py-2.5 text-sm text-error-text">Quitter et désactiver mon compte</button>}</div></section>{error && <p className="text-sm text-error-text">{error}</p>}<Modal open={modal !== null} onClose={() => setModal(null)} title={modal === "leave" ? "Quitter l’équipe ?" : modal === "suspend" ? "Suspendre l’entreprise ?" : "Supprimer l’entreprise ?"} description={modal === "leave" ? "À ta prochaine connexion, ton accès ne sera plus disponible." : modal === "suspend" ? "Les parcours visiteurs et l’accès de l’équipe seront coupés." : "Toutes les données liées à l’entreprise seront supprimées."}><div className="flex justify-end gap-2"><button onClick={() => setModal(null)} className="rounded-full border border-border px-4 py-2.5 text-sm text-ink">Annuler</button><button disabled={busy} onClick={lifecycle} className="rounded-full bg-error-text px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Traitement…" : "Confirmer"}</button></div></Modal></div>;
+  return <div className="max-w-2xl space-y-6"><div><h2 className="font-heading text-xl font-bold text-ink">Entreprise</h2><p className="mt-1 text-sm text-ink-soft">Identité de l’établissement et actions liées à ton compte.</p></div><form onSubmit={save} className="space-y-5 rounded-2xl border border-border bg-surface p-5"><div><label className="mb-1.5 block text-sm font-medium text-ink">Nom de l’entreprise</label><input disabled={!boss} value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-lg border border-border bg-canvas px-3 py-3 text-sm text-ink disabled:opacity-60" /></div><CloudinaryImageUploader value={logo} onChange={setLogo} disabled={!boss} />{boss ? <button disabled={busy} className="rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{saved ? "Enregistré" : busy ? "Enregistrement…" : "Enregistrer les changements"}</button> : <p className="rounded-lg bg-canvas p-3 text-xs text-ink-soft">Seul le patron peut changer le nom et le logo de l’entreprise.</p>}</form><section className="rounded-2xl border border-border bg-surface p-5"><h3 className="font-semibold text-ink">Zone sensible</h3><p className="mt-1 text-sm text-ink-soft">Ces actions sont irréversibles ou coupent l’accès de l’équipe.</p><div className="mt-4 flex flex-wrap gap-3">{boss && <><button onClick={() => setModal("suspend")} className="rounded-full border border-border px-4 py-2.5 text-sm text-ink">Suspendre l’entreprise</button><button onClick={() => setModal("delete")} className="rounded-full border border-error-text px-4 py-2.5 text-sm text-error-text">Supprimer l’entreprise</button></>}{!boss && <button onClick={() => setModal("leave")} className="rounded-full border border-error-text px-4 py-2.5 text-sm text-error-text">Quitter et désactiver mon compte</button>}</div></section>{error && <p className="text-sm text-error-text">{error}</p>}<Modal open={modal !== null} onClose={() => setModal(null)} title={modal === "leave" ? "Quitter l’équipe ?" : modal === "suspend" ? "Suspendre l’entreprise ?" : "Supprimer l’entreprise ?"} description={modal === "leave" ? "À ta prochaine connexion, ton accès ne sera plus disponible." : modal === "suspend" ? "Les parcours visiteurs et l’accès de l’équipe seront coupés." : "Toutes les données liées à l’entreprise seront supprimées."}><div className="flex justify-end gap-2"><button onClick={() => setModal(null)} className="rounded-full border border-border px-4 py-2.5 text-sm text-ink">Annuler</button><button disabled={busy} onClick={lifecycle} className="rounded-full bg-error-text px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Traitement…" : "Confirmer"}</button></div></Modal></div>;
 }

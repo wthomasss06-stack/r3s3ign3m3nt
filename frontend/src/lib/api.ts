@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { refreshOnce } from "./authClient";
 import { getAccessToken, setAccessToken } from "./tokenStore";
+import { normalizeApiError } from "./errors";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -18,6 +19,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
+    error.appError = normalizeApiError(error);
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;

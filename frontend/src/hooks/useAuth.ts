@@ -22,8 +22,12 @@ export function useGoogleAuthLogin() {
         setAccessToken(data.access);
         if (typeof window !== "undefined") sessionStorage.setItem("qr_login_greeting", JSON.stringify({ isNew: Boolean(data.is_new), name: data.user?.full_name || data.user?.email || "" }));
         router.push("/dashboard");
-      } catch {
-        setError("Connexion impossible. Réessaie.");
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          setError(error.response?.data?.error?.message || "Connexion impossible. Réessaie.");
+        } else {
+          setError("Connexion impossible. Réessaie.");
+        }
       } finally {
         setLoading(false);
       }

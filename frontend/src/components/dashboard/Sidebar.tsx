@@ -13,7 +13,7 @@ export default function Sidebar({ orgName, orgLogo = "", userName = "", userAvat
   const pathname = usePathname(); const router = useRouter(); const [logoutOpen, setLogoutOpen] = useState(false);
   const links = role === "STAFF"
     ? [{ href: "/dashboard/accueil", label: "Accueil", icon: House, exact: true }, { href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }]
-    : [{ href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }, { href: "/dashboard/accueil", label: "Mode staff", icon: House, exact: true }, { href: "/dashboard/parametres", label: "Paramètres", icon: GearSix, exact: false }, ...(role === "BOSS" ? [{ href: "/admin", label: "Administration", icon: GearSix, exact: true }] : [])];
+    : [{ href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }, { href: "/dashboard/accueil", label: "Mode staff", icon: House, exact: true }, { href: "/dashboard/parametres", label: "Paramètres", icon: GearSix, exact: false }, ...(role === "BOSS" ? [{ href: "/admin", label: "Administration plateforme", icon: GearSix, exact: true }] : [])];
   const active = (href: string, exact: boolean) => exact ? pathname === href : pathname.startsWith(href);
   const logout = async () => { await apiClient.post("/auth/logout/").catch(() => {}); setAccessToken(null); router.push("/"); };
   const timeLabel = new Date().getHours() >= 18 ? "Bonne soirée" : new Date().getHours() < 12 ? "Bonne journée" : "Bonne fin de journée";

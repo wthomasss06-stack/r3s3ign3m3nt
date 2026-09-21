@@ -46,6 +46,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
     is_active = models.BooleanField(default=True)
+    access_revoked_at = models.DateTimeField(null=True, blank=True)
+    access_revoked_reason = models.CharField(max_length=255, blank=True)
     is_staff = models.BooleanField(default=False)  # acces Django admin, distinct du role produit STAFF
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -75,6 +77,8 @@ class StaffInvitation(models.Model):
     token = models.CharField(max_length=64, unique=True)
     invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_reason = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -82,3 +86,20 @@ class StaffInvitation(models.Model):
 
     def __str__(self):
         return f"Invitation {self.email} -> {self.organization.name}"
+
+
+class AuditEvent(models.Model):
+    """Journal append-only des changements d’accès et d’administration d’équipe."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="audit_events")
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="audit_events_created")
+    action = models.CharField(max_length=80)
+    target_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_events_targeted")
+    target_invitation = models.ForeignKey(StaffInvitation, on_delete=models.SET_NULL, null=True, blank=True, related_name="audit_events")
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["organization", "created_at"])]

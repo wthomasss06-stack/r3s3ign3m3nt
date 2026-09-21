@@ -29,6 +29,10 @@ class InvalidGoogleTokenError(Exception):
     """Le jeton d'identite Google est absent, malforme, expire ou signe pour un autre client."""
 
 
+class RevokedAccessError(Exception):
+    """L’adresse Google est explicitement exclue d’un établissement."""
+
+
 def verify_google_credential(credential: str) -> dict:
     try:
         return id_token.verify_oauth2_token(
@@ -51,6 +55,9 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     existing = User.objects.filter(email=email).first()
     if existing:
         return existing, False
+
+    if StaffInvitation.objects.filter(email__iexact=email, revoked_at__isnull=False).exists():
+        raise RevokedAccessError("Vous ne faites plus partie du staff ou de la gestion de cet établissement.")
 
     invitation = (
         StaffInvitation.objects.filter(email__iexact=email, accepted_at__isnull=True)

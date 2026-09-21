@@ -52,7 +52,14 @@ export interface UserProfile {
   role: AccountRole;
   organization_id: string;
   organization_name: string;
+  is_active: boolean;
+  access_revoked_at: string | null;
+  access_revoked_reason: string;
 }
+
+export interface StaffInvitation { id: string; email: string; role: AccountRole; accepted_at: string | null; revoked_at: string | null; revoked_reason: string; created_at: string; }
+export interface TeamAccess { members: UserProfile[]; invitations: StaffInvitation[]; }
+export interface AuditEvent { id: string; action: string; actor_email: string | null; target_email: string | null; metadata: Record<string, unknown>; created_at: string; }
 
 export interface Organization {
   id: string;

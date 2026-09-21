@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import axios from "axios";
 
 import { db } from "@/lib/db";
+import { networkMonitor } from "@/lib/networkMonitor";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 const BATCH_SIZE = 20; // marge sous MAX_BATCH_SIZE=50 côté serveur
@@ -36,9 +37,10 @@ export function useBackgroundSync() {
       }
     };
 
-    window.addEventListener("online", syncPending);
-    if (navigator.onLine) syncPending();
+    const onOnline = () => { void syncPending(); };
+    window.addEventListener("online", onOnline);
+    void networkMonitor.check().then((reachable) => { if (reachable) void syncPending(); });
 
-    return () => window.removeEventListener("online", syncPending);
+    return () => window.removeEventListener("online", onOnline);
   }, []);
 }

@@ -20,6 +20,7 @@ export default function LoginPage() {
             alt="R3S3IGN3M3NT — données protégées, accès par rôle"
             fill
             className="object-cover opacity-40 mix-blend-overlay"
+            sizes="(min-width: 1024px) 50vw, 100vw"
             priority
           />
           <div className="relative z-10">

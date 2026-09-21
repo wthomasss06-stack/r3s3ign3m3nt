@@ -29,6 +29,9 @@ out/
 coverage/
 .npm/
 .pnpm-store/
+frontend/public/sw.js
+frontend/public/swe-worker-*.js
+frontend/public/workbox-*.js
 
 # OS/editor files
 .DS_Store
