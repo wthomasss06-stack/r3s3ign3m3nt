@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 
 import { ArrowDownRight, ArrowUpRight, CheckMark } from "@/components/icons";
 import Logo from "@/components/Logo";
+import PwaInstallButton from "@/components/marketing/PwaInstallButton";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -139,6 +140,7 @@ export default function LandingPage() {
               Voir comment ça marche <ArrowDownRight />
             </Link>
           </div>
+          <PwaInstallButton />
           <div className="mt-14 flex items-center gap-2 font-mk-mono text-[10px] text-mk-moss">
             <span className="h-[7px] w-[7px] animate-pulse rounded-full bg-mk-moss" />
             Enregistre les visiteurs même sans réseau, des jours durant.
