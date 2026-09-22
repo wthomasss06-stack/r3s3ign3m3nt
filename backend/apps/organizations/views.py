@@ -48,16 +48,23 @@ class RegenerateQRTokenView(APIView):
 class CloudinarySignatureView(APIView):
     """Signe un upload image côté serveur sans exposer le secret Cloudinary."""
 
-    permission_classes = [IsAuthenticated, IsBoss]
+    permission_classes = [IsAuthenticated, IsOrgMember]
 
     def post(self, request):
+        upload_kind = str(request.data.get("kind") or "branding").strip().lower()
+        if upload_kind not in {"avatar", "branding"}:
+            return error_response("Type d’image invalide.", status.HTTP_400_BAD_REQUEST)
+        # La photo de profil est modifiable par tout membre actif. Le logo de
+        # l’entreprise reste strictement réservé au Patron.
+        if upload_kind == "branding" and request.user.role != "BOSS":
+            self.permission_denied(request, message=IsBoss.message)
         cloud_name = getattr(settings, "CLOUDINARY_CLOUD_NAME", "").strip().strip("\"'")
         api_key = getattr(settings, "CLOUDINARY_API_KEY", "").strip().strip("\"'")
         api_secret = getattr(settings, "CLOUDINARY_API_SECRET", "").strip().strip("\"'")
         if not cloud_name or not api_key or not api_secret:
             return error_response("Cloudinary n’est pas configuré sur le serveur.", status.HTTP_503_SERVICE_UNAVAILABLE)
         timestamp = int(time.time())
-        folder = f"qr-register/{request.user.organization_id}"
+        folder = f"qr-register/{request.user.organization_id}/{'avatars' if upload_kind == 'avatar' else 'branding'}"
         params = {"folder": folder, "timestamp": timestamp}
         # Cloudinary signe les paramètres triés sans URL-encoder le slash du
         # dossier : `folder=qr-register/<org>&timestamp=<unix>`. Utiliser

@@ -8,7 +8,7 @@ import { apiClient } from "@/lib/api";
 
 type Signature = { cloud_name: string; api_key: string; timestamp: number; folder: string; signature: string };
 
-export default function CloudinaryImageUploader({ value, onChange, disabled = false, label = "Logo de l’entreprise" }: { value: string; onChange: (url: string) => void; disabled?: boolean; label?: string }) {
+export default function CloudinaryImageUploader({ value, onChange, disabled = false, label = "Logo de l’entreprise", uploadKind = "branding" }: { value: string; onChange: (url: string) => void; disabled?: boolean; label?: string; uploadKind?: "avatar" | "branding" }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [dragging, setDragging] = useState(false);
@@ -20,7 +20,7 @@ export default function CloudinaryImageUploader({ value, onChange, disabled = fa
     if (file.size > 5 * 1024 * 1024) { setStatus("error"); setError("Image trop lourde : 5 Mo maximum."); return; }
     setStatus("uploading"); setError("");
     try {
-      const { data: signature } = await apiClient.post<Signature>("/org/uploads/cloudinary-signature/");
+      const { data: signature } = await apiClient.post<Signature>("/org/uploads/cloudinary-signature/", { kind: uploadKind });
       const body = new FormData();
       body.append("file", file);
       body.append("api_key", signature.api_key);
@@ -28,6 +28,7 @@ export default function CloudinaryImageUploader({ value, onChange, disabled = fa
       body.append("folder", signature.folder);
       body.append("signature", signature.signature);
       const response = await axios.post<{ secure_url: string }>(`https://api.cloudinary.com/v1_1/${signature.cloud_name}/image/upload`, body, { timeout: 30_000 });
+      if (!response.data.secure_url) throw new Error("Cloudinary n’a pas renvoyé l’URL de l’image.");
       onChange(response.data.secure_url);
       setStatus("success");
     } catch (uploadError) {
