@@ -3,7 +3,6 @@ import axios from "axios";
 import { refreshOnce } from "./authClient";
 import { getAccessToken, setAccessToken } from "./tokenStore";
 import { normalizeApiError } from "./errors";
-import { clearSessionCache, readSessionCache } from "./sessionStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -66,9 +65,10 @@ apiClient.interceptors.response.use(
       return Promise.reject(Object.assign(error, { transient: true }));
     }
 
-    setAccessToken(null);
-    clearSessionCache();
-    if (typeof window !== "undefined" && !readSessionCache()) window.location.href = "/";
+    // Ne pas déconnecter silencieusement l’utilisateur sur un seul 401.
+    // Le refresh peut avoir été refusé après une rotation, un changement
+    // d’onglet ou une indisponibilité du cookie cross-site. La session locale
+    // reste affichée et la reconnexion explicite demeure disponible.
     return Promise.reject(error);
   },
 );

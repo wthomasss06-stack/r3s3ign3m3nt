@@ -1,32 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ClipboardText, QrCode } from "@phosphor-icons/react";
+import { ArrowLeft, ClipboardText, QrCode } from "@phosphor-icons/react";
 import Loader from "@/components/Loader";
 import QRCodeManager from "@/components/QRCodeManager";
 import { apiClient } from "@/lib/api";
-import type { Organization, UserProfile } from "@/types";
+import { useAuthContext } from "@/context/AuthContext";
+import type { Organization } from "@/types";
 
-type ViewState = "loading" | "error" | "ready";
+type ViewState = "loading" | "ready" | "error";
+type Mode = "choose" | "qr";
 
 export default function AccueilPage() {
+  const { user } = useAuthContext();
   const [org, setOrg] = useState<Organization | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
   const [state, setState] = useState<ViewState>("loading");
+  const [mode, setMode] = useState<Mode>("choose");
+
   useEffect(() => {
-    Promise.all([apiClient.get<Organization>("/org/me/"), apiClient.get<UserProfile>("/auth/me/")])
-      .then(([orgRes, meRes]) => { setOrg(orgRes.data); setUser(meRes.data); setState("ready"); })
+    if (!user) return;
+    apiClient.get<Organization>("/org/me/")
+      .then(({ data }) => { setOrg(data); setState("ready"); })
       .catch(() => setState("error"));
-  }, []);
-  if (state === "loading") return <Loader fullScreen={false} label="Ouverture de l’accueil…" />;
-  if (state === "error" || !org || !user) return <div className="space-y-3"><p className="text-ink-soft">Impossible de charger l’accueil.</p><button onClick={() => location.reload()} className="rounded-full bg-cta px-5 py-2.5 text-sm font-medium text-white">Réessayer</button></div>;
-  const isStaff = user.role === "STAFF";
+  }, [user?.role]);
+
+  if (state === "loading") return <Loader fullScreen={false} label="Ouverture du mode accueil…" />;
+  if (state === "error" || !org) return <div className="space-y-3"><p className="text-ink-soft">Impossible de charger le mode accueil.</p><button onClick={() => location.reload()} className="rounded-full bg-cta px-5 py-2.5 text-sm font-medium text-white">Réessayer</button></div>;
+
   const visitorUrl = `/v/${org.qr_secure_token}`;
-  return <div className="mx-auto w-full max-w-5xl space-y-8 overflow-hidden">
-    <header><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">{isStaff ? "Accueil" : "Mode Accueil"}</p><h1 className="mt-2 text-3xl font-bold text-ink">Accueil visiteurs</h1><p className="mt-2 max-w-2xl text-sm text-ink-soft">Affiche le QR pour les visiteurs équipés d’un téléphone ou ouvre directement le formulaire sur la tablette de l’établissement.</p></header>
-    <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-start">
-      <section className="flex min-w-0 flex-col items-center rounded-2xl border border-border bg-surface p-4 text-center shadow-subtle sm:p-10"><div className="mb-5 flex max-w-full items-center gap-2 truncate text-sm font-medium text-ink"><QrCode size={20} weight="bold" /> <span className="truncate">QR de {org.name}</span></div><QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} logoUrl={org.logo_url} canRegenerate={false} size={320} /><p className="mt-5 max-w-md text-sm text-ink-soft">Le logo de l’établissement est intégré au centre. Le visiteur peut scanner depuis plusieurs mètres.</p></section>
-      <section className="min-w-0 space-y-4"><div className="rounded-2xl border border-border bg-surface p-5"><h2 className="font-heading text-lg font-semibold text-ink">Accueil sans téléphone</h2><p className="mt-2 text-sm leading-relaxed text-ink-soft">Prête la tablette ou l’ordinateur d’accueil au visiteur. Le formulaire se remet à zéro après chaque enregistrement.</p><Link href={visitorUrl} className="mt-5 flex items-center justify-center gap-2 rounded-full bg-cta px-5 py-3 text-sm font-medium text-white"><ClipboardText size={18} weight="bold" /> Ouvrir le formulaire</Link></div><div className="rounded-xl bg-canvas p-4 text-xs leading-relaxed text-ink-soft"><strong className="text-ink">Mode hors-ligne :</strong> une première ouverture avec Internet suffit pour mettre le formulaire en cache. Les fiches en attente seront synchronisées au retour du réseau.</div></section>
-    </div>
-  </div>;
+  if (mode === "qr") return <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6"><button onClick={() => setMode("choose")} className="self-start inline-flex items-center gap-2 text-sm font-medium text-ink-soft hover:text-ink"><ArrowLeft size={17} /> Retour au Mode Accueil</button><div className="w-full rounded-2xl border border-border bg-surface p-6 text-center shadow-subtle sm:p-10"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">Mode QR</p><h1 className="mt-2 text-3xl font-bold text-ink">QR visiteurs</h1><p className="mt-2 text-sm text-ink-soft">Présente ce QR aux visiteurs pour ouvrir le formulaire sur leur téléphone.</p><div className="mt-7 flex justify-center"><QRCodeManager qrToken={org.qr_secure_token} orgName={org.name} logoUrl={org.logo_url} canRegenerate={false} size={320} /></div></div></div>;
+
+  const headingLabel = user?.role === "STAFF" ? "Accueil" : "Mode Staff";
+  return <div className="mx-auto w-full max-w-4xl space-y-8"><header><p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">{headingLabel}</p><h1 className="mt-2 text-3xl font-bold text-ink">{user?.role === "STAFF" ? "Accueil" : "Mode Staff"}</h1><p className="mt-2 max-w-2xl text-sm text-ink-soft">Choisis le mode à utiliser pour accueillir les visiteurs.</p></header><section className="grid gap-5 md:grid-cols-2"><button onClick={() => setMode("qr")} className="group flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-border bg-surface p-8 text-center shadow-subtle transition hover:-translate-y-1 hover:border-cta hover:shadow-lg"><span className="grid h-16 w-16 place-items-center rounded-2xl bg-cta/10 text-cta"><QrCode size={38} weight="bold" /></span><span className="mt-5 text-xl font-bold text-ink">Mode QR</span><span className="mt-2 text-sm text-ink-soft">Afficher le QR pour les visiteurs avec téléphone</span></button><Link href={visitorUrl} className="group flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-border bg-surface p-8 text-center shadow-subtle transition hover:-translate-y-1 hover:border-cta hover:shadow-lg"><span className="grid h-16 w-16 place-items-center rounded-2xl bg-cta/10 text-cta"><ClipboardText size={38} weight="bold" /></span><span className="mt-5 text-xl font-bold text-ink">Mode formulaire</span><span className="mt-2 text-sm text-ink-soft">Ouvrir directement le formulaire sur la tablette</span></Link></section></div>;
 }

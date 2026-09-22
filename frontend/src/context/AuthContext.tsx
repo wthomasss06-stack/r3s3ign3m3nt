@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import { usePathname } from "next/navigation";
 
 import { restoreSession as restoreAccessSession } from "@/lib/authClient";
 import { apiClient } from "@/lib/api";
@@ -32,7 +33,12 @@ function getInitialSession() {
   return { user: cached?.user || null, organization: cached?.organization || null };
 }
 
+function isPublicPath(pathname: string) {
+  return pathname === "/" || pathname === "/connexion" || pathname.startsWith("/v/") || pathname.startsWith("/aide");
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const initial = useMemo(getInitialSession, []);
   const [user, setUser] = useState<UserProfile | null>(initial.user);
   const [organization, setOrganization] = useState<Organization | null>(initial.organization);
@@ -55,18 +61,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const restoreSession = useCallback(async () => {
     if (restoreRef.current) return restoreRef.current;
     restoreRef.current = (async () => {
+      const cached = readSessionCache();
       const tokenValid = await restoreAccessSession();
       if (!tokenValid) {
-        setUser(null);
-        setOrganization(null);
-        clearSessionCache();
+        // Un refresh expiré ne doit pas effacer immédiatement la dernière session
+        // connue : l’utilisateur reste dans son dashboard et peut se reconnecter
+        // explicitement si le serveur confirme réellement l’expiration.
+        if (cached?.user) {
+          setUser(cached.user);
+          setOrganization(cached.organization || null);
+          return true;
+        }
         return false;
       }
       try {
         await loadProfileInBackground();
       } catch (requestError) {
         // Un cache local déjà présent reste utilisable pendant une panne réseau.
-        if (!readSessionCache()) throw requestError;
+        if (!cached?.user) throw requestError;
+        setUser(cached.user);
+        setOrganization(cached.organization || null);
       }
       return true;
     })().finally(() => { restoreRef.current = null; });
@@ -75,12 +89,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    // Les visiteurs publics ne doivent jamais tenter un refresh JWT sans raison.
+    if (isPublicPath(pathname)) {
+      setLoading(false);
+      return () => { mounted = false; };
+    }
     restoreSession().catch(() => undefined).finally(() => {
       if (mounted) setLoading(false);
     });
     if (initial.user || getAccessToken()) setLoading(false);
     return () => { mounted = false; };
-  }, [initial.user, restoreSession]);
+  }, [initial.user, pathname, restoreSession]);
 
   const loginWithGoogle = useCallback(async (credential: string) => {
     setLoggingIn(true);
@@ -118,17 +137,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [loggingOut]);
 
   const value = useMemo<AuthContextValue>(() => ({
-    user,
-    organization,
-    loading,
-    loggingIn,
-    loggingOut,
-    error,
-    isAuthenticated: Boolean(user),
-    loginWithGoogle,
-    restoreSession,
-    refreshUser,
-    logout,
+    user, organization, loading, loggingIn, loggingOut, error,
+    isAuthenticated: Boolean(user), loginWithGoogle, restoreSession, refreshUser, logout,
   }), [user, organization, loading, loggingIn, loggingOut, error, loginWithGoogle, restoreSession, refreshUser, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
