@@ -20,6 +20,7 @@ export interface OfflineCheckIn {
 export interface CachedForm {
   qr_token: string;
   organization_name: string;
+  organization_logo_url?: string;
   fields_schema: unknown;
   cached_at: string;
 }
@@ -35,6 +36,10 @@ class QRFormDatabase extends Dexie {
       formCache: "qr_token",
     });
     this.version(2).stores({
+      checkins: "idempotency_key, sync_status, next_retry_at, created_at_client",
+      formCache: "qr_token",
+    });
+    this.version(3).stores({
       checkins: "idempotency_key, sync_status, next_retry_at, created_at_client",
       formCache: "qr_token",
     });

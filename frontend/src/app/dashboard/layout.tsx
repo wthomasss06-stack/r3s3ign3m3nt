@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isLegacyOnboarding = pathname.startsWith("/dashboard/onboarding");
   return (
     <div className="min-h-screen bg-canvas">
-      {!isLegacyOnboarding && <Sidebar orgName={organization?.name || user.organization_name} orgLogo={organization?.logo_url} userName={user.full_name || user.email} userAvatar={user.avatar_url} role={user.role} />}
+      {!isLegacyOnboarding && <Sidebar orgName={organization?.name || user.organization_name} orgLogo={organization?.logo_url} userName={user.full_name || user.email} role={user.role} />}
       <main className={isLegacyOnboarding ? "min-h-screen p-6 md:p-10" : "p-6 pb-28 md:ml-[72px] md:p-10 md:pb-10"}>
         {!isLegacyOnboarding && <div className="mb-5 flex justify-end"><SyncStatusBadge /></div>}
         {children}
