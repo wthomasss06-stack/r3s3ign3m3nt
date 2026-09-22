@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, throttling
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -10,7 +11,7 @@ from apps.common.permissions import IsBoss, IsBossOrGerant
 from apps.common.responses import error_response
 
 from .cookies import clear_refresh_cookie, set_refresh_cookie
-from .models import AuditEvent, StaffInvitation, User
+from .models import AuditEvent, RefreshSession, StaffInvitation, User
 from .serializers import AuditEventSerializer, GoogleAuthSerializer, InviteStaffSerializer, StaffInvitationSerializer, UserProfileUpdateSerializer, UserSerializer
 from .services import (
     ROLE_CAPS,
@@ -18,7 +19,9 @@ from .services import (
     RevokedAccessError,
     count_role_usage,
     create_staff_invitation,
+    register_refresh_session,
     resolve_or_create_user,
+    revoke_refresh_session,
     verify_google_credential,
 )
 
@@ -58,6 +61,7 @@ class GoogleAuthView(APIView):
             status=status.HTTP_200_OK,
         )
         set_refresh_cookie(response, refresh)
+        register_refresh_session(user, refresh, request)
         return response
 
 
@@ -74,10 +78,30 @@ class CookieTokenRefreshView(APIView):
         if not raw_token:
             return error_response("Session expirée, reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
         try:
-            refresh = RefreshToken(raw_token)
+            with transaction.atomic():
+                refresh = RefreshToken(raw_token)
+                session = (
+                    RefreshSession.objects.select_for_update()
+                    .select_related("user")
+                    .filter(jti=str(refresh["jti"]), revoked_at__isnull=True)
+                    .first()
+                )
+                if not session or not session.user.is_active or session.expires_at <= timezone.now():
+                    response = error_response("Session invalide, reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
+                    clear_refresh_cookie(response)
+                    return response
+                session.revoked_at = timezone.now()
+                session.last_used_at = timezone.now()
+                session.save(update_fields=["revoked_at", "last_used_at"])
+                next_refresh = RefreshToken.for_user(session.user)
+                register_refresh_session(session.user, next_refresh, request)
         except TokenError:
-            return error_response("Session invalide, reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
-        return Response({"access": str(refresh.access_token)})
+            response = error_response("Session invalide, reconnecte-toi.", status.HTTP_401_UNAUTHORIZED)
+            clear_refresh_cookie(response)
+            return response
+        response = Response({"access": str(next_refresh.access_token)})
+        set_refresh_cookie(response, next_refresh)
+        return response
 
 
 class LogoutView(APIView):
@@ -86,6 +110,7 @@ class LogoutView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        revoke_refresh_session(request.COOKIES.get("qr_refresh_token"), reason="logout")
         response = Response({"detail": "Déconnecté."})
         clear_refresh_cookie(response)
         return response

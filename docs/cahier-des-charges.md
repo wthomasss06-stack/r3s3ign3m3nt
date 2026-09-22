@@ -171,7 +171,7 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 | `PATCH/DELETE` | `/api/v1/access-points/<id>/` | BOSS/GERANT ou BOSS | Modifier, désactiver ou supprimer un point d’accueil |
 | GET | `/api/v1/public/forms/<qr_token>/` | Public | Formulaire à afficher au scan |
 | POST | `/api/v1/checkins/sync/` | Public | Envoi (groupé, idempotent) des fiches visiteurs |
-| GET | `/api/v1/checkins/` | BOSS/STAFF | Registre paginé (fenêtre backend jusqu’à 100 fiches pour la pagination d’affichage) |
+| GET | `/api/v1/checkins/` | BOSS/STAFF | Registre paginé côté serveur (`page`, `page_size`, `count`, `next`, `previous`) |
 | GET | `/api/v1/checkins/stats/` | BOSS/GERANT/STAFF | Volume, volume du jour, heures de pointe et motifs fréquents |
 | GET | `/api/v1/checkins/export/` | BOSS | Export CSV |
 | POST | `/api/v1/org/me/regenerate-qr/` | BOSS | Invalide l'ancien QR |
@@ -179,7 +179,7 @@ Direction volontairement sobre plutôt que le style neo-brutaliste/sombre habitu
 
 ## 10. Tests automatisés
 
-21 tests d'intégration couvrent les flows critiques (voir `backend/apps/checkins/tests/`) : idempotence anti-doublon, rejet d'un champ obligatoire manquant, non-exploitation d'un `organization_id` fourni par le client, RBAC, agrégation des statistiques, feedback et administration. La migration multi-formulaires et les tests frontend passent en environnement local. La couverture n'est pas exhaustive : l'auth Google réelle, les navigateurs mobiles, plusieurs tablettes offline et la recette production restent des contrôles complémentaires.
+Les tests d'intégration couvrent les flows critiques (voir `backend/apps/`) : idempotence anti-doublon, rejet d'un champ obligatoire manquant, non-exploitation d'un `organization_id` fourni par le client, RBAC, pagination serveur au-delà de 100 visites, rotation des sessions refresh, agrégation des statistiques, feedback et administration. La migration multi-formulaires et les tests frontend passent en environnement local. La couverture n'est pas exhaustive : l'auth Google réelle, les navigateurs mobiles, plusieurs tablettes offline et la recette production restent des contrôles complémentaires.
 
 ## 12. Site vitrine & pages légales (livrés)
 
@@ -212,3 +212,10 @@ Sur mobile, le feedback est accessible par une icône ronde flottante afin de pr
 L’onglet **Paramètres > Équipe** utilise un seul bouton d’information placé à côté du titre. Ce bouton ouvre une modale large qui présente la matrice complète des permissions des rôles **Patron**, **Gérant** et **Staff** ; le Patron peut donc consulter ses propres permissions au même endroit que celles des autres rôles. Les panneaux individuels affichés à côté des boutons de choix de rôle dans l’invitation ont été supprimés pour éviter la duplication et les divergences de contenu.
 
 La matrice reflète le RBAC réellement appliqué par l’API : le Patron conserve les actions sensibles, le Gérant gère les opérations courantes et peut inviter un Staff, tandis que seul le Patron peut inviter un Gérant. La matrice reste une aide de compréhension et ne remplace pas les contrôles serveur. Les six flows et leurs diagrammes SVG ont été réalignés sur ce parcours, sur l’onboarding simplifié, sur l’onglet Entreprise, sur les formulaires/QR ajoutés depuis les paramètres et sur le mode offline de la tablette.
+
+
+## Mise à jour — priorité 3 sécurité et pagination serveur — 22 septembre 2026
+
+La sécurité de session est renforcée par une Content Security Policy frontend, des headers de durcissement, un JWT d’accès de courte durée et une rotation contrôlée des refresh tokens. Chaque refresh est associé à une session par appareil ; son JTI est conservé côté serveur pour permettre la révocation ciblée sans déconnecter les autres appareils. Les connexions et révocations sensibles sont ajoutées au journal d’audit.
+
+Le registre n’est plus limité à un lot fixe de 100 visites. Le backend expose une pagination serveur avec `page`, `page_size`, `count`, `next` et `previous`. Le dashboard demande 20 enregistrements par page sur ordinateur et 10 sur mobile. La taille maximale d’une page est contrôlée côté API.

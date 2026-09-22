@@ -18,6 +18,10 @@ La procédure de restauration doit être exécutée périodiquement sur un envir
 
 Configurer le health check de l’hébergeur sur `/api/v1/health/`. Les logs de requêtes contiennent uniquement méthode, chemin, statut, durée et identifiant de corrélation ; ils ne doivent pas recevoir de token, cookie ou réponse formulaire. Configurer `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` vers un collecteur first-party si les Core Web Vitals doivent être persistés ; sans cette variable, les métriques restent uniquement visibles en développement.
 
+## Persistance de session frontend
+
+Le JWT d’accès est conservé dans `localStorage` sous la clé versionnée `qr_access_token_v1` et le profil utilisateur validé sous `qr_session_cache_v1`. Au retour dans l’application, le shell du dashboard peut donc être rendu immédiatement depuis ce cache ; la validation du cookie de refresh et son renouvellement se poursuivent en arrière-plan. Le refresh token reste dans le cookie `httpOnly` `qr_refresh_token` et ne doit pas être copié dans `localStorage`, afin de limiter son exposition au JavaScript en cas de faille XSS. Un rejet explicite `401/403` invalide le cache et renvoie vers la connexion ; une erreur réseau transitoire conserve l’accès local et permet à l’utilisateur de réessayer.
+
 ## Contrat API
 
 Le schéma versionné est généré dans `docs/openapi.yaml`. Le endpoint staging est `/api/schema/` et l’interface de consultation est `/api/docs/`. Toute modification d’endpoint doit régénérer le fichier et faire passer les tests backend et frontend associés.

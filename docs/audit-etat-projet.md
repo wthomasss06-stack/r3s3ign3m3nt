@@ -24,3 +24,12 @@ Les améliorations produit encore prévues sont la notification WhatsApp, l’im
 ## Mise à jour de l’audit — 21 septembre 2026
 
 La gestion de plusieurs formulaires et QR codes est maintenant présentée par des modales d’ajout guidé. Le branding de l’entreprise est réservé au patron côté API ; des endpoints dédiés permettent la suspension/suppression contrôlée de l’entreprise et la désactivation volontaire d’un gérant ou d’un membre du staff. L’onglet Entreprise, les confirmations d’actions sensibles et les états de connexion/déconnexion sont intégrés au frontend. Le feedback mobile est réduit à une pastille icône. Une migration Django ajoute `Organization.is_suspended`.
+
+
+## Mise à jour de l’audit — 22 septembre 2026
+
+La priorité 3 de sécurité est implémentée : CSP frontend, headers `X-Content-Type-Options`, `Referrer-Policy` et `Permissions-Policy`, durée de vie du JWT d’accès ramenée à 10 minutes, rotation et révocation par appareil des refresh tokens, et journalisation des connexions/déconnexions dans `AuditEvent`. Le refresh token brut n’est jamais stocké en base ; seul son JTI est associé à `RefreshSession`. Un refresh déjà consommé est refusé.
+
+La pagination du registre est désormais serveur. Le dashboard charge 20 visites par page sur desktop et 10 sur mobile ; le total et les liens de navigation viennent de l’API. La couverture backend vérifie le parcours au-delà de 100 enregistrements et le plafonnement de la taille de page.
+
+Les contrôles restant à exécuter en staging sont l’audit de dépendances npm (`npm audit`), la recette CSP avec le vrai domaine Google OAuth et le test multi-appareils des sessions rotatives.

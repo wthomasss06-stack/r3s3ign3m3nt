@@ -14,7 +14,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-me-32-bytes-minimum")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "*").split(",")]
 
@@ -126,11 +126,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# ROTATE_REFRESH_TOKENS=False : evite la race condition de blacklist multi-onglets
-# (cf. skill jwt-auth-resilience). Le refresh token vit dans un cookie httpOnly,
-# jamais dans le JSON de reponse ni le localStorage cote client.
+# Le refresh token vit dans un cookie httpOnly, jamais dans le JSON de réponse ni
+# le localStorage côté client. La rotation et la révocation par appareil sont
+# gérées par RefreshSession, ce qui évite qu'un token réutilisé reste valable.
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=14),
     "ROTATE_REFRESH_TOKENS": False,
     "AUTH_HEADER_TYPES": ("Bearer",),

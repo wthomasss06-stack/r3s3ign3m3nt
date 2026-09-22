@@ -332,3 +332,10 @@ Le logo de référence du projet est [`frontend/public/akatech-studio-logo.webp`
 La mise à jour de septembre 2026 centralise aussi la lecture des droits : l’onglet **Équipe** présente une seule icône d’information qui ouvre la matrice des permissions pour les trois rôles. Le frontend reste informatif ; le backend applique le RBAC réel, notamment la règle « Gérant → Staff » et « Patron → Gérant ou Staff ».
 
 Projet propriétaire / SaaS conçu par AKATech Studio. Les conditions d’utilisation et de réutilisation du code doivent être définies avant toute distribution publique.
+
+
+## Mise à jour sécurité et pagination serveur — 22 septembre 2026
+
+La priorité 3 de sécurité est intégrée : Content Security Policy et headers de durcissement côté frontend, JWT d’accès limité à 10 minutes, refresh token `httpOnly` rotatif et révocable par appareil. Le backend conserve uniquement le JTI dans `RefreshSession`, jamais le token lui-même. Les connexions, déconnexions et révocations de session sont journalisées dans les événements d’audit.
+
+Le registre utilise une pagination serveur : 20 lignes par page sur desktop et 10 sur mobile via `page` et `page_size`. Le backend renvoie le total ainsi que `next` et `previous`, sans limitation fonctionnelle à 100 visites. La taille demandée est plafonnée côté API.

@@ -1,60 +1,32 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 
-import { restoreSession } from "@/lib/authClient";
-import { getAccessToken, setAccessToken } from "@/lib/tokenStore";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+import { useAuthContext } from "@/context/AuthContext";
 
 export function useGoogleAuthLogin() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { loginWithGoogle, error, loggingIn } = useAuthContext();
 
-  const login = useCallback(
-    async (credential: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data } = await axios.post(`${API_URL}/auth/google/`, { credential }, { withCredentials: true });
-        setAccessToken(data.access);
-        if (typeof window !== "undefined") sessionStorage.setItem("qr_login_greeting", JSON.stringify({ isNew: Boolean(data.is_new), name: data.user?.full_name || data.user?.email || "" }));
-        router.push(data.is_new ? "/onboarding" : "/dashboard");
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          setError(error.response?.data?.error?.message || "Connexion impossible. Réessaie.");
-        } else {
-          setError("Connexion impossible. Réessaie.");
-        }
-      } finally {
-        setLoading(false);
+  const login = useCallback(async (credential: string) => {
+    try {
+      const { isNew, name } = await loginWithGoogle(credential);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("qr_login_greeting", JSON.stringify({ isNew, name }));
       }
-    },
-    [router]
-  );
+      router.push(isNew ? "/onboarding" : "/dashboard");
+    } catch {
+      // Le provider expose déjà l’erreur à l’écran de connexion.
+    }
+  }, [loginWithGoogle, router]);
 
-  return { login, loading, error };
+  return { login, loading: loggingIn, error };
 }
 
-/** Restaure la session au montage (F5, nouvel onglet) sans jamais deconnecter sur
- * une erreur transitoire (cold start Render inclus — skill jwt-auth-resilience). */
+/** Compatibilité avec les layouts existants : la session est maintenant
+ * restaurée par AuthProvider dès le premier rendu, puis rafraîchie en arrière-plan. */
 export function useSilentSession() {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAccessToken()));
-
-  useEffect(() => {
-    let mounted = true;
-    restoreSession().then((ok) => {
-      if (!mounted) return;
-      setIsAuthenticated(ok);
-      setLoading(false);
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
+  const { loading, isAuthenticated } = useAuthContext();
   return { loading, isAuthenticated };
 }

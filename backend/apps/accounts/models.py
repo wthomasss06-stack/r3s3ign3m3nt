@@ -103,3 +103,24 @@ class AuditEvent(models.Model):
     class Meta:
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["organization", "created_at"])]
+
+
+class RefreshSession(models.Model):
+    """Session refresh indépendante par appareil, révocable sans déconnecter les autres appareils."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refresh_sessions")
+    jti = models.CharField(max_length=64, unique=True)
+    user_agent = models.CharField(max_length=512, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField()
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "revoked_at"]),
+            models.Index(fields=["expires_at"]),
+        ]

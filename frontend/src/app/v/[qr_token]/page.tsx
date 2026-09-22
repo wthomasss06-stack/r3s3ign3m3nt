@@ -13,7 +13,7 @@ export default function VisitorPage() {
 
   // Vide la file des soumissions en attente des qu'une connexion revient sur CET
   // appareil (kiosque) — independant du statut de chargement du formulaire lui-meme.
-  useBackgroundSync();
+  const sync = useBackgroundSync();
 
   if (status === "loading") {
     return <Loader />;
@@ -38,6 +38,7 @@ export default function VisitorPage() {
       orgName={data.organization_name}
       logoUrl={data.organization_logo_url}
       visitReasons={data.visit_reasons}
+      syncState={sync}
     />
   );
 }

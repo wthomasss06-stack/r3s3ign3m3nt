@@ -1,12 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChartLineUp, Clock, TrendUp, UsersThree } from "@phosphor-icons/react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import Loader from "@/components/Loader";
 import CheckInsTable from "@/components/CheckInsTable";
 import { apiClient } from "@/lib/api";
-import { exportToCSV } from "@/lib/exportCsv";
+import { exportAllToCSV } from "@/lib/exportCsv";
 import type { CheckInRecord, CheckInStats, FormField, Organization, PaginatedResponse, UserProfile } from "@/types";
 
 type ViewState = "loading" | "error" | "ready";
@@ -17,39 +17,64 @@ const tooltipStyle = { backgroundColor: "#fffdf8", border: "1px solid #e6e0d5", 
 export default function RegistrePage() {
   const [schema, setSchema] = useState<FormField[]>([]);
   const [records, setRecords] = useState<CheckInRecord[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalCount, setTotalCount] = useState(0);
   const [orgName, setOrgName] = useState("");
   const [stats, setStats] = useState<CheckInStats | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [state, setState] = useState<ViewState>("loading");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const firstLoad = useRef(true);
 
   const load = useCallback(async (initial = false) => {
     if (initial) setState("loading");
     try {
       const [tpl, chk, org, summary, me] = await Promise.all([
         apiClient.get<FormTemplateResponse>("/form-template/"),
-        apiClient.get<PaginatedResponse<CheckInRecord>>("/checkins/"),
+        apiClient.get<PaginatedResponse<CheckInRecord>>("/checkins/", { params: { page, page_size: pageSize } }),
         apiClient.get<Organization>("/org/me/"),
         apiClient.get<CheckInStats>("/checkins/stats/"),
         apiClient.get<UserProfile>("/auth/me/"),
       ]);
-      setSchema(tpl.data.fields_schema); setRecords(chk.data.results); setOrgName(org.data.name); setStats(summary.data); setUser(me.data); setLastUpdated(new Date()); setState("ready");
+      setSchema(tpl.data.fields_schema); setRecords(chk.data.results); setTotalCount(chk.data.count); setOrgName(org.data.name); setStats(summary.data); setUser(me.data); setLastUpdated(new Date()); setState("ready");
     } catch { if (initial) setState("error"); }
+  }, [page, pageSize]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const updatePageSize = () => setPageSize(mediaQuery.matches ? 10 : 20);
+    updatePageSize();
+    mediaQuery.addEventListener("change", updatePageSize);
+    return () => mediaQuery.removeEventListener("change", updatePageSize);
   }, []);
 
-  useEffect(() => { load(true); const timer = window.setInterval(() => load(false), 30_000); return () => window.clearInterval(timer); }, [load]);
+  useEffect(() => {
+    const initial = firstLoad.current;
+    firstLoad.current = false;
+    void load(initial);
+    const timer = window.setInterval(() => void load(false), 30_000);
+    return () => window.clearInterval(timer);
+  }, [load]);
 
   const hourlyData = useMemo(() => Array.from({ length: 24 }, (_, hour) => ({ label: `${hour}h`, hour, visites: stats?.hourly.find((entry) => entry.hour === hour)?.count ?? 0 })), [stats]);
   const reasonsData = useMemo(() => (stats?.frequent_reasons ?? []).slice(0, 6).map((item) => ({ label: item.label.length > 18 ? `${item.label.slice(0, 18)}…` : item.label, visites: item.count })), [stats]);
+  const canExport = user?.role === "BOSS" || user?.role === "GERANT";
+  const handleExport = async () => {
+    if (!canExport || exporting || totalCount === 0) return;
+    setExporting(true);
+    try { await exportAllToCSV(orgName); } finally { setExporting(false); }
+  };
 
   if (state === "loading") return <Loader fullScreen={false} />;
-  if (state === "error") return <div className="flex flex-col items-start gap-3"><p className="text-ink-soft">Impossible de charger le registre.</p><button onClick={() => load(true)} className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white">Réessayer</button></div>;
+  if (state === "error") return <div className="flex flex-col items-start gap-3"><p className="text-ink-soft">Impossible de charger le registre.</p><button onClick={() => { firstLoad.current = true; void load(true); }} className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white">Réessayer</button></div>;
 
   return <div className="space-y-6">
-    <div className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-ink">Registre</h1><p className="text-sm text-ink-soft">{stats?.total ?? records.length} visiteur{(stats?.total ?? records.length) > 1 ? "s" : ""} · actualisation automatique toutes les 30 secondes{lastUpdated ? ` · ${lastUpdated.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}</p></div><div className="flex flex-wrap items-center justify-end gap-3"><div className="flex max-w-full items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2"><div className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas text-xs font-bold text-ink">{user?.avatar_url ? <img src={user.avatar_url} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (user?.full_name || user?.email || "?").slice(0, 1).toUpperCase()}</div><div className="min-w-0"><p className="max-w-[150px] truncate text-xs font-semibold text-ink">{user?.full_name || user?.email}</p><p className="text-[11px] text-ink-soft">{user?.role === "BOSS" ? "Patron" : user?.role === "GERANT" ? "Gérant" : "Staff"}</p></div></div><button onClick={() => exportToCSV(records, schema, orgName)} disabled={records.length === 0} className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50">Exporter en CSV</button></div></div>
+    <div className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-ink">Registre</h1><p className="text-sm text-ink-soft">{stats?.total ?? totalCount} visiteur{(stats?.total ?? totalCount) > 1 ? "s" : ""} · actualisation automatique toutes les 30 secondes{lastUpdated ? ` · ${lastUpdated.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}</p></div><div className="flex flex-wrap items-center justify-end gap-3"><div className="flex max-w-full items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2"><div className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas text-xs font-bold text-ink">{user?.avatar_url ? <img src={user.avatar_url} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (user?.full_name || user?.email || "?").slice(0, 1).toUpperCase()}</div><div className="min-w-0"><p className="max-w-[150px] truncate text-xs font-semibold text-ink">{user?.full_name || user?.email}</p><p className="text-[11px] text-ink-soft">{user?.role === "BOSS" ? "Patron" : user?.role === "GERANT" ? "Gérant" : "Staff"}</p></div></div>{canExport && <button onClick={() => void handleExport()} disabled={totalCount === 0 || exporting} className="rounded-full bg-cta px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50">{exporting ? "Export en cours…" : "Exporter en CSV"}</button>}</div></div>
     {stats && <section className="grid gap-4 sm:grid-cols-3"><StatCard icon={<UsersThree size={21} />} label="Volume total" value={String(stats.total)} detail={`${stats.today} aujourd’hui`} /><StatCard icon={<Clock size={21} />} label="Heure de pointe" value={stats.peak_hour || "—"} detail="sur l’ensemble des visites" /><StatCard icon={<TrendUp size={21} />} label="Motif principal" value={stats.frequent_reasons[0]?.label || "—"} detail={stats.frequent_reasons[0] ? `${stats.frequent_reasons[0].count} visite${stats.frequent_reasons[0].count > 1 ? "s" : ""}` : "Aucune donnée"} /></section>}
     {stats && <section className="grid gap-4 lg:grid-cols-[1.15fr_.85fr]"><div className="rounded-xl border border-border bg-surface p-5"><div className="flex items-center gap-2"><ChartLineUp size={20} className="text-ink" /><h2 className="font-heading font-semibold text-ink">Visites par heure</h2></div><div className="mt-5 h-56 w-full"><ResponsiveContainer width="100%" height="100%"><LineChart data={hourlyData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}><CartesianGrid stroke="#eee8dc" strokeDasharray="3 3" vertical={false} /><XAxis dataKey="label" interval={2} tick={{ fontSize: 10, fill: "#817d75" }} axisLine={false} tickLine={false} /><YAxis allowDecimals={false} width={32} tick={{ fontSize: 10, fill: "#817d75" }} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "#817d75" }} /><Line type="monotone" dataKey="visites" name="Visites" stroke="#bd5b3f" strokeWidth={3} dot={{ r: 3, fill: "#bd5b3f", strokeWidth: 0 }} activeDot={{ r: 5 }} /></LineChart></ResponsiveContainer></div></div><div className="rounded-xl border border-border bg-surface p-5"><h2 className="font-heading font-semibold text-ink">Motifs fréquents</h2><div className="mt-4 h-56 w-full">{reasonsData.length === 0 ? <p className="pt-10 text-sm text-ink-soft">Les motifs apparaîtront après les premières visites.</p> : <ResponsiveContainer width="100%" height="100%"><BarChart data={reasonsData} layout="vertical" margin={{ top: 4, right: 8, left: 0, bottom: 0 }}><CartesianGrid stroke="#eee8dc" strokeDasharray="3 3" horizontal={false} /><XAxis type="number" allowDecimals={false} hide /><YAxis type="category" dataKey="label" width={105} tick={{ fontSize: 10, fill: "#817d75" }} axisLine={false} tickLine={false} /><Tooltip contentStyle={tooltipStyle} /><Bar dataKey="visites" name="Visites" fill="#bd5b3f" radius={[0, 6, 6, 0]} barSize={18} /></BarChart></ResponsiveContainer>}</div></div></section>}
-    <CheckInsTable records={records} activeSchema={schema} />
+    <CheckInsTable records={records} activeSchema={schema} page={page} pageSize={pageSize} totalCount={totalCount} onPageChange={setPage} />
   </div>;
 }
 
