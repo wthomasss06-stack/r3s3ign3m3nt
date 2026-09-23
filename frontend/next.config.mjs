@@ -17,14 +17,14 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdn.jsdelivr.net",
   "style-src 'self' 'unsafe-inline' https://accounts.google.com",
   "style-src-elem 'self' 'unsafe-inline' https://accounts.google.com",
   `img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com ${apiOrigin}`,
-  `connect-src 'self' ${apiOrigin} https://api.cloudinary.com https://res.cloudinary.com https://accounts.google.com https://www.googleapis.com https://*.googleusercontent.com`,
+  `connect-src 'self' ${apiOrigin} https://api.cloudinary.com https://res.cloudinary.com https://accounts.google.com https://www.googleapis.com https://*.googleusercontent.com https://cdn.jsdelivr.net`,
   "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
   "frame-src https://accounts.google.com",
-  "worker-src 'self' blob:",
+  "worker-src 'self' blob: https://cdn.jsdelivr.net",
 ].join('; ');
 
 /** @type {import('next').NextConfig} */
