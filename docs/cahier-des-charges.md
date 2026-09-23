@@ -50,7 +50,7 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 
 - [x] Authentification Google uniquement (patron et agent), aucun mot de passe
 - [x] Création automatique de l'espace (organisation + QR sécurisé) à la première connexion du patron
-- [x] Formulaire dynamique configurable par le patron : texte, téléphone, email, nombre, date, liste déroulante, case à cocher, signature
+- [x] Formulaire dynamique configurable par le patron : texte, téléphone, email, nombre, date, liste déroulante, case à cocher, photo, signature et identification OCR
 - [x] **5 modèles de formulaire suggérés** (Bureau/Cabinet, Restaurant, Hôtel, Accès salle/Chantier, Vierge) — le patron part d'un modèle ou construit en freestyle, et peut tout modifier ensuite
 - [x] Page visiteur "kiosque" : fonctionne hors-ligne indéfiniment après un premier chargement, signature au doigt
 - [x] Synchronisation automatique et idempotente (aucun doublon même en cas de coupure réseau)
@@ -68,6 +68,8 @@ Le patron et l'agent, eux, **ont besoin d'une connexion** pour se connecter (aut
 - [x] Plusieurs points d’accueil par établissement, chacun relié à un formulaire et à un QR opaque dédié
 - [x] Identification facultative de la tablette/appareil et date de dernière activité du point d’accueil
 - [x] Synchronisation offline résolue par le QR du point d’accueil, avec conservation du formulaire et de l’appareil d’origine
+- [x] Bloc `document_scan` optionnel : caméra arrière, CNI/passeport/document libre, OCR configurable et préremplissage du même formulaire
+- [x] Vérification humaine des données extraites avant validation ; conservation de l’image désactivée par défaut
 
 ### Prévu ensuite (SHOULD HAVE — V1.1/V1.2)
 

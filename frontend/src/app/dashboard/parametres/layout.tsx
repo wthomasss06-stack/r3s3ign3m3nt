@@ -9,11 +9,11 @@ import { apiClient } from "@/lib/api";
 import type { UserProfile } from "@/types";
 
 const ALL_TABS = [
-  { href: "/dashboard/parametres/formulaire", label: "Formulaire", staffCanSee: false },
-  { href: "/dashboard/parametres/qr-code", label: "QR Code", staffCanSee: true },
-  { href: "/dashboard/parametres/equipe", label: "Équipe", staffCanSee: false },
-  { href: "/dashboard/parametres/entreprise", label: "Entreprise", staffCanSee: true },
-  { href: "/dashboard/parametres/administration", label: "Administration", staffCanSee: false },
+  { href: "/dashboard/parametres/formulaire", label: "Formulaire", staffCanSee: false, bossOnly: false },
+  { href: "/dashboard/parametres/qr-code", label: "QR Code", staffCanSee: true, bossOnly: false },
+  { href: "/dashboard/parametres/equipe", label: "Équipe", staffCanSee: false, bossOnly: false },
+  { href: "/dashboard/parametres/entreprise", label: "Entreprise", staffCanSee: true, bossOnly: false },
+  { href: "/dashboard/parametres/administration", label: "Administration", staffCanSee: false, bossOnly: true },
 ];
 
 export default function ParametresLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +26,7 @@ export default function ParametresLayout({ children }: { children: React.ReactNo
 
   if (!role) return <Loader fullScreen={false} />;
 
-  const tabs = ALL_TABS.filter((tab) => role !== "STAFF" || tab.staffCanSee);
+  const tabs = ALL_TABS.filter((tab) => (role !== "STAFF" || tab.staffCanSee) && (!tab.bossOnly || role === "BOSS"));
 
   return (
     <div className="space-y-6">

@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.accounts.models import User
+from apps.accounts.models import AuditEvent, User
 from apps.checkins.models import CheckIn
 from apps.organizations.models import Organization
 from apps.accounts.cookies import set_refresh_cookie
 
 from .models import Feedback
-from .serializers import AdminMemberSerializer, AdminOrganizationSerializer, FeedbackAdminSerializer, FeedbackAdminUpdateSerializer, FeedbackCreateSerializer
+from .serializers import AdminMemberSerializer, AdminOrganizationSerializer, FeedbackAdminSerializer, FeedbackAdminUpdateSerializer, FeedbackCreateSerializer, PlatformAuditEventSerializer
 
 
 def is_platform_admin(request):
@@ -84,6 +84,14 @@ class PlatformOverviewView(APIView):
             "feedback_total": Feedback.objects.count(),
             "feedback_new": Feedback.objects.filter(status=Feedback.Status.NEW).count(),
         })
+
+
+class PlatformAuditListView(APIView):
+    permission_classes = [IsPlatformAdmin]
+
+    def get(self, request):
+        events = AuditEvent.objects.select_related("organization", "actor", "target_user")[:1000]
+        return Response(PlatformAuditEventSerializer(events, many=True).data)
 
 
 class PlatformOrganizationListView(APIView):

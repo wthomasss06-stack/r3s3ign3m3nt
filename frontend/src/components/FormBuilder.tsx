@@ -16,7 +16,10 @@ const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   select: "Liste déroulante",
   checkbox: "Case à cocher",
   signature: "Signature",
+  photo: "Photo visiteur",
+  document_scan: "Scanner une pièce d’identité",
 };
+const DOCUMENT_FIELD_OPTIONS = [["last_name", "Nom"], ["first_names", "Prénoms"], ["document_number", "Numéro du document"], ["birth_date", "Date de naissance"], ["nationality", "Nationalité"], ["expiry_date", "Date d’expiration"]] as const;
 
 let idCounter = 0;
 function newFieldId(): string {
@@ -181,6 +184,15 @@ export default function FormBuilder({
                     placeholder="Options séparées par une virgule (ex : Rendez-vous, Livraison)"
                     className="mt-2.5 w-full rounded-md border border-border bg-canvas p-2.5 text-sm text-ink outline-none focus:border-ink"
                   />
+                )}
+                {field.type === "document_scan" && (
+                  <div className="mt-3 space-y-3 rounded-lg border border-border bg-canvas p-3">
+                    <label className="block text-xs font-medium text-ink-soft">Type de document<select value={field.document_type || "free"} onChange={(e) => updateField(field.id, "document_type", e.target.value as FormField["document_type"])} className="mt-1 w-full rounded-md border border-border bg-surface p-2 text-sm text-ink"><option value="cni">CNI</option><option value="passport">Passeport</option><option value="free">Document libre</option></select></label>
+                    <div><p className="mb-2 text-xs font-medium text-ink-soft">Données à extraire</p><div className="grid grid-cols-2 gap-2">{DOCUMENT_FIELD_OPTIONS.map(([value, label]) => <label key={value} className="flex items-center gap-2 text-xs text-ink"><input type="checkbox" checked={(field.extract_fields || ["last_name", "first_names", "document_number", "birth_date"]).includes(value)} onChange={(e) => { const current = field.extract_fields || ["last_name", "first_names", "document_number", "birth_date"]; updateField(field.id, "extract_fields", e.target.checked ? [...current, value] : current.filter((item) => item !== value)); }} className="h-4 w-4 accent-cta" />{label}</label>)}</div></div>
+                    <label className="flex items-center gap-2 text-xs text-ink"><input type="checkbox" checked={field.requires_agent_validation !== false} onChange={(e) => updateField(field.id, "requires_agent_validation", e.target.checked)} className="h-4 w-4 accent-cta" />Vérification par un agent obligatoire</label>
+                    <label className="flex items-center gap-2 text-xs text-ink"><input type="checkbox" checked={field.retain_document_image === true} onChange={(e) => updateField(field.id, "retain_document_image", e.target.checked)} className="h-4 w-4 accent-cta" />Conserver l’image du document</label>
+                    <p className="text-[11px] text-ink-soft">L’image n’est pas conservée par défaut. Les données OCR restent modifiables avant validation.</p>
+                  </div>
                 )}
               </div>
             ))}

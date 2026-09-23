@@ -1,6 +1,21 @@
 from rest_framework import serializers
+from apps.accounts.models import AuditEvent
 
 from .models import Feedback
+
+
+class PlatformAuditEventSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source="organization.name", read_only=True)
+    actor_email = serializers.EmailField(source="actor.email", read_only=True, allow_null=True)
+    actor_name = serializers.CharField(source="actor.full_name", read_only=True, allow_null=True)
+    actor_role = serializers.CharField(source="actor.role", read_only=True, allow_null=True)
+    target_email = serializers.EmailField(source="target_user.email", read_only=True, allow_null=True)
+    target_name = serializers.CharField(source="target_user.full_name", read_only=True, allow_null=True)
+    target_role = serializers.CharField(source="target_user.role", read_only=True, allow_null=True)
+
+    class Meta:
+        model = AuditEvent
+        fields = ["id", "organization_name", "action", "actor_name", "actor_email", "actor_role", "target_name", "target_email", "target_role", "metadata", "created_at"]
 
 
 class FeedbackCreateSerializer(serializers.ModelSerializer):

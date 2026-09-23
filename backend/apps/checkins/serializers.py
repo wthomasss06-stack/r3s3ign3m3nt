@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from .models import AccessPoint, CheckIn, FormTemplate
 
-ALLOWED_FIELD_TYPES = ("text", "phone", "email", "number", "date", "select", "checkbox", "signature")
+ALLOWED_FIELD_TYPES = ("text", "phone", "email", "number", "date", "select", "checkbox", "signature", "photo", "document_scan")
+DOCUMENT_TYPES = ("cni", "passport", "free")
+DOCUMENT_EXTRACT_FIELDS = ("last_name", "first_names", "document_number", "birth_date", "nationality", "expiry_date")
 
 
 class FormFieldSchemaSerializer(serializers.Serializer):
@@ -11,6 +13,10 @@ class FormFieldSchemaSerializer(serializers.Serializer):
     label = serializers.CharField(max_length=255)
     required = serializers.BooleanField(default=False)
     options = serializers.ListField(child=serializers.CharField(), required=False)
+    document_type = serializers.ChoiceField(choices=DOCUMENT_TYPES, required=False)
+    extract_fields = serializers.ListField(child=serializers.ChoiceField(choices=DOCUMENT_EXTRACT_FIELDS), required=False)
+    requires_agent_validation = serializers.BooleanField(required=False, default=True)
+    retain_document_image = serializers.BooleanField(required=False, default=False)
 
 
 class FormTemplateSerializer(serializers.ModelSerializer):

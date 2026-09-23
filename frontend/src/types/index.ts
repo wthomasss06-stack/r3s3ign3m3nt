@@ -1,4 +1,4 @@
-export type FieldType = "text" | "phone" | "email" | "number" | "date" | "select" | "checkbox" | "signature";
+export type FieldType = "text" | "phone" | "email" | "number" | "date" | "select" | "checkbox" | "signature" | "photo" | "document_scan";
 
 export interface FormField {
   id: string;
@@ -6,6 +6,10 @@ export interface FormField {
   label: string;
   required: boolean;
   options?: string[];
+  document_type?: "cni" | "passport" | "free";
+  extract_fields?: ("last_name" | "first_names" | "document_number" | "birth_date" | "nationality" | "expiry_date")[];
+  requires_agent_validation?: boolean;
+  retain_document_image?: boolean;
 }
 
 export interface PublicFormData {
@@ -21,7 +25,7 @@ export interface PublicFormData {
 
 export interface CheckInRecord {
   id: string;
-  responses: Record<string, string | boolean>;
+  responses: Record<string, unknown>;
   signature_blob: string | null;
   created_at_client: string;
   synced_at: string;
@@ -83,3 +87,4 @@ export interface PlatformOverview { organizations: number; users: number; active
 export interface PlatformFeedback { id: string; category: string; category_label: string; message: string; page_url: string; contact_email: string; user_email: string | null; organization_name: string | null; status: string; status_label: string; admin_note: string; created_at: string; updated_at: string; }
 export interface PlatformMember { id: string; email: string; full_name: string; role: AccountRole; is_active: boolean; organization_id: string | null; organization_name: string | null; created_at: string; }
 export interface PlatformOrganization { id: string; name: string; logo_url: string; visit_reasons: string[]; created_at: string; member_count: number; checkin_count: number; feedback_count: number; members: PlatformMember[]; }
+export interface PlatformAuditEvent { id: string; organization_name: string; action: string; actor_name: string | null; actor_email: string | null; actor_role: AccountRole | null; target_name: string | null; target_email: string | null; target_role: AccountRole | null; metadata: Record<string, unknown>; created_at: string; }

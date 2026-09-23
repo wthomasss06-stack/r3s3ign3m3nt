@@ -17,7 +17,7 @@ type SubmitStatus = "idle" | "saving" | "saved_offline" | "synced";
 export function useSubmitForm(qrToken: string) {
   const [status, setStatus] = useState<SubmitStatus>("idle");
 
-  const submitForm = async (responses: Record<string, string | boolean>, signatureBlob: string) => {
+  const submitForm = async (responses: Record<string, unknown>, signatureBlob: string) => {
     setStatus("saving");
 
     const checkin = {

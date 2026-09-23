@@ -3,7 +3,7 @@ import Dexie, { Table } from "dexie";
 export interface OfflineCheckIn {
   idempotency_key: string;
   qr_token: string;
-  responses: Record<string, string | boolean>;
+  responses: Record<string, unknown>;
   signature_blob: string;
   created_at_client: string;
   sync_status: "pending" | "syncing" | "synced" | "failed";

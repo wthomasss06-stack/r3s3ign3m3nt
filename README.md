@@ -48,7 +48,8 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 
 - Scan d’un QR Code opaque ou ouverture directe du lien public.
 - Logo de l’établissement au centre du QR.
-- Formulaire dynamique : texte, téléphone, email, nombre, date, liste, case à cocher et signature.
+- Formulaire dynamique : texte, téléphone, email, nombre, date, liste, case à cocher, photo, signature et bloc d’identification OCR.
+- Bloc `document_scan` optionnel : caméra arrière, CNI/passeport/document libre, extraction configurable, correction obligatoire par l’agent et conservation de l’image désactivée par défaut.
 - Motifs de visite configurables, bouton d’actualisation et champ libre « Autre ».
 - Plusieurs formulaires par établissement, avec formulaire par défaut et affectation par point d’accueil.
 - Signature enregistrée en data URI SVG et affichée dans le registre.
