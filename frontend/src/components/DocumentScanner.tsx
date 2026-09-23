@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, IdentificationCard, Spinner, UploadSimple, X } from "@phosphor-icons/react";
-import { createWorker } from "tesseract.js";
+import { createWorker, PSM } from "tesseract.js";
 
 type ExtractKey = "last_name" | "first_names" | "document_number" | "birth_date" | "nationality" | "expiry_date";
 export type DocumentScanResult = { document_type: string; extracted: Partial<Record<ExtractKey, string>>; raw_text: string; image?: string; validated_at: string };
@@ -12,7 +12,7 @@ const LABELS: Record<ExtractKey, string> = { last_name: "Nom", first_names: "Pr�
 function guessFields(text: string, keys: ExtractKey[]) {
   const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   const dates = text.match(/\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b/g) || [];
-  const number = text.match(/\b[A-Z]{1,4}[A-Z0-9-]{5,18}\b/g)?.[0] || "";
+  const number = text.match(/\b(?:[A-Z]{1,4}[A-Z0-9-]{4,18}|\d{6,18})\b/g)?.[0] || "";
   const result: Partial<Record<ExtractKey, string>> = {};
   if (keys.includes("last_name")) result.last_name = lines.find((line) => /^[A-ZÀ-Ÿ\s'-]{3,}$/.test(line)) || lines[0] || "";
   if (keys.includes("first_names")) result.first_names = lines[1] || "";
@@ -21,6 +21,36 @@ function guessFields(text: string, keys: ExtractKey[]) {
   if (keys.includes("expiry_date")) result.expiry_date = dates[1] || "";
   if (keys.includes("nationality")) result.nationality = lines.find((line) => /ivoir|national|fran|ghan|malien|sénégal/i.test(line)) || "";
   return result;
+}
+
+/**
+ * Les photos de téléphone sont souvent trop grandes, sombres ou peu
+ * contrastées pour Tesseract. On garde l’image originale pour l’aperçu et
+ * on prépare une copie dédiée à l’OCR, sans l’envoyer ni la conserver.
+ */
+async function prepareOcrImage(source: string): Promise<string> {
+  const image = new Image();
+  image.decoding = "async";
+  image.src = source;
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("image-load-failed"));
+  });
+
+  const longestSide = Math.max(image.naturalWidth, image.naturalHeight);
+  const scale = Math.min(2, Math.max(1, 1800 / Math.max(longestSide, 1)));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return source;
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.filter = "grayscale(1) contrast(1.35) brightness(1.05)";
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  context.filter = "none";
+  return canvas.toDataURL("image/jpeg", 0.94);
 }
 
 export default function DocumentScanner({ documentType = "free", extractFields = ["last_name", "first_names", "document_number", "birth_date"], required = false, requiresAgentValidation = true, retainDocumentImage = false, onChange }: { documentType?: string; extractFields?: ExtractKey[]; required?: boolean; requiresAgentValidation?: boolean; retainDocumentImage?: boolean; onChange: (value: DocumentScanResult | null) => void }) {
@@ -65,13 +95,30 @@ export default function DocumentScanner({ documentType = "free", extractFields =
 
   const processImage = async (image: string) => {
     setCaptured(image); setBusy(true); setError("");
+    let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
     try {
-      const worker = await createWorker("fra");
-      const result = await worker.recognize(image);
-      await worker.terminate();
-      setRawText(result.data.text); setValues(guessFields(result.data.text, extractFields));
-    } catch { setError("La lecture OCR a échoué. Tu peux reprendre la photo ou saisir les informations manuellement."); }
-    finally { setBusy(false); }
+      const ocrImage = await prepareOcrImage(image);
+      worker = await createWorker("fra+eng");
+      await worker.setParameters({
+        tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+        preserve_interword_spaces: "1",
+      });
+      let result = await worker.recognize(ocrImage);
+
+      // Les documents avec beaucoup de zones séparées (CNI, passeport,
+      // justificatif) sont parfois mieux lus en mode texte dispersé.
+      if (result.data.text.trim().length < 12) {
+        await worker.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT });
+        result = await worker.recognize(ocrImage);
+      }
+      const text = result.data.text.trim();
+      if (!text) throw new Error("ocr-empty-result");
+      setRawText(text); setValues(guessFields(text, extractFields));
+    } catch { setError("La lecture OCR a échoué. Améliore la lumière, cadre tout le document, puis réessaie ou saisis les informations manuellement."); }
+    finally {
+      await worker?.terminate();
+    }
+    setBusy(false);
   };
 
   const capture = async () => {

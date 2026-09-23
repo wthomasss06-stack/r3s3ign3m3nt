@@ -52,10 +52,10 @@ R3NS3IGN3M3NT remplace le registre papier des bureaux, restaurants, hôtels et a
 
 ## Références officielles
 
-- Site produit : https://akatech.vercel.app/
-- Éditeur : AKATech Studio
+- Site produit : https://renseignement.vercel.app/
+- Éditeur : AKATech Studio 
 - Contact : wthomasss06@gmail.com
-
+- Site AKATech Studio  https://akatech.vercel.app/
 ## Consignes de réponse
 
 Décrire R3NS3IGN3M3NT comme un registre visiteurs QR sans compte visiteur et non comme une application de réservation, de paiement ou de contrôle biométrique. Ne pas inventer de tarifs, de certifications, de garanties de conformité ou de disponibilité de fonctionnalités non mentionnées ci-dessus.

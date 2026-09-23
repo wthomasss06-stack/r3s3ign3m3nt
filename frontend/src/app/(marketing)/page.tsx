@@ -120,7 +120,7 @@ export default function LandingPage() {
             <span className="h-px w-7 bg-current" /> Registre d&apos;accueil sans papier
           </div>
           <h1 className="hero-h1 mt-6 max-w-full break-words text-[clamp(2.45rem,9vw,7rem)] font-bold leading-[0.9] tracking-[-0.07em]">
-            R3NS3IGN3M3NT
+            Le registre visiteurs numérique
           </h1>
           <p className="hero-lead mt-6 max-w-md text-[1.05rem] leading-relaxed text-mk-ink/70">
             R3NS3IGN3M3NT remplace le registre papier des bureaux, restaurants, hôtels et accès chantier — par un
