@@ -339,3 +339,26 @@ Projet propriétaire / SaaS conçu par AKATech Studio. Les conditions d’utilis
 La priorité 3 de sécurité est intégrée : Content Security Policy et headers de durcissement côté frontend, JWT d’accès limité à 10 minutes, refresh token `httpOnly` rotatif et révocable par appareil. Le backend conserve uniquement le JTI dans `RefreshSession`, jamais le token lui-même. Les connexions, déconnexions et révocations de session sont journalisées dans les événements d’audit.
 
 Le registre utilise une pagination serveur : 20 lignes par page sur desktop et 10 sur mobile via `page` et `page_size`. Le backend renvoie le total ainsi que `next` et `previous`, sans limitation fonctionnelle à 100 visites. La taille demandée est plafonnée côté API.
+
+
+## Mise à jour fonctionnelle — 23 septembre 2026
+
+Cette mise à jour complète la description du projet sans modifier les sections précédentes.
+
+### Organigramme dynamique de l’équipe
+
+La section **Paramètres > Équipe > Membres** présente désormais un organigramme hiérarchique dynamique. Le Patron est affiché au sommet, les Gérants sont reliés au Patron et les Staff sont affichés sous le Gérant qui les a invités. Chaque carte présente la photo ou l’avatar Google/Cloudinary, le nom réel, le rôle et l’état d’accès. Les Staff sans manager sont regroupés dans une zone **Staff à affecter**.
+
+La relation hiérarchique est persistée sur `User.manager`. Lorsqu’un Gérant invite un Staff et que celui-ci accepte avec l’adresse Google invitée, le backend rattache automatiquement le nouveau compte à ce Gérant. La migration correspondante est `backend/apps/accounts/migrations/0006_user_manager.py`.
+
+### Administration et journal d’audit
+
+Le journal d’audit a été retiré de l’onglet Équipe. Il est maintenant disponible dans **Paramètres > Administration**, une section réservée au Patron et protégée par le backend. Les événements affichent le nom réel de l’auteur, son email comme secours, la cible éventuelle, l’action traduite et la date de l’événement.
+
+### Images, avatars et Cloudinary
+
+Le flux d’images accepte les avatars Google ainsi que les photos et logos envoyés vers Cloudinary. Les signatures sont générées côté backend avec des dossiers séparés `avatars` et `branding`. La CSP autorise les domaines Google Identity, `googleusercontent.com`, Cloudinary et l’API d’upload Cloudinary. Le service worker n’intercepte plus les images externes avec le cache générique, ce qui évite les erreurs `no-response` sur les avatars Google.
+
+### Validation de la version actuelle
+
+La version actuelle a été vérifiée avec **34 tests backend passants**, une migration Django cohérente, un type-check TypeScript réussi et un build Next.js réussi. L’archive de livraison exclut uniquement les dépendances générées `node_modules`, `.next` et les couvertures de test générées.

@@ -13,6 +13,7 @@ const ALL_TABS = [
   { href: "/dashboard/parametres/qr-code", label: "QR Code", staffCanSee: true },
   { href: "/dashboard/parametres/equipe", label: "Équipe", staffCanSee: false },
   { href: "/dashboard/parametres/entreprise", label: "Entreprise", staffCanSee: true },
+  { href: "/dashboard/parametres/administration", label: "Administration", staffCanSee: false },
 ];
 
 export default function ParametresLayout({ children }: { children: React.ReactNode }) {
@@ -31,7 +32,7 @@ export default function ParametresLayout({ children }: { children: React.ReactNo
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-ink">Paramètres</h1>
-        <p className="text-sm text-ink-soft">Formulaire, QR Code et équipe de ton établissement.</p>
+        <p className="text-sm text-ink-soft">Formulaire, QR Code, entreprise, équipe et administration.</p>
       </div>
 
       <div className="flex gap-1 overflow-x-auto border-b border-border">

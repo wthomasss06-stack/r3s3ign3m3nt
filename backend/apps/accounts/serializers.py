@@ -6,10 +6,12 @@ from .models import AuditEvent, StaffInvitation, User
 class UserSerializer(serializers.ModelSerializer):
     organization_id = serializers.UUIDField(source="organization.id", read_only=True)
     organization_name = serializers.CharField(source="organization.name", read_only=True)
+    manager_id = serializers.UUIDField(source="manager.id", read_only=True, allow_null=True)
+    manager_name = serializers.CharField(source="manager.full_name", read_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = ["id", "email", "full_name", "avatar_url", "role", "organization_id", "organization_name", "is_active", "access_revoked_at", "access_revoked_reason"]
+        fields = ["id", "email", "full_name", "avatar_url", "role", "manager_id", "manager_name", "organization_id", "organization_name", "is_active", "access_revoked_at", "access_revoked_reason"]
         read_only_fields = fields
 
 
@@ -22,11 +24,13 @@ class StaffInvitationSerializer(serializers.ModelSerializer):
 
 class AuditEventSerializer(serializers.ModelSerializer):
     actor_email = serializers.EmailField(source="actor.email", read_only=True)
+    actor_name = serializers.CharField(source="actor.full_name", read_only=True, allow_null=True)
     target_email = serializers.EmailField(source="target_user.email", read_only=True, allow_null=True)
+    target_name = serializers.CharField(source="target_user.full_name", read_only=True, allow_null=True)
 
     class Meta:
         model = AuditEvent
-        fields = ["id", "action", "actor_email", "target_email", "metadata", "created_at"]
+        fields = ["id", "action", "actor_name", "actor_email", "target_name", "target_email", "metadata", "created_at"]
         read_only_fields = fields
 
 

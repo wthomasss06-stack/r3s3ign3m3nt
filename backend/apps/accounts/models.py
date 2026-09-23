@@ -45,6 +45,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True,
     )
+    manager = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="managed_members",
+        null=True,
+        blank=True,
+        limit_choices_to={"role": Role.GERANT},
+    )
     is_active = models.BooleanField(default=True)
     access_revoked_at = models.DateTimeField(null=True, blank=True)
     access_revoked_reason = models.CharField(max_length=255, blank=True)

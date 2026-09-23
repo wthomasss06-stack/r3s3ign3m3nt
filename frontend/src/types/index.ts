@@ -50,6 +50,8 @@ export interface UserProfile {
   full_name: string;
   avatar_url: string;
   role: AccountRole;
+  manager_id: string | null;
+  manager_name: string | null;
   organization_id: string;
   organization_name: string;
   is_active: boolean;
@@ -59,7 +61,7 @@ export interface UserProfile {
 
 export interface StaffInvitation { id: string; email: string; role: AccountRole; accepted_at: string | null; revoked_at: string | null; revoked_reason: string; created_at: string; }
 export interface TeamAccess { members: UserProfile[]; invitations: StaffInvitation[]; }
-export interface AuditEvent { id: string; action: string; actor_email: string | null; target_email: string | null; metadata: Record<string, unknown>; created_at: string; }
+export interface AuditEvent { id: string; action: string; actor_name: string | null; actor_email: string | null; target_name: string | null; target_email: string | null; metadata: Record<string, unknown>; created_at: string; }
 
 export interface Organization {
   id: string;

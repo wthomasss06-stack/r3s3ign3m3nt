@@ -230,7 +230,7 @@ class RevokeMemberView(APIView):
 
 
 class AuditEventListView(APIView):
-    permission_classes = [IsAuthenticated, IsBossOrGerant]
+    permission_classes = [IsAuthenticated, IsBoss]
 
     def get(self, request):
         events = AuditEvent.objects.filter(organization=request.user.organization).select_related("actor", "target_user")[:100]

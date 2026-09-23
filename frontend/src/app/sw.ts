@@ -1,4 +1,3 @@
-import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist } from "serwist";
 
@@ -15,7 +14,9 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  // Le cache générique interceptait les images Google/Cloudinary et
+  // transformait un blocage CSP ou une panne réseau en `no-response`.
+  runtimeCaching: [],
 });
 
 serwist.addEventListeners();

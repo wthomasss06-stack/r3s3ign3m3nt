@@ -4,29 +4,24 @@ import { useEffect, useState } from "react";
 import InviteStaff from "@/components/dashboard/InviteStaff";
 import Loader from "@/components/Loader";
 import PermissionMatrixModal from "@/components/dashboard/PermissionMatrixModal";
+import OrgChart from "@/components/dashboard/OrgChart";
 import { apiClient } from "@/lib/api";
-import type { AuditEvent, TeamAccess, UserProfile } from "@/types";
+import type { TeamAccess, UserProfile } from "@/types";
 
 type ViewState = "loading" | "error" | "ready";
 
 export default function EquipePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [team, setTeam] = useState<TeamAccess | null>(null);
-  const [events, setEvents] = useState<AuditEvent[]>([]);
   const [state, setState] = useState<ViewState>("loading");
   const [actionError, setActionError] = useState("");
 
   const load = () => {
     setState("loading");
-    Promise.all([
-      apiClient.get<UserProfile>("/auth/me/"),
-      apiClient.get<TeamAccess>("/auth/team/"),
-      apiClient.get<AuditEvent[]>("/auth/audit/"),
-    ])
-      .then(([me, access, audit]) => {
+    Promise.all([apiClient.get<UserProfile>("/auth/me/"), apiClient.get<TeamAccess>("/auth/team/")])
+      .then(([me, access]) => {
         setUser(me.data);
         setTeam(access.data);
-        setEvents(audit.data);
         setState("ready");
       })
       .catch(() => setState("error"));
@@ -58,10 +53,9 @@ export default function EquipePage() {
       {actionError && <p className="text-sm text-error-text">{actionError}</p>}
 
       <section className="rounded-xl border border-border bg-surface p-5">
-        <h2 className="font-semibold text-ink">Membres</h2>
-        <div className="mt-4 divide-y divide-border">
-          {team.members.map((member) => <div key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div className="flex min-w-0 items-center gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-canvas text-sm font-bold text-ink">{member.avatar_url ? <img src={member.avatar_url} alt={`Avatar de ${member.full_name || member.email}`} className="h-full w-full object-cover" referrerPolicy="no-referrer" /> : (member.full_name || member.email || "?").slice(0, 1).toUpperCase()}</div><div className="min-w-0"><p className="truncate font-medium text-ink">{member.full_name || member.email}</p><p className="truncate text-xs text-ink-soft">{member.email} · {member.role === "GERANT" ? "Gérant" : member.role === "STAFF" ? "Staff" : "Patron"}{!member.is_active ? " · accès révoqué" : ""}</p></div></div>{isBoss && member.role !== "BOSS" && member.is_active && <button onClick={() => revoke(`/auth/team/members/${member.id}/revoke/`, `Révoquer ${member.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}
-        </div>
+        <div><h2 className="font-semibold text-ink">Membres</h2><p className="mt-1 text-sm text-ink-soft">Visualise la hiérarchie de ton établissement : le Patron, ses Gérants et les Staff rattachés.</p></div>
+        <OrgChart members={team.members} />
+        <div className="mt-4 border-t border-border pt-4"><p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-soft">Actions membres</p><div className="divide-y divide-border">{team.members.filter((member) => member.role !== "BOSS").map((member) => <div key={member.id} className="flex flex-wrap items-center justify-between gap-3 py-2"><p className="text-sm text-ink">{member.full_name || member.email}<span className="ml-2 text-xs text-ink-soft">{member.role === "GERANT" ? "Gérant" : "Staff"}</span></p>{isBoss && member.is_active && <button onClick={() => revoke(`/auth/team/members/${member.id}/revoke/`, `Révoquer ${member.email}`)} className="rounded-full border border-error-text px-3 py-1.5 text-xs text-error-text">Révoquer</button>}</div>)}</div></div>
       </section>
 
       <section className="rounded-xl border border-border bg-surface p-5">
@@ -72,7 +66,6 @@ export default function EquipePage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-surface p-5"><h2 className="font-semibold text-ink">Journal d’audit récent</h2><div className="mt-4 divide-y divide-border">{events.slice(0, 10).map((event) => <div key={event.id} className="py-2 text-sm text-ink"><span className="font-medium">{event.action}</span><span className="ml-2 text-ink-soft">{event.target_email || "—"} · {new Date(event.created_at).toLocaleString("fr-FR")}</span></div>)}{events.length === 0 && <p className="py-3 text-sm text-ink-soft">Aucun événement d’accès.</p>}</div></section>
     </div>
   );
 }

@@ -81,12 +81,14 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     )
 
     if invitation:
+        manager = invitation.invited_by if invitation.role == User.Role.STAFF and invitation.invited_by and invitation.invited_by.role == User.Role.GERANT else None
         user = User.objects.create_user(
             email=email,
             full_name=google_profile.get("name", ""),
             avatar_url=google_profile.get("picture", ""),
             role=invitation.role,
             organization=invitation.organization,
+            manager=manager,
         )
         invitation.accepted_at = user.created_at
         invitation.save(update_fields=["accepted_at"])
