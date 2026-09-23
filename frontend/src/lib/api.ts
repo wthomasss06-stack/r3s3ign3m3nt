@@ -4,7 +4,11 @@ import { refreshOnce } from "./authClient";
 import { getAccessToken, setAccessToken } from "./tokenStore";
 import { normalizeApiError } from "./errors";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// En navigateur, passer par Next.js garde le cookie de refresh sur le même
+// domaine que l’application. L’URL backend directe reste réservée au SSR/dev.
+const API_URL = typeof window !== "undefined"
+  ? "/api/v1"
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1");
 const REQUEST_TIMEOUT_MS = 12_000;
 
 // Le refresh token reste dans un cookie httpOnly ; le JWT d’accès est seulement

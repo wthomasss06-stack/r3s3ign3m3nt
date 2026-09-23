@@ -32,6 +32,9 @@ const nextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: process.cwd(),
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*` }];
+  },
   async headers() {
     return [{
       source: "/(.*)",

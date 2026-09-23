@@ -1,6 +1,10 @@
 import { getAccessToken, setAccessToken } from "./tokenStore";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+// Le navigateur appelle le proxy Next.js same-origin afin que le cookie
+// httpOnly de refresh ne soit pas traité comme un cookie tiers.
+const API_URL = typeof window !== "undefined"
+  ? "/api/v1"
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1");
 // Render/Railway free tier : un cold start peut prendre 10-30s. On attend large
 // avant de conclure a une vraie coupure (skill jwt-auth-resilience).
 const REFRESH_TIMEOUT_MS = 12_000;

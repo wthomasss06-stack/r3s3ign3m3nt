@@ -10,7 +10,9 @@ import { clearSessionCache, readSessionCache, writeSessionCache } from "@/lib/se
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/lib/tokenStore";
 import type { Organization, UserProfile } from "@/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_URL = typeof window !== "undefined"
+  ? "/api/v1"
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1");
 
 interface AuthContextValue {
   user: UserProfile | null;
@@ -28,21 +30,17 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function getInitialSession() {
-  const cached = readSessionCache();
-  return { user: cached?.user || null, organization: cached?.organization || null };
-}
-
 function isPublicPath(pathname: string) {
   return pathname === "/" || pathname === "/connexion" || pathname === "/admin" || pathname.startsWith("/v/") || pathname.startsWith("/aide");
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const initial = useMemo(getInitialSession, []);
-  const [user, setUser] = useState<UserProfile | null>(initial.user);
-  const [organization, setOrganization] = useState<Organization | null>(initial.organization);
-  const [loading, setLoading] = useState(() => !initial.user && !getAccessToken());
+  // Ne jamais lire localStorage pendant le rendu : le serveur ne possède pas
+  // ce stockage et cela provoquait React #418 au rechargement du dashboard.
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [loading, setLoading] = useState(true);
   const [loggingIn, setLoggingIn] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +87,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const cached = readSessionCache();
+
+    // Afficher immédiatement la dernière session connue pendant que le token
+    // d’accès est vérifié ou renouvelé en arrière-plan.
+    if (cached?.user) {
+      setUser(cached.user);
+      setOrganization(cached.organization || null);
+    }
+
     // Les visiteurs publics ne doivent jamais tenter un refresh JWT sans raison.
     if (isPublicPath(pathname)) {
       setLoading(false);
@@ -97,9 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restoreSession().catch(() => undefined).finally(() => {
       if (mounted) setLoading(false);
     });
-    if (initial.user || getAccessToken()) setLoading(false);
     return () => { mounted = false; };
-  }, [initial.user, pathname, restoreSession]);
+  }, [pathname, restoreSession]);
 
   const loginWithGoogle = useCallback(async (credential: string) => {
     setLoggingIn(true);
