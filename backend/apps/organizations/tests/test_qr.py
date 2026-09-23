@@ -37,6 +37,18 @@ def test_boss_can_request_cloudinary_signature_without_secret(db, boss_user, org
     assert response.status_code == 200
     assert response.data["cloud_name"] == "demo"
     assert response.data["api_key"] == "key"
-    expected = hashlib.sha1(f"folder=qr-register/{organization.id}&timestamp=1789992007secret".encode("utf-8")).hexdigest()
+    expected = hashlib.sha1(f"folder=qr-register/{organization.id}/branding&timestamp=1789992007secret".encode("utf-8")).hexdigest()
     assert response.data["signature"] == expected
     assert "api_secret" not in response.data
+    assert response.data["upload_url"] == "https://api.cloudinary.com/v1_1/demo/image/upload"
+
+
+@override_settings(CLOUDINARY_CLOUD_NAME="demo", CLOUDINARY_API_KEY="key", CLOUDINARY_API_SECRET="secret")
+def test_member_can_request_avatar_signature_in_dedicated_folder(db, staff_user):
+    with patch("apps.organizations.views.time.time", return_value=1789992007):
+        response = auth_client(staff_user).post(
+            "/api/v1/org/uploads/cloudinary-signature/", {"kind": "avatar"}, format="json"
+        )
+
+    assert response.status_code == 200
+    assert response.data["folder"] == f"qr-register/{staff_user.organization_id}/avatars"

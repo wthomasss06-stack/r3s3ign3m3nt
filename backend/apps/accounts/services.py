@@ -56,6 +56,19 @@ def resolve_or_create_user(google_profile: dict) -> tuple[User, bool]:
     email = google_profile["email"]
     existing = User.objects.filter(email=email).first()
     if existing:
+        # Un compte créé avant l’ajout des avatars peut encore avoir une photo
+        # vide. Google reste la source de secours, mais une URL Cloudinary
+        # personnalisée ne doit jamais être écrasée par une reconnexion.
+        google_picture = str(google_profile.get("picture") or "").strip()
+        updates = []
+        if not existing.avatar_url and google_picture:
+            existing.avatar_url = google_picture
+            updates.append("avatar_url")
+        if not existing.full_name and google_profile.get("name"):
+            existing.full_name = str(google_profile["name"]).strip()
+            updates.append("full_name")
+        if updates:
+            existing.save(update_fields=updates)
         return existing, False
 
     if StaffInvitation.objects.filter(email__iexact=email, revoked_at__isnull=False).exists():

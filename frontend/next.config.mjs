@@ -19,7 +19,7 @@ const contentSecurityPolicy = [
   "form-action 'self'",
   "script-src 'self' 'unsafe-inline' https://accounts.google.com",
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://res.cloudinary.com https://lh3.googleusercontent.com ${apiOrigin}`,
+  `img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com ${apiOrigin}`,
   `connect-src 'self' ${apiOrigin} https://accounts.google.com https://www.googleapis.com`,
   "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
   "frame-src https://accounts.google.com",

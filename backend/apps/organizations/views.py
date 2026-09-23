@@ -72,7 +72,14 @@ class CloudinarySignatureView(APIView):
         # différente de celle recalculée par Cloudinary.
         string_to_sign = "&".join(f"{key}={value}" for key, value in sorted(params.items()))
         signature = hashlib.sha1(f"{string_to_sign}{api_secret}".encode("utf-8")).hexdigest()
-        return Response({"cloud_name": cloud_name, "api_key": api_key, "timestamp": timestamp, "folder": folder, "signature": signature})
+        return Response({
+            "cloud_name": cloud_name,
+            "api_key": api_key,
+            "timestamp": timestamp,
+            "folder": folder,
+            "signature": signature,
+            "upload_url": f"https://api.cloudinary.com/v1_1/{cloud_name}/image/upload",
+        })
 
 
 class OrganizationLifecycleView(APIView):
