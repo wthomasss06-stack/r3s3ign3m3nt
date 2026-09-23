@@ -27,6 +27,10 @@ def default_template(organization):
 def resolve_public_target(qr_token):
     access_point = AccessPoint.objects.select_related("organization", "form_template").filter(secure_token=qr_token, is_active=True, organization__is_suspended=False).first()
     if access_point:
+        # Le point créé automatiquement pour le QR général partage le token
+        # de l'organisation : il doit suivre le formulaire par défaut.
+        if access_point.secure_token == access_point.organization.qr_secure_token:
+            return access_point.organization, default_template(access_point.organization), access_point
         return access_point.organization, access_point.form_template, access_point
     organization = Organization.objects.filter(qr_secure_token=qr_token, is_suspended=False).first()
     if not organization:

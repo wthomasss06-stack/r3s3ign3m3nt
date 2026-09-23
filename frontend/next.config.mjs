@@ -21,7 +21,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline' https://accounts.google.com",
   "style-src-elem 'self' 'unsafe-inline' https://accounts.google.com",
   `img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com ${apiOrigin}`,
-  `connect-src 'self' ${apiOrigin} https://api.cloudinary.com https://accounts.google.com https://www.googleapis.com https://*.googleusercontent.com`,
+  `connect-src 'self' ${apiOrigin} https://api.cloudinary.com https://res.cloudinary.com https://accounts.google.com https://www.googleapis.com https://*.googleusercontent.com`,
   "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
   "frame-src https://accounts.google.com",
   "worker-src 'self' blob:",
@@ -39,7 +39,7 @@ const nextConfig = {
         { key: "Content-Security-Policy", value: contentSecurityPolicy },
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
         { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
       ],
     }];

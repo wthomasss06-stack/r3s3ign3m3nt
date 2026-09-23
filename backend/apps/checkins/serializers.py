@@ -40,7 +40,7 @@ class FormTemplateCreateSerializer(serializers.ModelSerializer):
 
 
 class AccessPointSerializer(serializers.ModelSerializer):
-    form_title = serializers.CharField(source="form_template.title", read_only=True)
+    form_title = serializers.SerializerMethodField()
     public_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -50,6 +50,13 @@ class AccessPointSerializer(serializers.ModelSerializer):
 
     def get_public_url(self, obj):
         return f"/v/{obj.secure_token}"
+
+    def get_form_title(self, obj):
+        if obj.secure_token == obj.organization.qr_secure_token:
+            template = obj.organization.form_templates.filter(is_default=True).first() or obj.organization.form_templates.filter(is_active=True).first()
+            if template:
+                return template.title
+        return obj.form_template.title
 
 
 class AccessPointWriteSerializer(serializers.ModelSerializer):

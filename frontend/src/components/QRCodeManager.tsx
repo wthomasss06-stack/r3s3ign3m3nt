@@ -9,10 +9,12 @@ export default function QRCodeManager({ qrToken, orgName, logoUrl = "", canRegen
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [qrLogo, setQrLogo] = useState(logoUrl);
+  const [origin, setOrigin] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/v/${token}`;
+  const publicUrl = `${origin}/v/${token}`;
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     let cancelled = false;
     setQrLogo(logoUrl);
     if (!logoUrl || logoUrl.startsWith("data:")) return () => { cancelled = true; };
