@@ -34,7 +34,7 @@ function getInitialSession() {
 }
 
 function isPublicPath(pathname: string) {
-  return pathname === "/" || pathname === "/connexion" || pathname.startsWith("/v/") || pathname.startsWith("/aide");
+  return pathname === "/" || pathname === "/connexion" || pathname === "/admin" || pathname.startsWith("/v/") || pathname.startsWith("/aide");
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

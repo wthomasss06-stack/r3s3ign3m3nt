@@ -7,16 +7,23 @@ import { setAccessToken } from "@/lib/tokenStore";
 import type { PlatformAuditEvent, PlatformFeedback, PlatformMember, PlatformOrganization, PlatformOverview } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const ADMIN_SESSION_KEY = "platform_admin_session";
 
 type Tab = "overview" | "organizations" | "members" | "feedback" | "audit";
 
 export default function AdminPage() {
-  const [logged, setLogged] = useState(false); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState("");
+  const [logged, setLogged] = useState(false); const [restoring, setRestoring] = useState(true); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("overview"); const [overview, setOverview] = useState<PlatformOverview | null>(null); const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]); const [members, setMembers] = useState<PlatformMember[]>([]); const [feedback, setFeedback] = useState<PlatformFeedback[]>([]); const [audit, setAudit] = useState<PlatformAuditEvent[]>([]); const [loading, setLoading] = useState(false); const [newOrg, setNewOrg] = useState(""); const [newMemberEmail, setNewMemberEmail] = useState(""); const [newMemberOrg, setNewMemberOrg] = useState(""); const [newMemberRole, setNewMemberRole] = useState("STAFF");
   const load = async () => { setLoading(true); try { const [o, orgs, ms, fs, auditResponse] = await Promise.all([apiClient.get<PlatformOverview>("/admin/overview/"), apiClient.get<PlatformOrganization[]>("/admin/organizations/"), apiClient.get<PlatformMember[]>("/admin/members/"), apiClient.get<PlatformFeedback[]>("/admin/feedback/"), apiClient.get<PlatformAuditEvent[]>("/admin/audit/")]); setOverview(o.data); setOrganizations(orgs.data); setMembers(ms.data); setFeedback(fs.data); setAudit(auditResponse.data); setLogged(true); } catch { setLogged(false); } finally { setLoading(false); } };
-  useEffect(() => { if (localStorage.getItem("platform_admin_session") === "1") load(); }, []);
-  const login = async (event: React.FormEvent) => { event.preventDefault(); setError(""); try { const response = await axios.post(`${API_URL}/admin/login/`, { email, password }, { withCredentials: true }); setAccessToken(response.data.access); localStorage.setItem("platform_admin_session", "1"); await load(); } catch { setError("Identifiants admin invalides."); } };
-  const logout = () => { setAccessToken(null); localStorage.removeItem("platform_admin_session"); setLogged(false); };
+  useEffect(() => {
+    let mounted = true;
+    if (localStorage.getItem(ADMIN_SESSION_KEY) !== "1") { setRestoring(false); return () => { mounted = false; }; }
+    load().finally(() => { if (mounted) setRestoring(false); });
+    return () => { mounted = false; };
+  }, []);
+  const login = async (event: React.FormEvent) => { event.preventDefault(); setError(""); try { const response = await axios.post(`${API_URL}/admin/login/`, { email, password }, { withCredentials: true }); setAccessToken(response.data.access); localStorage.setItem(ADMIN_SESSION_KEY, "1"); await load(); } catch { localStorage.removeItem(ADMIN_SESSION_KEY); setError("Identifiants admin invalides."); } };
+  const logout = async () => { try { await axios.post(`${API_URL}/auth/logout/`, null, { withCredentials: true }); } catch {} setAccessToken(null); localStorage.removeItem(ADMIN_SESSION_KEY); setLogged(false); };
+  if (restoring) return <main className="grid min-h-screen place-items-center bg-canvas"><p className="text-sm text-ink-soft">Restauration de la session admin…</p></main>;
   const deleteOrg = async (id: string) => { if (!window.confirm("Supprimer cette entreprise et ses données liées ?")) return; await apiClient.delete(`/admin/organizations/${id}/`); load(); };
   const createOrg = async (event: React.FormEvent) => { event.preventDefault(); if (!newOrg.trim()) return; await apiClient.post("/admin/organizations/", { name: newOrg.trim() }); setNewOrg(""); load(); };
   const editOrg = async (org: PlatformOrganization) => { const name = window.prompt("Nom de l’entreprise", org.name)?.trim(); if (name && name !== org.name) { await apiClient.patch(`/admin/organizations/${org.id}/`, { name }); load(); } };
