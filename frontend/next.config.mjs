@@ -6,9 +6,15 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === "development",
 });
 
+// Ne pas utiliser NEXT_PUBLIC_API_URL pour le proxy : cette variable a pu être
+// définie avec l’URL Vercel, ce qui faisait proxy-er /api/v1 vers lui-même.
+// BACKEND_API_URL doit contenir l’URL Render complète en production.
+const backendApiUrl = process.env.BACKEND_API_URL
+  || (process.env.NODE_ENV === "development" ? "http://localhost:8000/api/v1" : "https://r3s3ign3m3nt.onrender.com/api/v1");
+const backendApiBase = backendApiUrl.replace(/\/$/, "").replace(/\/api\/v1$/, "");
 const apiOrigin = (() => {
-  try { return new URL(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1").origin; }
-  catch { return "http://localhost:8000"; }
+  try { return new URL(backendApiUrl).origin; }
+  catch { return "https://r3s3ign3m3nt.onrender.com"; }
 })();
 
 const contentSecurityPolicy = [
@@ -33,7 +39,7 @@ const nextConfig = {
   outputFileTracingRoot: process.cwd(),
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   async rewrites() {
-    return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*` }];
+    return [{ source: "/api/v1/:path*", destination: `${backendApiBase}/api/v1/:path*` }];
   },
   async headers() {
     return [{
