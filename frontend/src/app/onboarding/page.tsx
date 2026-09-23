@@ -109,7 +109,7 @@ export default function OnboardingPage() {
         {step === 1 && <div className="space-y-6">
           <div><h2 className="text-2xl font-bold text-ink">Ton identité et ton rôle</h2><p className="mt-2 text-sm text-ink-soft">Les informations viennent de Google. Tu peux modifier ton nom et remplacer ton avatar. Ton rôle est conservé depuis ton invitation ou créé en tant que patron.</p></div>
           <div className="grid gap-5 sm:grid-cols-[auto_1fr] sm:items-start">
-            <CloudinaryImageUploader value={avatar} onChange={setAvatar} label="Photo de profil" />
+            <CloudinaryImageUploader value={avatar} onChange={setAvatar} label="Photo de profil" uploadKind="avatar" />
             <div className="space-y-4">
               <label className="block text-sm font-medium text-ink">Nom et prénom<input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ex. Awa Kouassi" className="mt-2 w-full rounded-lg border border-border bg-canvas px-3 py-3 outline-none focus:border-ink" /></label>
               <p className="text-sm text-ink-soft">{user.email}</p>
