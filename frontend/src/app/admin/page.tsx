@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Buildings, ChatCircleDots, ChartLineUp, ShieldCheck, SignOut, Trash, UsersThree } from "@phosphor-icons/react";
+import { useDialog } from "@/components/ui/DialogProvider";
 import { apiClient } from "@/lib/api";
 import { setAccessToken } from "@/lib/tokenStore";
+import { dayPartWish } from "@/lib/greeting";
 import type { PlatformAuditEvent, PlatformFeedback, PlatformMember, PlatformOrganization, PlatformOverview } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -12,6 +14,7 @@ const ADMIN_SESSION_KEY = "platform_admin_session";
 type Tab = "overview" | "organizations" | "members" | "feedback" | "audit";
 
 export default function AdminPage() {
+  const { confirm, prompt, alert: notify } = useDialog();
   const [logged, setLogged] = useState(false); const [restoring, setRestoring] = useState(true); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState("");
   const [tab, setTab] = useState<Tab>("overview"); const [overview, setOverview] = useState<PlatformOverview | null>(null); const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]); const [members, setMembers] = useState<PlatformMember[]>([]); const [feedback, setFeedback] = useState<PlatformFeedback[]>([]); const [audit, setAudit] = useState<PlatformAuditEvent[]>([]); const [loading, setLoading] = useState(false); const [newOrg, setNewOrg] = useState(""); const [newMemberEmail, setNewMemberEmail] = useState(""); const [newMemberOrg, setNewMemberOrg] = useState(""); const [newMemberRole, setNewMemberRole] = useState("STAFF");
   const load = async () => { setLoading(true); try { const [o, orgs, ms, fs, auditResponse] = await Promise.all([apiClient.get<PlatformOverview>("/admin/overview/"), apiClient.get<PlatformOrganization[]>("/admin/organizations/"), apiClient.get<PlatformMember[]>("/admin/members/"), apiClient.get<PlatformFeedback[]>("/admin/feedback/"), apiClient.get<PlatformAuditEvent[]>("/admin/audit/")]); setOverview(o.data); setOrganizations(orgs.data); setMembers(ms.data); setFeedback(fs.data); setAudit(auditResponse.data); setLogged(true); } catch { setLogged(false); } finally { setLoading(false); } };
@@ -22,14 +25,68 @@ export default function AdminPage() {
     return () => { mounted = false; };
   }, []);
   const login = async (event: React.FormEvent) => { event.preventDefault(); setError(""); try { const response = await axios.post(`${API_URL}/admin/login/`, { email, password }, { withCredentials: true }); setAccessToken(response.data.access); localStorage.setItem(ADMIN_SESSION_KEY, "1"); await load(); } catch { localStorage.removeItem(ADMIN_SESSION_KEY); setError("Identifiants admin invalides."); } };
-  const logout = async () => { try { await axios.post(`${API_URL}/auth/logout/`, null, { withCredentials: true }); } catch {} setAccessToken(null); localStorage.removeItem(ADMIN_SESSION_KEY); setLogged(false); };
+  // Au revoir : la déconnexion part dans la boîte (bouton en chargement).
+  const logout = async () => { await confirm({ tone: "brand", mood: "wink", title: "À bientôt !", message: <><strong>{dayPartWish()}.</strong><br />Ta session administrateur sera fermée sur cet appareil.</>, confirmLabel: "Se déconnecter", cancelLabel: "Rester connecté", runningLabel: "Déconnexion…", run: async () => { try { await axios.post(`${API_URL}/auth/logout/`, null, { withCredentials: true }); } catch {} setAccessToken(null); localStorage.removeItem(ADMIN_SESSION_KEY); setLogged(false); } }); };
   if (restoring) return <main className="grid min-h-screen place-items-center bg-canvas"><p className="text-sm text-ink-soft">Restauration de la session admin…</p></main>;
-  const deleteOrg = async (id: string) => { if (!window.confirm("Supprimer cette entreprise et ses données liées ?")) return; await apiClient.delete(`/admin/organizations/${id}/`); load(); };
+  const deleteOrg = async (id: string) => {
+    const org = organizations.find((item) => item.id === id);
+    await confirm({
+      tone: "danger",
+      title: "Supprimer cette entreprise ?",
+      message: <>{org ? <><strong>{org.name}</strong> sera supprimée</> : "Cette entreprise sera supprimée"} avec toutes ses données liées. Cette action ne peut pas être annulée.</>,
+      confirmLabel: "Supprimer",
+      cancelLabel: "Garder",
+      runningLabel: "Suppression…",
+      run: async () => { await apiClient.delete(`/admin/organizations/${id}/`); load(); },
+      successTitle: "Entreprise supprimée",
+      errorTitle: "Suppression impossible",
+    });
+  };
   const createOrg = async (event: React.FormEvent) => { event.preventDefault(); if (!newOrg.trim()) return; await apiClient.post("/admin/organizations/", { name: newOrg.trim() }); setNewOrg(""); load(); };
-  const editOrg = async (org: PlatformOrganization) => { const name = window.prompt("Nom de l’entreprise", org.name)?.trim(); if (name && name !== org.name) { await apiClient.patch(`/admin/organizations/${org.id}/`, { name }); load(); } };
-  const updateMember = async (member: PlatformMember, patch: Record<string, unknown>) => { await apiClient.patch(`/admin/members/${member.id}/`, patch); load(); };
+  const editOrg = async (org: PlatformOrganization) => {
+    await prompt({
+      tone: "info",
+      mood: "smile",
+      title: "Renommer l’entreprise",
+      label: "Nom de l’entreprise",
+      defaultValue: org.name,
+      confirmLabel: "Enregistrer",
+      runningLabel: "Enregistrement…",
+      run: async (name) => { if (name !== org.name) { await apiClient.patch(`/admin/organizations/${org.id}/`, { name }); load(); } },
+      errorTitle: "Modification impossible",
+    });
+  };
+  const ROLE_LABELS: Record<string, string> = { BOSS: "Patron", GERANT: "Gérant", STAFF: "Staff" };
+  // Désactiver un compte, changer un rôle ou un rattachement a des effets immédiats : on confirme avant d'agir.
+  const updateMember = async (member: PlatformMember, patch: Record<string, unknown>) => {
+    const name = member.full_name || member.email;
+    const apply = async () => { await apiClient.patch(`/admin/members/${member.id}/`, patch); load(); };
+    if (patch.is_active === false) {
+      await confirm({ tone: "danger", mood: "annoyed", title: "Désactiver ce compte ?", message: <><strong>{name}</strong> ne pourra plus se connecter tant que le compte reste désactivé.</>, confirmLabel: "Désactiver", runningLabel: "Désactivation…", run: apply, successTitle: "Compte désactivé", errorTitle: "Modification impossible" });
+    } else if (typeof patch.role === "string") {
+      await confirm({ tone: "warning", mood: "smug", title: "Changer le rôle ?", message: <><strong>{name}</strong> passera de {ROLE_LABELS[member.role] ?? member.role} à <strong>{ROLE_LABELS[patch.role] ?? patch.role}</strong>. Ses droits changent immédiatement.</>, confirmLabel: "Changer le rôle", runningLabel: "Modification…", run: apply, successTitle: "Rôle mis à jour", errorTitle: "Modification impossible" });
+    } else if ("organization_id" in patch) {
+      const target = organizations.find((item) => item.id === patch.organization_id)?.name;
+      await confirm({ tone: "warning", mood: "smug", title: "Changer d’entreprise ?", message: <><strong>{name}</strong> sera rattaché à {target ? <strong>{target}</strong> : "aucune entreprise"}.</>, confirmLabel: "Confirmer", runningLabel: "Modification…", run: apply, successTitle: "Rattachement mis à jour", errorTitle: "Modification impossible" });
+    } else {
+      try { await apply(); } catch { await notify({ tone: "danger", title: "Oups !", message: "La modification n’a pas pu être enregistrée. Réessaie dans un instant." }); }
+    }
+  };
   const createMember = async (event: React.FormEvent) => { event.preventDefault(); if (!newMemberEmail.trim() || !newMemberOrg) return; await apiClient.post("/admin/members/", { email: newMemberEmail.trim(), organization_id: newMemberOrg, role: newMemberRole }); setNewMemberEmail(""); load(); };
-  const deleteMember = async (id: string) => { if (!window.confirm("Supprimer ce compte ?")) return; await apiClient.delete(`/admin/members/${id}/`); load(); };
+  const deleteMember = async (id: string) => {
+    const member = members.find((item) => item.id === id);
+    await confirm({
+      tone: "danger",
+      title: "Supprimer ce compte ?",
+      message: member ? <>Le compte de <strong>{member.full_name || member.email}</strong> sera supprimé.</> : "Ce compte sera supprimé.",
+      confirmLabel: "Supprimer",
+      cancelLabel: "Garder",
+      runningLabel: "Suppression…",
+      run: async () => { await apiClient.delete(`/admin/members/${id}/`); load(); },
+      successTitle: "Compte supprimé",
+      errorTitle: "Suppression impossible",
+    });
+  };
   const updateFeedback = async (item: PlatformFeedback, status: string) => { await apiClient.patch(`/admin/feedback/${item.id}/`, { status }); load(); };
   if (!logged) return <main className="grid min-h-screen place-items-center bg-canvas px-5"><form onSubmit={login} className="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-subtle"><p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">Administration plateforme</p><h1 className="mt-2 font-heading text-3xl font-bold text-ink">Espace AKATech</h1><p className="mt-2 text-sm text-ink-soft">Connexion avec les variables admin configurées sur Render.</p><div className="mt-6 space-y-3"><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email admin" className="w-full rounded-lg border border-border bg-canvas px-3 py-3 text-sm outline-none focus:border-ink" /><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe admin" className="w-full rounded-lg border border-border bg-canvas px-3 py-3 text-sm outline-none focus:border-ink" />{error && <p className="text-sm text-error-text">{error}</p>}<button className="w-full rounded-full bg-cta px-4 py-3 text-sm font-semibold text-white">Ouvrir l’administration</button></div></form></main>;
   return <div className="min-h-screen bg-canvas"><aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-border bg-surface p-4 md:flex"><div className="border-b border-border pb-5"><p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft">AKATech Studio</p><h1 className="mt-2 font-heading text-xl font-bold text-ink">Admin plateforme</h1></div><nav className="mt-5 space-y-1">{([['overview','Vue d’ensemble',ChartLineUp],['organizations','Entreprises',Buildings],['members','Personnel',UsersThree],['feedback','Feedbacks',ChatCircleDots],['audit','Journal d’audit',ShieldCheck]] as const).map(([key,label,Icon]) => <button key={key} onClick={() => setTab(key)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-medium ${tab === key ? "bg-cta text-white" : "text-ink-soft hover:bg-canvas"}`}><Icon size={19} weight="bold" />{label}</button>)}</nav><button onClick={logout} className="mt-auto flex items-center gap-3 px-3 py-3 text-sm text-ink-soft hover:text-ink"><SignOut size={19} />Déconnexion</button></aside><main className="p-5 pb-24 md:ml-64 md:p-10"><div className="mb-6 flex items-center justify-between"><div><p className="text-xs uppercase tracking-[0.15em] text-ink-soft">Administration</p><h2 className="mt-1 text-3xl font-bold text-ink">{tab === "overview" ? "Vue d’ensemble" : tab === "organizations" ? "Gestion des entreprises" : tab === "members" ? "Personnel" : tab === "feedback" ? "Feedbacks" : "Journal d’audit"}</h2></div><button onClick={load} className="rounded-full border border-border px-4 py-2 text-sm text-ink-soft hover:bg-surface">Actualiser</button></div><nav className="mb-6 flex gap-1 overflow-x-auto border-b border-border md:hidden">{([['overview','Vue d’ensemble',ChartLineUp],['organizations','Entreprises',Buildings],['members','Personnel',UsersThree],['feedback','Feedbacks',ChatCircleDots],['audit','Journal',ShieldCheck]] as const).map(([key,label,Icon]) => <button key={key} onClick={() => setTab(key)} className={`flex items-center gap-1 whitespace-nowrap border-b-2 px-3 py-2 text-xs font-medium ${tab === key ? "border-cta text-ink" : "border-transparent text-ink-soft"}`}><Icon size={15} />{label}</button>)}</nav>{loading ? <p className="text-ink-soft">Chargement…</p> : tab === "overview" ? <Overview data={overview} /> : tab === "organizations" ? <Organizations data={organizations} newOrg={newOrg} setNewOrg={setNewOrg} createOrg={createOrg} editOrg={editOrg} deleteOrg={deleteOrg} /> : tab === "members" ? <Members data={members} organizations={organizations} newMemberEmail={newMemberEmail} setNewMemberEmail={setNewMemberEmail} newMemberOrg={newMemberOrg} setNewMemberOrg={setNewMemberOrg} newMemberRole={newMemberRole} setNewMemberRole={setNewMemberRole} createMember={createMember} updateMember={updateMember} deleteMember={deleteMember} /> : tab === "feedback" ? <FeedbackList data={feedback} updateFeedback={updateFeedback} /> : <AuditList data={audit} />}</main></div>;

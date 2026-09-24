@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import WebVitals from "@/components/WebVitals";
+import { DialogProvider } from "@/components/ui/DialogProvider";
 import { AuthProvider } from "@/context/AuthContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -29,5 +30,5 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  return <GoogleOAuthProvider clientId={clientId}><AuthProvider><WebVitals />{children}</AuthProvider></GoogleOAuthProvider>;
+  return <GoogleOAuthProvider clientId={clientId}><AuthProvider><WebVitals /><DialogProvider>{children}</DialogProvider></AuthProvider></GoogleOAuthProvider>;
 }

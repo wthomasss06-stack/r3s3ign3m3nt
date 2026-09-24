@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import Loader from "@/components/Loader";
 import Sidebar from "@/components/dashboard/Sidebar";
-import Modal from "@/components/ui/Modal";
+import { useDialog } from "@/components/ui/DialogProvider";
 import { useAuthContext } from "@/context/AuthContext";
 import SyncStatusBadge from "@/components/SyncStatusBadge";
+import { firstNameOf } from "@/lib/greeting";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { loading, user, organization, isAuthenticated } = useAuthContext();
-  const [greeting, setGreeting] = useState<string | null>(null);
+  const { alert } = useDialog();
 
   useEffect(() => {
     if (loading) return;
@@ -21,16 +22,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push("/");
       return;
     }
+    // Le message d’accueil attend la fin de l’ancien onboarding, puis s’affiche une seule fois.
+    if (pathname.startsWith("/dashboard/onboarding")) return;
     const raw = sessionStorage.getItem("qr_login_greeting");
     if (!raw) return;
+    sessionStorage.removeItem("qr_login_greeting");
     try {
       const info = JSON.parse(raw) as { isNew?: boolean; name?: string };
-      setGreeting(info.isNew ? `Bienvenue${info.name ? `, ${info.name}` : ""} !` : `Bon retour${info.name ? `, ${info.name}` : ""} !`);
+      const firstName = firstNameOf(info.name);
+      void alert(info.isNew
+        ? { tone: "brand", mood: "excited", title: `Bienvenue${firstName ? `, ${firstName}` : ""} !`, message: "Ton espace est prêt. Tu peux commencer par consulter le registre ou ouvrir les paramètres.", okLabel: "Commencer" }
+        : { tone: "brand", mood: "cheeky", title: `Bon retour${firstName ? `, ${firstName}` : ""} !`, message: "Content de te revoir. Ton registre t’attend.", okLabel: "C’est parti" });
     } catch {
       // Une donnée de session corrompue ne doit pas bloquer l’espace.
     }
-    sessionStorage.removeItem("qr_login_greeting");
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, router, pathname, alert]);
 
   if (loading && !user) return <Loader />;
   if (!user) return null;
@@ -43,7 +49,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {!isLegacyOnboarding && <div className="mb-5 flex justify-end"><SyncStatusBadge /></div>}
         {children}
       </main>
-      {!isLegacyOnboarding && <Modal open={Boolean(greeting)} onClose={() => setGreeting(null)} title={greeting || "Bienvenue"} description="Ton espace est prêt. Tu peux commencer par consulter le registre ou ouvrir les paramètres."><div className="flex justify-end"><button onClick={() => setGreeting(null)} className="rounded-full bg-cta px-5 py-2.5 text-sm font-semibold text-white">Commencer</button></div></Modal>}
     </div>
   );
 }

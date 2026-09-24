@@ -3,6 +3,7 @@ import { useRef, useState, type DragEvent, type PointerEvent } from "react";
 import { Check, DotsSixVertical, Plus, Trash } from "@phosphor-icons/react";
 
 import { ArrowUpRight } from "@/components/icons";
+import { useDialog } from "@/components/ui/DialogProvider";
 import { apiClient } from "@/lib/api";
 import { FORM_PRESETS } from "@/lib/formPresets";
 import type { FieldType, FormField } from "@/types";
@@ -20,6 +21,7 @@ function keepSignaturesLast(fields: FormField[]): FormField[] {
 }
 
 export default function FormBuilder({ initialSchema, formId, initialTitle = "Registre d'accès", onSaved }: { initialSchema: FormField[]; formId?: string; initialTitle?: string; onSaved?: () => void }) {
+  const { confirm } = useDialog();
   const [fields, setFields] = useState<FormField[]>(() => keepSignaturesLast(initialSchema));
   const [title, setTitle] = useState(initialTitle);
   const [saving, setSaving] = useState(false);
@@ -29,8 +31,15 @@ export default function FormBuilder({ initialSchema, formId, initialTitle = "Reg
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const pointerDragRef = useRef<{ id: string; pointerId: number } | null>(null);
 
-  const applyPreset = (presetFields: FormField[]) => {
-    if (fields.length > 0 && !window.confirm("Remplacer les champs actuels par ce modèle ? Tu pourras toujours les modifier ensuite.")) return;
+  const applyPreset = async (presetFields: FormField[]) => {
+    if (fields.length > 0 && !(await confirm({
+      tone: "info",
+      mood: "smug",
+      title: "Remplacer les champs ?",
+      message: "Les champs actuels seront remplacés par ce modèle. Rien n’est publié tant que tu n’enregistres pas.",
+      confirmLabel: "Remplacer",
+      cancelLabel: "Garder mes champs",
+    }))) return;
     setFields(keepSignaturesLast(presetFields.map((f) => ({ ...f, id: newFieldId() }))));
     setSaved(false);
   };

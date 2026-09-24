@@ -2,11 +2,13 @@
 import { useState, type FormEvent } from "react";
 import axios from "axios";
 
+import { useDialog } from "@/components/ui/DialogProvider";
 import { apiClient } from "@/lib/api";
 
 type InviteRole = "GERANT" | "STAFF";
 
 export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOSS" | "GERANT" }) {
+  const { confirm } = useDialog();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<InviteRole>("STAFF");
   const [link, setLink] = useState<string | null>(null);
@@ -15,6 +17,14 @@ export default function InviteStaff({ viewerRole = "BOSS" }: { viewerRole?: "BOS
 
   const handleInvite = async (e: FormEvent) => {
     e.preventDefault();
+    // Le rôle Gérant donne des droits de gestion : on demande une confirmation explicite.
+    if (role === "GERANT" && !(await confirm({
+      tone: "warning",
+      mood: "smug",
+      title: "Inviter un Gérant ?",
+      message: <><strong>{email}</strong> pourra gérer les formulaires, exporter le registre et inviter du staff.</>,
+      confirmLabel: "Inviter",
+    }))) return;
     setSending(true);
     setError(null);
     setLink(null);

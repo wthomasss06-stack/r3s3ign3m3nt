@@ -3,17 +3,31 @@ import { useEffect, useState } from "react";
 import { Plus, QrCode, Trash } from "@phosphor-icons/react";
 import Loader from "@/components/Loader";
 import Modal from "@/components/ui/Modal";
+import { useDialog } from "@/components/ui/DialogProvider";
 import QRCodeManager from "@/components/QRCodeManager";
 import { apiClient } from "@/lib/api";
 import type { AccessPoint, FormTemplate, Organization } from "@/types";
 
 type ViewState = "loading" | "error" | "ready";
 export default function QRCodePage() {
+  const { confirm } = useDialog();
   const [org, setOrg] = useState<Organization | null>(null); const [points, setPoints] = useState<AccessPoint[]>([]); const [forms, setForms] = useState<FormTemplate[]>([]); const [state, setState] = useState<ViewState>("loading"); const [modalOpen, setModalOpen] = useState(false); const [name, setName] = useState(""); const [device, setDevice] = useState(""); const [formId, setFormId] = useState(""); const [error, setError] = useState(""); const [creating, setCreating] = useState(false);
   const load = () => { setState("loading"); Promise.all([apiClient.get<Organization>("/org/me/"), apiClient.get<AccessPoint[]>("/access-points/"), apiClient.get<FormTemplate[]>("/form-templates/")]).then(([organization, access, templates]) => { setOrg(organization.data); setPoints(access.data); setForms(templates.data); setFormId((current) => current || templates.data.find((item) => item.is_default)?.id || templates.data[0]?.id || ""); setState("ready"); }).catch(() => setState("error")); };
   useEffect(load, []);
   const create = async (event: React.FormEvent) => { event.preventDefault(); if (!name.trim() || !formId) return; setCreating(true); setError(""); try { await apiClient.post("/access-points/", { name: name.trim(), device_label: device.trim(), form_template: formId, is_active: true }); setName(""); setDevice(""); setModalOpen(false); load(); } catch { setError("Impossible de créer ce QR. Vérifie le nom et réessaie."); } finally { setCreating(false); } };
-  const remove = async (point: AccessPoint) => { if (!window.confirm(`Supprimer le point « ${point.name} » ?`)) return; await apiClient.delete(`/access-points/${point.id}/`); load(); };
+  const remove = async (point: AccessPoint) => {
+    await confirm({
+      tone: "danger",
+      title: "Supprimer ce QR ?",
+      message: <>Le point d’accueil « <strong>{point.name}</strong> » sera supprimé et son QR ne fonctionnera plus.</>,
+      confirmLabel: "Supprimer",
+      cancelLabel: "Garder",
+      runningLabel: "Suppression…",
+      run: async () => { await apiClient.delete(`/access-points/${point.id}/`); load(); },
+      successTitle: "QR supprimé",
+      errorTitle: "Suppression impossible",
+    });
+  };
   if (state === "loading") return <Loader fullScreen={false} />;
   if (state === "error" || !org) return <div className="space-y-3"><p className="text-ink-soft">Impossible de charger les points d’accueil.</p><button onClick={load} className="rounded-full bg-cta px-4 py-2 text-sm text-white">Réessayer</button></div>;
   return <div className="space-y-7"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">Points d’accueil</p><h1 className="mt-1 text-2xl font-bold text-ink">QR codes</h1><p className="mt-1 max-w-2xl text-sm text-ink-soft">Un QR par entrée, tablette ou comptoir. Chaque QR dédié ouvre le formulaire qui lui est associé ; le QR général suit le formulaire par défaut.</p></div><button onClick={() => { setModalOpen(true); setError(""); }} className="flex items-center gap-2 rounded-full bg-cta px-4 py-2.5 text-sm font-semibold text-white"><Plus size={17} weight="bold" /> Nouveau QR</button></div>
