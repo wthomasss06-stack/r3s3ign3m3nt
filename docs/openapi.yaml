@@ -56,6 +56,16 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/audit/:
+    get:
+      operationId: v1_admin_audit_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/admin/feedback/:
     get:
       operationId: v1_admin_feedback_retrieve
@@ -374,6 +384,12 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
       tags:
       - v1
       security:
@@ -524,6 +540,20 @@ paths:
           description: No response body
     patch:
       operationId: v1_org_me_partial_update
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/org/me/karnet/:
+    patch:
+      operationId: v1_org_me_karnet_partial_update
+      description: |-
+        Active/desactive le Niveau 2 KARNET et ses sous-capacites pour l'etablissement.
+        Reserve au BOSS. Le frontend consomme uniquement `capabilities` dans la reponse —
+        il ne decide jamais lui-meme de l'etat (cf. plan de bascule Niveau 1 -> Niveau 2).
       tags:
       - v1
       security:

@@ -67,12 +67,24 @@ export interface StaffInvitation { id: string; email: string; role: AccountRole;
 export interface TeamAccess { members: UserProfile[]; invitations: StaffInvitation[]; }
 export interface AuditEvent { id: string; action: string; actor_name: string | null; actor_email: string | null; target_name: string | null; target_email: string | null; metadata: Record<string, unknown>; created_at: string; }
 
+/** Calculee cote serveur uniquement (Organization.capabilities) — le frontend ne fait
+ * jamais ce calcul lui-meme, il ne fait que refleter ce que l'API renvoie. */
+export interface OrganizationCapabilities {
+  registration: boolean;
+  karnet: boolean;
+  reservations: boolean;
+  payments: boolean;
+  rappels: boolean;
+}
+
 export interface Organization {
   id: string;
   name: string;
   logo_url: string;
   visit_reasons: string[];
   qr_secure_token: string;
+  karnet_enabled: boolean;
+  capabilities: OrganizationCapabilities;
   created_at: string;
 }
 

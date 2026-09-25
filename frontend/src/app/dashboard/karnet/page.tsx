@@ -1,0 +1,46 @@
+"use client";
+
+import Link from "next/link";
+import { BellRinging, CalendarCheck, CreditCard, Cube, UsersThree } from "@phosphor-icons/react";
+import type { ElementType } from "react";
+
+import { useAuthContext } from "@/context/AuthContext";
+import type { OrganizationCapabilities } from "@/types";
+
+const SECTIONS: { key: keyof OrganizationCapabilities; href: string; label: string; icon: ElementType; description: string }[] = [
+  { key: "karnet", href: "/dashboard/karnet/visiteurs", label: "Visiteurs", icon: UsersThree, description: "Fiches clients et historique des passages." },
+  { key: "karnet", href: "/dashboard/karnet/ressources", label: "Ressources", icon: Cube, description: "Chambres, tables ou équipements à gérer." },
+  { key: "reservations", href: "/dashboard/karnet/reservations", label: "Réservations", icon: CalendarCheck, description: "Planning et disponibilités." },
+  { key: "payments", href: "/dashboard/karnet/paiements", label: "Paiements", icon: CreditCard, description: "Encaissements liés aux réservations." },
+  { key: "rappels", href: "/dashboard/karnet/rappels", label: "Rappels", icon: BellRinging, description: "Notifications automatiques aux clients." },
+];
+
+export default function KarnetOverviewPage() {
+  const { organization } = useAuthContext();
+  const capabilities = organization?.capabilities;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-ink-soft">
+        Le Registre reste ton socle : KARN3T ajoute les fonctions de gestion hôtelière autour de lui, débloquées progressivement.
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTIONS.map(({ key, href, label, icon: Icon, description }) => {
+          const active = Boolean(capabilities?.[key]);
+          return (
+            <Link key={href} href={href} className="rounded-xl border border-border bg-surface p-4 transition hover:border-cta">
+              <div className="flex items-center justify-between">
+                <Icon size={22} weight="bold" className="text-cta" />
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${active ? "bg-cta/10 text-cta" : "bg-canvas text-ink-soft"}`}>
+                  {active ? "Actif" : "Bientôt"}
+                </span>
+              </div>
+              <p className="mt-3 font-semibold text-ink">{label}</p>
+              <p className="mt-1 text-sm text-ink-soft">{description}</p>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

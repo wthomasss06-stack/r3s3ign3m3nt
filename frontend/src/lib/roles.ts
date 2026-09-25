@@ -25,6 +25,7 @@ export const PERMISSION_MATRIX: PermissionRow[] = [
   { label: "Régénérer le QR principal historique", boss: true, gerant: false, staff: false },
   { label: "Modifier le nom/logo de l’établissement", boss: true, gerant: false, staff: false },
   { label: "Modifier les motifs de visite", boss: true, gerant: true, staff: false },
+  { label: "Activer/désactiver le Niveau 2 KARN3T", boss: true, gerant: false, staff: false },
   { label: "Inviter un Gérant", boss: true, gerant: false, staff: false },
   { label: "Inviter un Staff", boss: true, gerant: true, staff: false },
   { label: "Utiliser le mode Accueil / Staff", boss: true, gerant: true, staff: true },

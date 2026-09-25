@@ -8,10 +8,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.models import AuditEvent
 from apps.common.permissions import IsBoss, IsOrgMember
 from apps.common.responses import error_response
 
-from .serializers import OrganizationSerializer, OrganizationUpdateSerializer
+from .serializers import OrganizationKarnetUpdateSerializer, OrganizationSerializer, OrganizationUpdateSerializer
 
 
 class MyOrganizationView(APIView):
@@ -94,3 +95,47 @@ class OrganizationLifecycleView(APIView):
     def delete(self, request):
         request.user.organization.delete()
         return Response(status=204)
+
+
+class OrganizationKarnetView(APIView):
+    """Active/desactive le Niveau 2 KARNET et ses sous-capacites pour l'etablissement.
+    Reserve au BOSS. Le frontend consomme uniquement `capabilities` dans la reponse —
+    il ne decide jamais lui-meme de l'etat (cf. plan de bascule Niveau 1 -> Niveau 2)."""
+
+    permission_classes = [IsAuthenticated, IsBoss]
+
+    def patch(self, request):
+        organization = request.user.organization
+        serializer = OrganizationKarnetUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        update_fields = []
+
+        if "karnet_enabled" in data and data["karnet_enabled"] != organization.karnet_enabled:
+            previous = organization.karnet_enabled
+            organization.karnet_enabled = data["karnet_enabled"]
+            update_fields.append("karnet_enabled")
+            AuditEvent.objects.create(
+                organization=organization,
+                actor=request.user,
+                action="organization.karnet_enabled" if organization.karnet_enabled else "organization.karnet_disabled",
+                metadata={"previous": previous, "next": organization.karnet_enabled},
+            )
+
+        if "capabilities" in data:
+            previous_capabilities = dict(organization.karnet_capabilities)
+            merged = {**organization.karnet_capabilities, **data["capabilities"]}
+            if merged != organization.karnet_capabilities:
+                organization.karnet_capabilities = merged
+                update_fields.append("karnet_capabilities")
+                AuditEvent.objects.create(
+                    organization=organization,
+                    actor=request.user,
+                    action="organization.karnet_capability_updated",
+                    metadata={"previous": previous_capabilities, "next": merged},
+                )
+
+        if update_fields:
+            organization.save(update_fields=update_fields)
+        return Response(OrganizationSerializer(organization).data)

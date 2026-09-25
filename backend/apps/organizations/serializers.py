@@ -4,10 +4,20 @@ from .models import Organization
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
+    capabilities = serializers.SerializerMethodField()
+
     class Meta:
         model = Organization
-        fields = ["id", "name", "logo_url", "visit_reasons", "qr_secure_token", "created_at", "is_suspended"]
-        read_only_fields = ["id", "qr_secure_token", "created_at"]
+        fields = [
+            "id", "name", "logo_url", "visit_reasons", "qr_secure_token", "created_at",
+            "is_suspended", "karnet_enabled", "capabilities",
+        ]
+        # karnet_enabled n'est modifiable que via OrganizationKarnetView (meme logique que
+        # is_suspended, reserve a OrganizationLifecycleView) ; capabilities est toujours calcule.
+        read_only_fields = ["id", "qr_secure_token", "created_at", "karnet_enabled", "capabilities"]
+
+    def get_capabilities(self, organization):
+        return organization.capabilities
 
 
 class OrganizationUpdateSerializer(serializers.Serializer):
@@ -23,3 +33,23 @@ class RenameOrganizationSerializer(serializers.Serializer):
 
     def validate_name(self, value):
         return value.strip()
+
+
+class OrganizationKarnetUpdateSerializer(serializers.Serializer):
+    """Corps de PATCH /org/me/karnet/. Les deux champs sont optionnels mais au moins
+    un doit etre fourni ; `capabilities` n'accepte que les sous-cles connues (jamais
+    `registration` ni `karnet`, qui sont toujours calcules, jamais saisis)."""
+
+    karnet_enabled = serializers.BooleanField(required=False)
+    capabilities = serializers.DictField(child=serializers.BooleanField(), required=False)
+
+    def validate_capabilities(self, value):
+        unknown = set(value) - set(Organization.KarnetCapability.values)
+        if unknown:
+            raise serializers.ValidationError(f"Capacité(s) inconnue(s) : {', '.join(sorted(unknown))}.")
+        return value
+
+    def validate(self, attrs):
+        if not attrs:
+            raise serializers.ValidationError("Aucune modification fournie.")
+        return attrs
