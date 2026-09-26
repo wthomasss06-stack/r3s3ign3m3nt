@@ -31,9 +31,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     try {
       const info = JSON.parse(raw) as { isNew?: boolean; name?: string };
       const firstName = firstNameOf(info.name);
+      const isKarnet = Boolean(organization?.capabilities?.karnet);
       void alert(info.isNew
         ? { tone: "brand", mood: "excited", title: `Bienvenue${firstName ? `, ${firstName}` : ""} !`, message: "Ton espace est prêt. Tu peux commencer par consulter le registre ou ouvrir les paramètres.", okLabel: "Commencer" }
-        : { tone: "brand", mood: "cheeky", title: `Bon retour${firstName ? `, ${firstName}` : ""} !`, message: "Content de te revoir. Ton registre t’attend.", okLabel: "C’est parti" });
+        : isKarnet
+          ? { tone: "brand", mood: "cheeky", title: `Bon retour${firstName ? `, ${firstName}` : ""} !`, message: "Ton établissement est au Niveau 2 : en plus du registre, les sections KARN3T (visiteurs, ressources, réservations…) t’attendent dans la barre latérale.", okLabel: "C’est parti" }
+          : { tone: "brand", mood: "cheeky", title: `Bon retour${firstName ? `, ${firstName}` : ""} !`, message: "Content de te revoir. Ton registre t’attend.", okLabel: "C’est parti" });
     } catch {
       // Une donnée de session corrompue ne doit pas bloquer l’espace.
     }

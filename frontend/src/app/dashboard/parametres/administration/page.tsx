@@ -43,6 +43,10 @@ export default function AdministrationPage() {
       confirmLabel: enabling ? "Activer" : "Désactiver",
       cancelLabel: "Annuler",
       runningLabel: enabling ? "Activation…" : "Désactivation…",
+      successTitle: enabling ? "KARN3T est activé !" : "KARN3T est désactivé.",
+      successMessage: enabling
+        ? "La barre latérale, le titre d’onglet et le favicon reflètent déjà le Niveau 2 — rien d’autre à faire."
+        : "L’établissement repasse à l’identité Renseignement seule.",
       run: async () => {
         await apiClient.patch("/org/me/karnet/", { karnet_enabled: enabling });
         await refreshUser();

@@ -46,6 +46,13 @@ const STEPS = [
   { n: "04", title: "Synchroniser", body: "Envoi automatique dès que l'appareil retrouve une connexion. Le patron voit tout depuis son dashboard." },
 ];
 
+const KARNET_HIGHLIGHTS = [
+  { title: "Visiteurs & clients", body: "Un carnet de fiches relié à ton registre, avec historique des passages." },
+  { title: "Ressources", body: "Chambres, tables, salles ou équipements à déclarer disponibles." },
+  { title: "Réservations", body: "Planning et disponibilités de tes ressources en un coup d’œil." },
+  { title: "Paiements & rappels", body: "Encaissements liés aux réservations et notifications automatiques — à venir." },
+];
+
 const FAQS = [
   { question: "Le visiteur doit-il créer un compte ?", answer: "Non. Il scanne simplement le QR Code, remplit le formulaire depuis son téléphone ou la tablette d’accueil, puis signe. Aucune application ni inscription n’est nécessaire." },
   { question: "Est-ce que R3NS3IGN3M3NT fonctionne sans connexion ?", answer: "Oui. Le formulaire continue d’enregistrer les visites hors-ligne sur l’appareil. Les données se synchronisent automatiquement dès que la connexion revient." },
@@ -79,6 +86,16 @@ export default function LandingPage() {
       gsap.from(card, {
         scrollTrigger: { trigger: card, start: "top 85%", toggleActions: "play none none reverse" },
         y: 40,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.out",
+      });
+    });
+
+    gsap.utils.toArray<HTMLElement>(".karnet-card").forEach((card) => {
+      gsap.from(card, {
+        scrollTrigger: { trigger: card, start: "top 88%", toggleActions: "play none none reverse" },
+        y: 30,
         opacity: 0,
         duration: 0.6,
         ease: "power2.out",
@@ -219,6 +236,31 @@ export default function LandingPage() {
                 <p className="mt-2 text-sm leading-relaxed text-mk-ink/70">{f.body}</p>
               </div>
             </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Niveau 2 — KARN3T */}
+      <section className="grid gap-10 bg-mk-deep px-5 py-24 text-deep-ink sm:px-10 lg:grid-cols-[1fr_1.4fr] lg:py-36">
+        <div>
+          <div className="flex items-center gap-2.5 font-mk-mono text-[10px] uppercase tracking-[0.12em] text-mk-sage">
+            <span className="h-px w-7 bg-current" /> Niveau 2
+          </div>
+          <h2 className="mt-6 text-[2.6rem] leading-[0.95] tracking-[-0.03em] sm:text-[3.5rem]">
+            Ton registre peut <em className="font-mk-serif italic font-bold text-mk-lime">devenir KARN3T.</em>
+          </h2>
+          <p className="mt-6 max-w-sm text-sm leading-relaxed text-mk-sage">
+            Le registre reste le socle : rien n&apos;y change. Quand ton établissement est prêt, active
+            KARN3T depuis tes paramètres pour ajouter la gestion des visiteurs, des ressources et des
+            réservations, débloquées progressivement.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {KARNET_HIGHLIGHTS.map((item) => (
+            <div key={item.title} className="karnet-card rounded-[1.2rem] border border-deep-ink/15 p-6">
+              <p className="font-bold text-deep-ink">{item.title}</p>
+              <p className="mt-2 text-sm leading-relaxed text-mk-sage">{item.body}</p>
+            </div>
           ))}
         </div>
       </section>

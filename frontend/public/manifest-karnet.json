@@ -1,0 +1,29 @@
+{
+  "name": "KARN3T — gestion établissement",
+  "short_name": "KARN3T",
+  "description": "Visiteurs, ressources et réservations pour ton établissement, au-delà du registre.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eeeee2",
+  "theme_color": "#173426",
+  "icons": [
+    {
+      "src": "/icons/karnet-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/karnet-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/karnet-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import type { OrganizationCapabilities } from "@/types";
 
 const IDENTITIES = {
-  base: { title: "R3NS3IGN3M3NT", icon: "/favicon.png", apple: "/icons/icon-192.png" },
-  karnet: { title: "KARN3T", icon: "/brand/karnet-favicon.png", apple: "/icons/karnet-apple-touch-icon.png" },
+  base: { title: "R3NS3IGN3M3NT", icon: "/favicon.png", apple: "/icons/icon-192.png", manifest: "/manifest.json" },
+  karnet: { title: "KARN3T", icon: "/brand/karnet-favicon.png", apple: "/icons/karnet-apple-touch-icon.png", manifest: "/manifest-karnet.json" },
 };
 
 function setLinkIcon(rel: string, href: string) {
@@ -20,17 +20,19 @@ function setLinkIcon(rel: string, href: string) {
 }
 
 /**
- * Bascule l'identité du navigateur (titre d'onglet + favicon) entre Renseignement et
- * KARN3T selon `organization.capabilities.karnet` — un état décidé côté serveur
- * uniquement (cf. plan de bascule Niveau 1 → Niveau 2), jamais calculé ici.
+ * Bascule l'identité du navigateur ET du manifest PWA (titre d'onglet, favicon,
+ * manifest installable) entre Renseignement et KARN3T selon
+ * `organization.capabilities.karnet` — un état décidé côté serveur uniquement (cf. plan
+ * de bascule Niveau 1 → Niveau 2), jamais calculé ici.
  *
  * Le nom et le logo de CHAQUE établissement (orgName/orgLogo affichés dans la Sidebar)
  * restent inchangés : c'est l'identité de l'entreprise du client, pas celle du produit.
- * Seule l'identité produit du navigateur (ce composant) reflète le palier actif.
+ * Seule l'identité produit (ce composant) reflète le palier actif.
  *
- * Limite connue : le manifest PWA (public/manifest.json) reste statique et affiche
- * toujours l'identité Renseignement à l'installation — le rendre dynamique par
- * établissement demanderait un manifest généré côté serveur, hors périmètre ici.
+ * Deux manifests statiques (public/manifest.json et public/manifest-karnet.json) plutôt
+ * qu'un manifest généré côté serveur par établissement : le lien <link rel="manifest">
+ * est réécrit ici avant que l'utilisateur ne déclenche "Ajouter à l'écran d'accueil",
+ * ce qui suffit en pratique et évite un aller-retour serveur à chaque chargement.
  */
 export default function ProductIdentity({ capabilities }: { capabilities?: OrganizationCapabilities }) {
   const isKarnet = Boolean(capabilities?.karnet);
@@ -40,6 +42,7 @@ export default function ProductIdentity({ capabilities }: { capabilities?: Organ
     document.title = identity.title;
     setLinkIcon("icon", identity.icon);
     setLinkIcon("apple-touch-icon", identity.apple);
+    setLinkIcon("manifest", identity.manifest);
   }, [isKarnet]);
 
   return null;
