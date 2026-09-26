@@ -88,6 +88,50 @@ export interface Organization {
   created_at: string;
 }
 
+export type KarnetResourceUnit = "jour" | "heure" | "unite";
+
+export interface KarnetClient {
+  id: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  note: string;
+  created_at: string;
+}
+
+export interface KarnetResource {
+  id: string;
+  name: string;
+  unit: KarnetResourceUnit;
+  unit_display: string;
+  price: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export type KarnetReservationStatus = "en_cours" | "terminee" | "annulee";
+
+export interface KarnetReservation {
+  id: string;
+  client: string;
+  client_name: string;
+  client_phone: string;
+  resource: string;
+  resource_name: string;
+  resource_unit: KarnetResourceUnit;
+  quantity: number;
+  unit_price: string;
+  total_amount: string;
+  starts_at: string;
+  ends_at: string | null;
+  status: KarnetReservationStatus;
+  is_paid: boolean;
+  paid_at: string | null;
+  reminder_acknowledged: boolean;
+  reminder_due: boolean;
+  created_at: string;
+}
+
 export interface FormTemplate { id: string; title: string; fields_schema: FormField[]; version: number; is_active: boolean; is_default: boolean; updated_at: string; }
 export interface AccessPoint { id: string; name: string; device_label: string; secure_token: string; is_active: boolean; last_seen_at: string | null; created_at: string; form_template: string; form_title: string; public_url: string; }
 

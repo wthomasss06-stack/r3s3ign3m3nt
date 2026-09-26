@@ -18,8 +18,9 @@ export default function Sidebar({ orgName, orgLogo = "", userName = "", role, ca
     ? [{ href: "/dashboard/accueil", label: "Accueil", icon: House, exact: true }, { href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }]
     : [{ href: "/dashboard", label: "Registre", icon: ClipboardText, exact: true }, { href: "/dashboard/accueil", label: "Mode Staff", icon: House, exact: true }, { href: "/dashboard/parametres", label: "Paramètres", icon: GearSix, exact: false }];
   // Le socle Renseignement reste toujours visible. KARN3T (Niveau 2) s'ajoute comme
-  // section distincte une fois active par le BOSS — jamais pour STAFF dans cette passe.
-  const showKarnet = role !== "STAFF" && Boolean(capabilities?.karnet);
+  // section distincte une fois active par le BOSS — accessible à tous les rôles, car
+  // STAFF (ex. réception) est en pratique le premier à opérer réservations/rappels.
+  const showKarnet = Boolean(capabilities?.karnet);
   const karnetLinks = showKarnet ? [
     { href: "/dashboard/karnet", label: "Vue d’ensemble", icon: SquaresFour, exact: true },
     { href: "/dashboard/karnet/visiteurs", label: "Visiteurs", icon: UsersThree, exact: false },

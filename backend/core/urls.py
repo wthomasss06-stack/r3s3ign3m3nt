@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/v1/org/", include("apps.organizations.urls")),
     path("api/v1/", include("apps.checkins.urls")),
     path("api/v1/", include("apps.feedback.urls")),
+    path("api/v1/karnet/", include("apps.karnet.urls")),
 ]

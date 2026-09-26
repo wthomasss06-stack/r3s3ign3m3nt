@@ -30,10 +30,15 @@ class Organization(models.Model):
         """Etat effectif des fonctionnalites pour cet etablissement, calcule cote serveur
         uniquement — le frontend ne fait jamais ce calcul lui-meme (cf. plan de bascule
         Niveau 1 -> Niveau 2). `registration` (Renseignement) est le socle permanent,
-        toujours actif. Les sous-capacites KARNET retombent a False tant que
-        `karnet_enabled` est False, sans effacer l'etat enregistre : reactiver KARNET
-        restaure exactement ce qui etait deja debloque, sans tout reconfigurer."""
-        subs = {key: False for key in self.KarnetCapability.values}
-        if self.karnet_enabled:
-            subs.update({key: bool(self.karnet_capabilities.get(key)) for key in self.KarnetCapability.values})
+        toujours actif. Une fois `karnet_enabled`, les sous-capacites KARNET sont
+        actives PAR DEFAUT (ce sont des fonctionnalites reelles, pas des ecrans en
+        preparation) ; un ops peut desactiver une sous-capacite precise pour un
+        etablissement donne via le Django admin en la mettant explicitement a False
+        dans karnet_capabilities. Tant que karnet_enabled est False, tout retombe a
+        False sans effacer l'etat enregistre : reactiver KARNET restaure exactement
+        ce qui etait deja configure."""
+        if not self.karnet_enabled:
+            subs = {key: False for key in self.KarnetCapability.values}
+        else:
+            subs = {key: bool(self.karnet_capabilities.get(key, True)) for key in self.KarnetCapability.values}
         return {"registration": True, "karnet": self.karnet_enabled, **subs}

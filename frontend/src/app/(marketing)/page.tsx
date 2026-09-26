@@ -48,9 +48,9 @@ const STEPS = [
 
 const KARNET_HIGHLIGHTS = [
   { title: "Visiteurs & clients", body: "Un carnet de fiches relié à ton registre, avec historique des passages." },
-  { title: "Ressources", body: "Chambres, tables, salles ou équipements à déclarer disponibles." },
-  { title: "Réservations", body: "Planning et disponibilités de tes ressources en un coup d’œil." },
-  { title: "Paiements & rappels", body: "Encaissements liés aux réservations et notifications automatiques — à venir." },
+  { title: "Ressources", body: "Chambres, tables, salles ou équipements, avec leur prix déclaré." },
+  { title: "Réservations", body: "Montant calculé automatiquement à chaque créneau ou consommation." },
+  { title: "Paiements & rappels", body: "Suivi des montants dus et sonnerie de fin de créneau horaire." },
 ];
 
 const FAQS = [

@@ -24,7 +24,7 @@ def test_boss_can_enable_karnet(db, boss_user, organization):
     assert response.status_code == 200
     assert response.data["karnet_enabled"] is True
     assert response.data["capabilities"]["karnet"] is True
-    assert response.data["capabilities"]["reservations"] is False  # pas activee individuellement
+    assert response.data["capabilities"]["reservations"] is True  # actif par défaut, ce sont de vraies fonctionnalités
     organization.refresh_from_db()
     assert organization.karnet_enabled is True
     event = AuditEvent.objects.get(organization=organization, action="organization.karnet_enabled")
@@ -58,27 +58,34 @@ def test_unauthenticated_cannot_toggle_karnet(db, organization):
     assert response.status_code == 401
 
 
-def test_sub_capability_is_stored_but_inert_until_karnet_enabled(db, boss_user, organization):
-    client = auth_client(boss_user)
-
-    response = client.patch("/api/v1/org/me/karnet/", {"capabilities": {"reservations": True}}, format="json")
+def test_sub_capability_defaults_to_active_once_karnet_enabled(db, boss_user, organization):
+    response = auth_client(boss_user).patch("/api/v1/org/me/karnet/", {"karnet_enabled": True}, format="json")
     assert response.status_code == 200
-    assert response.data["capabilities"]["reservations"] is False  # KARNET encore desactive
+    assert response.data["capabilities"]["payments"] is True
+    assert response.data["capabilities"]["rappels"] is True
 
+
+def test_sub_capability_can_be_explicitly_disabled(db, boss_user, organization):
+    client = auth_client(boss_user)
     client.patch("/api/v1/org/me/karnet/", {"karnet_enabled": True}, format="json")
-    organization.refresh_from_db()
-    assert organization.capabilities["reservations"] is True  # retrouvee sans devoir la re-cocher
+
+    response = client.patch("/api/v1/org/me/karnet/", {"capabilities": {"payments": False}}, format="json")
+
+    assert response.status_code == 200
+    assert response.data["capabilities"]["payments"] is False
+    assert response.data["capabilities"]["reservations"] is True  # inchangée
 
 
 def test_disabling_karnet_preserves_capability_state(db, boss_user, organization):
     client = auth_client(boss_user)
-    client.patch("/api/v1/org/me/karnet/", {"karnet_enabled": True, "capabilities": {"reservations": True}}, format="json")
+    client.patch("/api/v1/org/me/karnet/", {"karnet_enabled": True, "capabilities": {"payments": False}}, format="json")
 
     client.patch("/api/v1/org/me/karnet/", {"karnet_enabled": False}, format="json")
 
     organization.refresh_from_db()
-    assert organization.karnet_capabilities.get("reservations") is True  # etat conserve
-    assert organization.capabilities["reservations"] is False  # mais masque tant que KARNET est off
+    assert organization.karnet_capabilities.get("payments") is False  # état conservé
+    assert organization.capabilities["payments"] is False  # masqué tant que KARNET est off
+    assert organization.capabilities["reservations"] is False  # masqué aussi, bien que jamais désactivée explicitement
 
 
 def test_rejects_unknown_capability_key(db, boss_user, organization):

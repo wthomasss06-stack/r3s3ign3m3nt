@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.organizations",
     "apps.checkins",
     "apps.feedback",
+    "apps.karnet",
 ]
 
 MIDDLEWARE = [

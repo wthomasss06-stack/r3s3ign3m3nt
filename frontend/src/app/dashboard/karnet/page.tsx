@@ -8,11 +8,11 @@ import { useAuthContext } from "@/context/AuthContext";
 import type { OrganizationCapabilities } from "@/types";
 
 const SECTIONS: { key: keyof OrganizationCapabilities; href: string; label: string; icon: ElementType; description: string }[] = [
-  { key: "karnet", href: "/dashboard/karnet/visiteurs", label: "Visiteurs", icon: UsersThree, description: "Fiches clients et historique des passages." },
-  { key: "karnet", href: "/dashboard/karnet/ressources", label: "Ressources", icon: Cube, description: "Chambres, tables ou équipements à gérer." },
-  { key: "reservations", href: "/dashboard/karnet/reservations", label: "Réservations", icon: CalendarCheck, description: "Planning et disponibilités." },
-  { key: "payments", href: "/dashboard/karnet/paiements", label: "Paiements", icon: CreditCard, description: "Encaissements liés aux réservations." },
-  { key: "rappels", href: "/dashboard/karnet/rappels", label: "Rappels", icon: BellRinging, description: "Notifications automatiques aux clients." },
+  { key: "karnet", href: "/dashboard/karnet/visiteurs", label: "Visiteurs", icon: UsersThree, description: "Fiches clients, au-delà d'un simple passage au registre." },
+  { key: "karnet", href: "/dashboard/karnet/ressources", label: "Ressources", icon: Cube, description: "Chambres, tables ou articles avec leur prix déclaré." },
+  { key: "reservations", href: "/dashboard/karnet/reservations", label: "Réservations", icon: CalendarCheck, description: "Créneaux, montant calculé automatiquement à la création." },
+  { key: "payments", href: "/dashboard/karnet/paiements", label: "Paiements", icon: CreditCard, description: "Suivi manuel des montants dus et encaissés — pas de vraie transaction pour l'instant." },
+  { key: "rappels", href: "/dashboard/karnet/rappels", label: "Rappels", icon: BellRinging, description: "Sonnerie quand un créneau facturé à l'heure arrive à son terme." },
 ];
 
 export default function KarnetOverviewPage() {
