@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Porteur** | AKATech Studio (Elvis) |
-| **Statut** | V1.2 — Formulaires multiples, QR par point d’accueil et gestion multi-tablettes livrés. Recette production maintenue comme étape de contrôle. |
-| **Version du document** | 1.4 |
+| **Statut** | V1.2 (Niveau 1 — registre) livré. **Niveau 2 — KARN3T** (clients, ressources, réservations, paiements, rappels) fusionné dans le même produit, phases 1 à 9 livrées et vérifiées (backend + frontend), phase 10 (recette complète) en cours — voir `docs/phase-10-recette.md`. |
+| **Version du document** | 1.5 |
 
-> Nom commercial retenu : **R3NS3IGN3M3NT**. `qr-register-saas` reste le nom de code utilisé dans le code et les dossiers du projet.
+> Nom commercial retenu : **R3NS3IGN3M3NT**. `qr-register-saas` reste le nom de code utilisé dans le code et les dossiers du projet. Le Niveau 2 optionnel porte le nom commercial **KARN3T**.
 
 ## 1. Contexte & problème
 
@@ -221,3 +221,101 @@ La matrice reflète le RBAC réellement appliqué par l’API : le Patron conser
 La sécurité de session est renforcée par une Content Security Policy frontend, des headers de durcissement, un JWT d’accès de courte durée et une rotation contrôlée des refresh tokens. Chaque refresh est associé à une session par appareil ; son JTI est conservé côté serveur pour permettre la révocation ciblée sans déconnecter les autres appareils. Les connexions et révocations sensibles sont ajoutées au journal d’audit.
 
 Le registre n’est plus limité à un lot fixe de 100 visites. Le backend expose une pagination serveur avec `page`, `page_size`, `count`, `next` et `previous`. Le dashboard demande 20 enregistrements par page sur ordinateur et 10 sur mobile. La taille maximale d’une page est contrôlée côté API.
+
+## 16. Niveau 2 — KARN3T (hébergement, beauté, coworking, événementiel…) — septembre 2026
+
+R3NS3IGN3M3NT reste utilisable seul (Niveau 1 — registre de visiteurs). KARN3T est un
+Niveau 2 optionnel, activable/désactivable à tout moment par le Patron
+(`Paramètres > Administration`), qui transforme le registre en gestion clients
+complète pour un établissement qui vend des créneaux ou des séjours : hôtel,
+salon de beauté, coworking, restaurant/événementiel, parking, sport et loisirs.
+
+### 16.1 Principe
+
+```
+Visiteur → formulaire QR → CheckIn → Client KARN3T → Réservation → Paiement
+```
+
+Le visiteur remplit le même formulaire qu'au Niveau 1. Si KARN3T est actif, sa
+visite crée ou retrouve automatiquement une fiche client (identifiée par email
+puis téléphone, normalisés), sans ressaisie. Rien n'est perdu si KARN3T est
+désactivé puis réactivé plus tard : les fiches et réservations restent en base,
+seule leur interface disparaît temporairement.
+
+### 16.2 Modèle de données KARN3T
+
+| Entité | Champs clés | Notes |
+|---|---|---|
+| `Client` | `full_name`, `phone`, `email`, `note` | Rattaché à un `CheckIn` via une relation nullable ; jamais supprimé par la désactivation de KARN3T |
+| `Resource` | `category`, `resource_type`, `billing_unit`, `unit`, `price`, `capacity`, `code`, `location`, `duration_label`, `equipment` | `billing_unit` (par heure/séance/jour/nuit/mois/forfait) est ce que Patron/Gérant choisissent dans **ResourceBuilder** ; `unit` (jour/heure/unité) en est **dérivé automatiquement côté serveur** et reste seul consulté par le moteur de réservation (calcul de `ends_at`, détection de conflit) |
+| `Reservation` | `client`, `resource`, `quantity`, `unit_price`, `total_amount` (figé à la création), `starts_at`, `ends_at`, `status`, `is_paid`, `reminder_acknowledged` | Le montant facturé à la création n'est jamais recalculé si le tarif change ensuite |
+
+Catégories de ressources disponibles dans ResourceBuilder : Hébergement, Beauté
+et soins, Espaces professionnels, Événementiel et restauration, Stationnement,
+Sport et loisirs, Autre ressource (type libre). Chaque catégorie propose des
+types prêts à l'emploi (ex. Hébergement → Chambre simple/double/familiale,
+Suite, Studio, Appartement, Villa) et peut être complétée manuellement.
+
+### 16.3 Capacités activables
+
+Au-delà de l'interrupteur principal `karnet_enabled`, trois sous-capacités sont
+réglables indépendamment par le Patron : **Réservations**, **Paiements**,
+**Rappels**. Elles sont actives par défaut dès l'activation de KARN3T, mais
+peuvent être désactivées une à une (ex. un établissement qui veut le carnet de
+clients sans le suivi des paiements). L'état de chaque sous-capacité est
+conservé même quand KARN3T entier est désactivé, pour être restauré tel quel à
+la réactivation.
+
+### 16.4 Rôles et permissions (vérifiées côté API, pas seulement affichées)
+
+| Action | Patron | Gérant | Staff |
+|---|---|---|---|
+| Activer/désactiver KARN3T et ses sous-capacités | ✅ | ❌ | ❌ |
+| Créer/modifier/supprimer une ressource (ResourceBuilder) | ✅ | ✅ | ❌ (lecture seule) |
+| Créer un client, créer une réservation | ✅ | ✅ | ✅ (si la capacité est active) |
+| Encaisser un paiement | ✅ | ✅ | ✅ |
+| **Annuler un encaissement déjà enregistré** | ✅ | ✅ | ❌ — évite qu'un Staff masque une recette par erreur |
+| Acquitter un rappel de fin de créneau | ✅ | ✅ | ✅ |
+
+### 16.5 Onboarding ResourceBuilder
+
+À l'activation de KARN3T, le Patron est redirigé vers un assistant de création
+de ressources (catégorie → type → personnalisation → tarif → enregistrement),
+avec une option explicite « Plus tard » : la configuration des ressources n'est
+jamais bloquante pour continuer à utiliser le registre. Chaque ressource créée
+ou modifiée est enregistrée immédiatement (pas de brouillon local perdu si
+l'onglet se ferme).
+
+### 16.6 Fiche client complète
+
+Chaque client dispose d'une fiche (`/dashboard/karnet/clients/<id>`) qui
+regroupe : coordonnées, compteurs (nombre de passages, de réservations,
+dernière visite), solde dû, historique détaillé des passages (réponses du
+formulaire d'origine) et l'ensemble de ses réservations/paiements, avec une
+action directe « Créer une réservation » qui préremplit le client.
+
+### 16.7 État des livraisons (phases de fusion registre + KARN3T)
+
+| Phase | Contenu | État |
+|---|---|---|
+| 1-2 | Modèle métier et backend : `CheckIn` lié à `Client`, formulaire configurable par rôle d'identité | ✅ livré |
+| 3 | Conversion visiteur → client automatique, idempotente | ✅ livré |
+| 4 | Champs d'identité configurables dans le FormBuilder | ✅ livré |
+| 5-6 | Dashboard Clients et navigation fusionnée | ✅ livré |
+| 7 | Fiche client complète, action « Créer une réservation » | ✅ livré |
+| 8 | Parcours de réservation depuis un client existant, préremplissage, contrôle de créneau | ✅ livré |
+| 9 | Permissions finales par rôle, règle métier paiements | ✅ livré |
+| 10 | Recette complète (desktop/mobile, offline réel, multi-tablettes) | 🟡 tests automatisés livrés, recette manuelle documentée dans `docs/phase-10-recette.md`, à dérouler avant ouverture commerciale |
+
+Voir `rapport-fusion-r3ns3ign3m3nt-karnet.md` pour le détail livraison par
+livraison, et `docs/phase-10-recette.md` pour la checklist de recette manuelle.
+
+### 16.8 Limite connue et documentée (pas un bug)
+
+La normalisation de téléphone actuelle ne rapproche pas un numéro local
+(`0701020304`) de sa forme internationale (`+2250701020304`) : ce sont deux
+identifiants distincts pour la détection de doublon client. Confirmé par un
+test automatisé (`test_sync_matches_same_client_with_dashes_or_country_code_variants`).
+À traiter avant une ouverture commerciale à grande échelle en Côte d'Ivoire
+(normalisation spécifique à l'indicatif +225), déjà noté comme tel dans le
+rapport de fusion.

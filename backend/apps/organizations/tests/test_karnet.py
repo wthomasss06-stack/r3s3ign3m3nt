@@ -88,6 +88,29 @@ def test_disabling_karnet_preserves_capability_state(db, boss_user, organization
     assert organization.capabilities["reservations"] is False  # masqué aussi, bien que jamais désactivée explicitement
 
 
+def test_reactivating_karnet_restores_capabilities_and_keeps_existing_data(db, boss_user, organization):
+    """Recette phase 10 — désactiver puis réactiver KARN3T ne doit ni perdre la
+    configuration des sous-capacités ni supprimer les fiches déjà créées."""
+    from apps.karnet.models import Client
+
+    client_api = auth_client(boss_user)
+    client_api.patch("/api/v1/org/me/karnet/", {"karnet_enabled": True, "capabilities": {"rappels": False}}, format="json")
+    fiche = Client.objects.create(organization=organization, full_name="David Kouassi")
+
+    client_api.patch("/api/v1/org/me/karnet/", {"karnet_enabled": False}, format="json")
+    disabled = client_api.get("/api/v1/karnet/clients/")
+    assert disabled.status_code == 403  # Niveau 1 : l'API karnet redevient inaccessible…
+
+    reactivated = client_api.patch("/api/v1/org/me/karnet/", {"karnet_enabled": True}, format="json")
+    assert reactivated.status_code == 200
+    assert reactivated.data["capabilities"]["reservations"] is True  # jamais touchée : reste active
+    assert reactivated.data["capabilities"]["rappels"] is False  # restaurée telle que configurée avant la coupure
+
+    reenabled_clients = client_api.get("/api/v1/karnet/clients/")
+    assert reenabled_clients.status_code == 200
+    assert any(c["id"] == str(fiche.id) for c in reenabled_clients.data)  # ...et rien n'a été perdu
+
+
 def test_rejects_unknown_capability_key(db, boss_user, organization):
     response = auth_client(boss_user).patch("/api/v1/org/me/karnet/", {"capabilities": {"invalide": True}}, format="json")
     assert response.status_code == 400

@@ -27,15 +27,26 @@ class ClientDetailSerializer(ClientSerializer):
 
 class ResourceSerializer(serializers.ModelSerializer):
     unit_display = serializers.CharField(source="get_unit_display", read_only=True)
+    billing_unit_display = serializers.CharField(source="get_billing_unit_display", read_only=True)
+    category_display = serializers.CharField(source="get_category_display", read_only=True)
 
     class Meta:
         model = Resource
-        fields = ["id", "name", "unit", "unit_display", "price", "is_active", "created_at"]
-        read_only_fields = ["id", "unit_display", "created_at"]
+        fields = [
+            "id", "name", "unit", "unit_display", "price", "is_active", "created_at",
+            "category", "category_display", "resource_type", "billing_unit", "billing_unit_display",
+            "code", "description", "capacity", "location", "duration_label", "equipment",
+        ]
+        read_only_fields = ["id", "unit_display", "billing_unit_display", "category_display", "created_at"]
 
     def validate_price(self, value):
         if value <= 0:
             raise serializers.ValidationError("Le prix doit être supérieur à 0.")
+        return value
+
+    def validate_capacity(self, value):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("La capacité doit être supérieure à 0.")
         return value
 
 

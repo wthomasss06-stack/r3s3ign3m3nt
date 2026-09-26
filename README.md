@@ -24,7 +24,7 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 | Site AKATech Studio | [akatech.vercel.app](https://akatech.vercel.app/) |
 | Contact | wthomasss06@gmail.com · +225 01 42 50 77 50 |
 | Localisation déclarée | Abidjan, Côte d’Ivoire |
-| Statut | V1.1 fonctionnelle, recette production à maintenir |
+| Statut | V1.2 (Niveau 1 — registre) fonctionnelle. Niveau 2 KARN3T fusionné (clients, ressources, réservations, paiements, rappels), phases 1 à 9 livrées, phase 10 (recette) en cours. |
 
 ## Fonctionnalités livrées
 
@@ -73,6 +73,38 @@ Le visiteur n’a pas besoin de créer un compte. Le mode kiosque fonctionne off
 - Motifs de visite les plus fréquents.
 - Export CSV.
 
+### Niveau 2 — KARN3T (clients, ressources, réservations)
+
+Optionnel, activable/désactivable à tout moment par le Patron sans perte de
+données (`Paramètres > Administration`). Une fois actif, le registre devient
+l’espace **Clients** et la navigation ajoute une section **KARN3T**.
+
+- **Ressources (ResourceBuilder)** : catalogue par catégorie (Hébergement,
+  Beauté et soins, Espaces professionnels, Événementiel et restauration,
+  Stationnement, Sport et loisirs, Autre) avec types prêts à l’emploi (chambre,
+  fauteuil, bureau, table…) et champs personnalisables (capacité, prix, mode de
+  tarification, emplacement, équipements). Chaque ressource est enregistrée
+  immédiatement ; réservé à Patron/Gérant, consultation seule pour le Staff.
+  Proposé automatiquement à l’activation de KARN3T, avec option « Plus tard ».
+- **Clients** : une visite valide crée ou retrouve automatiquement une fiche
+  client (email puis téléphone, normalisés), sans ressaisie. Fiche client
+  complète (`/dashboard/karnet/clients/<id>`) : coordonnées, compteurs,
+  historique des passages, réservations/paiements, action directe « Créer une
+  réservation ».
+- **Réservations** : sélection d’un client existant en premier (préremplie
+  depuis sa fiche), calcul automatique du montant (quantité × prix), détection
+  de conflit de créneau pour les ressources à l’heure/au jour.
+- **Paiements** : encaissement ouvert à toute l’équipe ; annuler un
+  encaissement déjà enregistré est réservé à Patron/Gérant.
+- **Rappels** : sonnerie de fin de créneau pour les ressources facturées à
+  l’heure, acquittable par toute l’équipe.
+- Trois sous-capacités (Réservations, Paiements, Rappels) activables/
+  désactivables indépendamment, avec état conservé même si KARN3T entier est
+  désactivé puis réactivé.
+- Voir `rapport-fusion-r3ns3ign3m3nt-karnet.md` pour l’historique de livraison
+  détaillé et `docs/phase-10-recette.md` pour la checklist de recette manuelle
+  (multi-appareils, offline réel) restant à dérouler avant ouverture commerciale.
+
 ### Vitrine et conformité
 
 - Landing page marketing responsive et PWA.
@@ -101,6 +133,7 @@ qr-register-saas/
 │   ├── apps/accounts/               # Utilisateurs, Google OAuth, invitations, rôles
 │   ├── apps/organizations/          # Établissements, branding, QR et membres
 │   ├── apps/checkins/               # Formulaires multiples, points d’accueil, sync, registre
+│   ├── apps/karnet/                 # Niveau 2 — clients, ressources (ResourceBuilder), réservations, paiements, rappels
 │   ├── apps/feedback/                # Feedback public, admin plateforme et métriques
 │   ├── core/                        # Settings, URLs, WSGI
 │   ├── manage.py
@@ -175,6 +208,14 @@ Toutes les routes API sont préfixées par `/api/v1`.
 | `GET` | `/checkins/export/` | Selon permission | Export CSV |
 | `POST` | `/org/me/regenerate-qr/` | Patron | Invalider l’ancien QR |
 | `GET` | `/health/` | Public | Vérifier la disponibilité backend |
+| `PATCH` | `/org/me/karnet/` | Patron | Activer/désactiver KARN3T et ses sous-capacités |
+| `GET/POST` | `/karnet/clients/` | Membre (KARN3T actif) | Lister/créer une fiche client |
+| `GET/PATCH` | `/karnet/clients/<id>/` | Membre / Patron·Gérant | Fiche client complète (compteurs) / modifier |
+| `GET/POST` | `/karnet/resources/` | Membre (lecture) / Patron·Gérant (création) | Catalogue de ressources (ResourceBuilder) |
+| `PATCH/DELETE` | `/karnet/resources/<id>/` | Patron/Gérant | Modifier ou désactiver/supprimer une ressource |
+| `GET/POST` | `/karnet/reservations/` | Membre (KARN3T actif) | Lister/créer une réservation (calcul automatique du montant) |
+| `PATCH` | `/karnet/reservations/<id>/` | Membre / Patron·Gérant pour annuler un paiement | Statut, paiement, accusé de rappel |
+| `GET` | `/checkins/?client=<id>` | Membre | Historique des passages d’un client (fiche client) |
 | `POST` | `/admin/login/` | Public avec identifiants Render | Ouvrir une session admin plateforme |
 | `GET` | `/admin/overview/` | Admin plateforme | Métriques globales |
 | `GET/POST` | `/admin/organizations/` | Admin plateforme | Lister ou créer une entreprise |
@@ -275,7 +316,7 @@ npm run type-check
 npm run build
 ```
 
-État de la dernière validation : **21 tests backend passants, type-check frontend OK et build Next.js OK**.
+État de la dernière validation : **65 tests backend passants (dont KARN3T : clients, ressources, réservations, permissions, réactivation), `tsc --noEmit` sans erreur**. Le build `next build` échoue dans cet environnement de développement uniquement à cause du blocage réseau vers `fonts.googleapis.com` (police `Chelsea Market`) — sans rapport avec le code applicatif ; à revérifier en environnement avec accès réseau complet avant mise en production.
 
 ## Déploiement production
 
@@ -315,6 +356,8 @@ Avant chaque mise en production :
 - [`docs/flow-tablette-employe.md`](docs/flow-tablette-employe.md) — parcours tablette/kiosque.
 - [`docs/flows/`](docs/flows/) — six diagrammes SVG des parcours et permissions.
 - [`docs/modele-economique.md`](docs/modele-economique.md) — stratégie gratuit, offres payantes et indicateurs de lancement.
+- [`rapport-fusion-r3ns3ign3m3nt-karnet.md`](rapport-fusion-r3ns3ign3m3nt-karnet.md) — historique de livraison de la fusion registre + KARN3T, phase par phase.
+- [`docs/phase-10-recette.md`](docs/phase-10-recette.md) — checklist de recette manuelle (multi-appareils, offline réel) à dérouler avant ouverture commerciale.
 
 ## Limitations et prochaines évolutions
 
@@ -363,3 +406,35 @@ Le flux d’images accepte les avatars Google ainsi que les photos et logos envo
 ### Validation de la version actuelle
 
 La version actuelle a été vérifiée avec **34 tests backend passants**, une migration Django cohérente, un type-check TypeScript réussi et un build Next.js réussi. L’archive de livraison exclut uniquement les dépendances générées `node_modules`, `.next` et les couvertures de test générées.
+
+## Mise à jour — fusion KARN3T, phases 7 à 10 — 26 septembre 2026
+
+Le Niveau 2 KARN3T (clients, ressources, réservations, paiements, rappels) est
+fusionné dans le registre R3NS3IGN3M3NT. Cette mise à jour livre les phases 7 à
+9 et démarre la phase 10 :
+
+- **Fiche client complète** (`/dashboard/karnet/clients/<id>`) : compteurs
+  calculés côté serveur, historique des passages, réservations/paiements,
+  action « Créer une réservation ».
+- **Parcours de réservation depuis un client existant** : sélection du client
+  en première étape (préremplie depuis sa fiche), alerte de conflit de créneau
+  avant envoi, création manuelle conservée comme parcours de secours.
+- **Règle métier paiements** : annuler un encaissement déjà enregistré est
+  désormais réservé à Patron/Gérant (API + interface Paiements) ; l’encaissement
+  lui-même reste ouvert à toute l’équipe.
+- **ResourceBuilder** : le formulaire de ressource simple (nom/unité/prix) est
+  remplacé par un assistant par catégorie et type (hébergement, beauté, espaces
+  professionnels, événementiel, stationnement, sport/loisirs), avec capacité,
+  code, emplacement, équipements et mode de tarification. Le champ technique
+  `unit` (jour/heure/unité), seul connu du moteur de réservation, est désormais
+  **dérivé automatiquement** du mode de tarification choisi (`billing_unit`) ;
+  compatibilité conservée pour un appel qui fixerait encore `unit` directement.
+  Proposé à l’activation de KARN3T avec option « Plus tard ».
+- **Phase 10 (recette)** : scénarios de doublons (téléphone avec tirets/espaces,
+  email en casse différente) et de réactivation de KARN3T couverts par des
+  tests automatisés ; le reste (multi-appareils, offline réel, tablette) est
+  documenté dans `docs/phase-10-recette.md` pour une recette manuelle avant
+  ouverture commerciale.
+
+Validation : 65 tests backend passants, migration `karnet.0002` appliquée
+proprement, `manage.py check` sans erreur, `tsc --noEmit` sans erreur.

@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard } from "@phosphor-icons/react";
+import { CreditCard, X } from "@phosphor-icons/react";
 
 import Loader from "@/components/Loader";
+import { useAuthContext } from "@/context/AuthContext";
 import { apiClient } from "@/lib/api";
 import { formatDateTime, formatXOF, STATUS_LABELS, STATUS_STYLES } from "@/lib/karnet";
 import type { KarnetReservation } from "@/types";
 
 export default function KarnetPaiementsPage() {
+  const { user } = useAuthContext();
+  // Phase 9 — règle métier : encaisser reste ouvert à toute l'équipe, mais
+  // annuler un encaissement déjà enregistré est réservé à Patron/Gérant
+  // (l'API renvoie 403 sinon ; ce contrôle d'affichage évite juste de proposer
+  // une action qui échouerait pour un Staff).
+  const canUnmark = user?.role === "BOSS" || user?.role === "GERANT";
   const [reservations, setReservations] = useState<KarnetReservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,6 +37,18 @@ export default function KarnetPaiementsPage() {
     try {
       await apiClient.patch(`/karnet/reservations/${id}/`, { is_paid: true });
       load();
+    } finally {
+      setMarkingId(null);
+    }
+  };
+
+  const unmarkPaid = async (id: string) => {
+    setMarkingId(id);
+    try {
+      await apiClient.patch(`/karnet/reservations/${id}/`, { is_paid: false });
+      load();
+    } catch {
+      setError("Impossible d’annuler cet encaissement.");
     } finally {
       setMarkingId(null);
     }
@@ -91,7 +110,19 @@ export default function KarnetPaiementsPage() {
                   <p className="font-medium text-ink">{r.client_name} · {r.resource_name}</p>
                   <p className="text-xs text-ink-soft">{r.paid_at ? `Payé le ${formatDateTime(r.paid_at)}` : ""}</p>
                 </div>
-                <span className="font-semibold text-ink">{formatXOF(r.total_amount)}</span>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-ink">{formatXOF(r.total_amount)}</span>
+                  {canUnmark && (
+                    <button
+                      onClick={() => unmarkPaid(r.id)}
+                      disabled={markingId === r.id}
+                      title="Annuler cet encaissement"
+                      className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-medium text-ink-soft transition hover:border-error-text hover:text-error-text disabled:opacity-60"
+                    >
+                      <X size={12} weight="bold" /> Annuler
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
             {paid.length === 0 && <p className="p-4 text-sm text-ink-soft">Aucun encaissement enregistré pour l’instant.</p>}

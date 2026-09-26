@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Loader from "@/components/Loader";
 import { useDialog } from "@/components/ui/DialogProvider";
@@ -27,6 +28,7 @@ const CAPABILITY_LABELS: { key: keyof OrganizationCapabilities; label: string }[
 export default function AdministrationPage() {
   const { organization, refreshUser } = useAuthContext();
   const { confirm } = useDialog();
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ export default function AdministrationPage() {
 
   const askToggleKarnet = async () => {
     const enabling = !organization?.karnet_enabled;
-    await confirm({
+    const activated = await confirm({
       tone: "brand",
       title: enabling ? "Activer KARN3T ?" : "Désactiver KARN3T ?",
       message: enabling
@@ -52,6 +54,10 @@ export default function AdministrationPage() {
         await refreshUser();
       },
     });
+    // Onboarding : juste après l'activation, on propose de configurer les
+    // ressources tout de suite (chambres, fauteuils, bureaux…) — le builder
+    // laisse "Plus tard" pour qui préfère le faire ensuite depuis l'onglet Ressources.
+    if (activated && enabling) router.push("/dashboard/karnet/ressources?onboarding=1");
   };
 
   useEffect(() => {

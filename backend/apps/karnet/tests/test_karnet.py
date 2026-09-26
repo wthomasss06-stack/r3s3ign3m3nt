@@ -44,6 +44,59 @@ def test_boss_and_gerant_can_create_resource_staff_cannot(db, boss_user, gerant_
     assert len(listing.data) == 2
 
 
+def test_resource_builder_billing_unit_drives_the_reservation_unit(db, boss_user, organization):
+    """ResourceBuilder envoie catégorie/type/billing_unit — c'est ce dernier qui
+    détermine `unit` (jour/heure/unité), jamais l'inverse, pour que le moteur de
+    réservation (conflits, ends_at) reste sur les 3 valeurs qu'il connaît déjà."""
+    enable_karnet(organization)
+    payload = {
+        "name": "Chambre 204", "category": "accommodation", "resource_type": "Chambre double",
+        "billing_unit": "night", "price": "25000", "code": "CH-204", "capacity": 2,
+        "location": "2e étage", "equipment": "Climatisation, Wi-Fi", "duration_label": "1 nuit",
+    }
+
+    response = auth_client(boss_user).post("/api/v1/karnet/resources/", payload, format="json")
+
+    assert response.status_code == 201
+    assert response.data["unit"] == "jour"  # dérivé de billing_unit=night
+    assert response.data["billing_unit"] == "night"
+    assert response.data["category"] == "accommodation"
+    assert response.data["capacity"] == 2
+    resource = Resource.objects.get(id=response.data["id"])
+    assert resource.unit == Resource.Unit.JOUR
+
+
+def test_resource_builder_session_and_month_map_to_expected_units(db, boss_user, organization):
+    enable_karnet(organization)
+    client_api = auth_client(boss_user)
+
+    session = client_api.post(
+        "/api/v1/karnet/resources/",
+        {"name": "Fauteuil 1", "category": "beauty", "billing_unit": "session", "price": "8000"},
+        format="json",
+    )
+    monthly = client_api.post(
+        "/api/v1/karnet/resources/",
+        {"name": "Bureau A", "category": "workspace", "billing_unit": "month", "price": "150000"},
+        format="json",
+    )
+
+    assert session.data["unit"] == "heure"
+    assert monthly.data["unit"] == "unite"
+
+
+def test_resource_builder_omitted_billing_unit_keeps_legacy_unit_field(db, boss_user, organization):
+    """Compatibilité : un appel qui ne connaît pas encore billing_unit (l'ancien
+    formulaire simple, ou un script existant) doit toujours pouvoir fixer `unit`
+    directement, sans que le nouveau champ ne l'écrase silencieusement."""
+    enable_karnet(organization)
+    response = auth_client(boss_user).post(
+        "/api/v1/karnet/resources/", {"name": "Table 9", "unit": "heure", "price": "5000"}, format="json"
+    )
+    assert response.status_code == 201
+    assert response.data["unit"] == "heure"
+
+
 def test_any_role_can_create_client(db, staff_user, organization):
     enable_karnet(organization)
     response = auth_client(staff_user).post("/api/v1/karnet/clients/", {"full_name": "David Kouassi", "phone": "0707070707"}, format="json")

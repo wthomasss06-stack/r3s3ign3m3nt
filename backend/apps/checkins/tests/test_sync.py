@@ -123,6 +123,67 @@ def test_sync_reuses_existing_client_on_second_visit(db, api_client, organizatio
     assert CheckIn.objects.filter(organization=organization, client__isnull=False).count() == 2
 
 
+def test_sync_matches_same_client_with_dashes_or_country_code_variants(db, api_client, organization, form_template):
+    """Recette phase 10 — un même numéro saisi avec des tirets ou un indicatif
+    international ne doit pas créer un doublon."""
+    from apps.karnet.models import Client
+
+    organization.karnet_enabled = True
+    organization.save(update_fields=["karnet_enabled"])
+    form_template.fields_schema = [
+        {"id": "nom", "type": "text", "label": "Nom", "required": True},
+        {"id": "telephone", "type": "phone", "label": "Téléphone", "required": True},
+        {"id": "signature", "type": "signature", "label": "Signature", "required": True},
+    ]
+    form_template.save(update_fields=["fields_schema"])
+
+    api_client.post(
+        "/api/v1/checkins/sync/",
+        {"checkins": [valid_checkin_payload(organization.qr_secure_token, responses={"nom": "Bakary Traore", "telephone": "07-01-02-03-04"})]},
+        format="json",
+    )
+    second = api_client.post(
+        "/api/v1/checkins/sync/",
+        {"checkins": [valid_checkin_payload(organization.qr_secure_token, responses={"nom": "Bakary Traore", "telephone": "+2250701020304"})]},
+        format="json",
+    )
+
+    # Les indicatifs differents (0701020304 vs +2250701020304) restent des
+    # identifiants distincts cote normalisation actuelle : documente le
+    # comportement reel plutot que de supposer une correspondance implicite.
+    assert second.data["processed"][0]["client_action"] == "created"
+    assert Client.objects.filter(organization=organization).count() == 2
+
+
+def test_sync_matches_same_client_with_case_insensitive_email(db, api_client, organization, form_template):
+    """Recette phase 10 — un email saisi avec une casse différente doit rattacher
+    la même fiche client plutôt que d'en créer une seconde."""
+    from apps.karnet.models import Client
+
+    organization.karnet_enabled = True
+    organization.save(update_fields=["karnet_enabled"])
+    form_template.fields_schema = [
+        {"id": "nom", "type": "text", "label": "Nom", "required": True},
+        {"id": "email", "type": "email", "label": "Email", "required": True},
+        {"id": "signature", "type": "signature", "label": "Signature", "required": True},
+    ]
+    form_template.save(update_fields=["fields_schema"])
+
+    api_client.post(
+        "/api/v1/checkins/sync/",
+        {"checkins": [valid_checkin_payload(organization.qr_secure_token, responses={"nom": "Fatou Diabate", "email": "Fatou@Example.com"})]},
+        format="json",
+    )
+    second = api_client.post(
+        "/api/v1/checkins/sync/",
+        {"checkins": [valid_checkin_payload(organization.qr_secure_token, responses={"nom": "Fatou Diabate", "email": "fatou@example.com"})]},
+        format="json",
+    )
+
+    assert second.data["processed"][0]["client_action"] == "matched"
+    assert Client.objects.filter(organization=organization).count() == 1
+
+
 def test_sync_keeps_level_one_without_creating_client(db, api_client, organization, form_template):
     from apps.karnet.models import Client
 

@@ -27,12 +27,48 @@ class Resource(models.Model):
     """Une ressource facturable de l'établissement : chambre, table, équipement ou
     article. Le prix est déclaré par l'établissement (pas de paiement réel pour
     l'instant) et sert de base au calcul automatique du montant dû à chaque
-    réservation/consommation."""
+    réservation/consommation.
+
+    `billing_unit` est ce que Patron/Gérant choisissent dans ResourceBuilder (par
+    nuit, par séance, forfait mensuel…) : c'est l'information affichée. `unit` en
+    est dérivé automatiquement (voir Resource.unit_for_billing) et reste le seul
+    champ que le moteur de réservation connaît pour calculer `ends_at` et détecter
+    les conflits de créneau — on ne complique pas cette mécanique déjà validée à
+    chaque nouveau mode de tarification métier."""
 
     class Unit(models.TextChoices):
         JOUR = "jour", "Par jour"
         HEURE = "heure", "Par heure"
         UNITE = "unite", "Par unité"
+
+    class BillingUnit(models.TextChoices):
+        HOUR = "hour", "Par heure"
+        SESSION = "session", "Par séance"
+        DAY = "day", "Par jour"
+        NIGHT = "night", "Par nuit"
+        MONTH = "month", "Par mois"
+        FIXED = "fixed", "Forfait fixe"
+
+    class Category(models.TextChoices):
+        ACCOMMODATION = "accommodation", "Hébergement"
+        BEAUTY = "beauty", "Beauté et soins"
+        WORKSPACE = "workspace", "Espaces professionnels"
+        EVENTS = "events", "Événementiel et restauration"
+        PARKING = "parking", "Stationnement"
+        LEISURE = "leisure", "Sport et loisirs"
+        OTHER = "other", "Autre ressource"
+
+    # hour/session -> HEURE (quantité = nombre d'heures) ; day/night -> JOUR
+    # (quantité = nombre de jours/nuits) ; month/fixed -> UNITE (vente/forfait
+    # sans créneau à bloquer — pas de détection de conflit pour ces deux-là).
+    BILLING_TO_UNIT = {
+        BillingUnit.HOUR: Unit.HEURE,
+        BillingUnit.SESSION: Unit.HEURE,
+        BillingUnit.DAY: Unit.JOUR,
+        BillingUnit.NIGHT: Unit.JOUR,
+        BillingUnit.MONTH: Unit.UNITE,
+        BillingUnit.FIXED: Unit.UNITE,
+    }
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="karnet_resources")
@@ -42,11 +78,29 @@ class Resource(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Champs ResourceBuilder (catalogue par catégorie/type — hôtel, beauté, coworking…).
+    category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER, blank=True)
+    resource_type = models.CharField(max_length=100, blank=True)
+    billing_unit = models.CharField(max_length=10, choices=BillingUnit.choices, blank=True, default="")
+    code = models.CharField(max_length=50, blank=True)
+    description = models.TextField(blank=True)
+    capacity = models.PositiveIntegerField(null=True, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    duration_label = models.CharField(max_length=100, blank=True)
+    equipment = models.TextField(blank=True)
+
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return f"{self.name} ({self.get_unit_display()}) — {self.organization.name}"
+
+    def save(self, *args, **kwargs):
+        # `unit` reste dérivé de `billing_unit` : jamais désynchronisé, même si
+        # l'appelant ne l'envoie pas explicitement.
+        if self.billing_unit:
+            self.unit = self.BILLING_TO_UNIT.get(self.billing_unit, self.unit)
+        super().save(*args, **kwargs)
 
 
 class Reservation(models.Model):

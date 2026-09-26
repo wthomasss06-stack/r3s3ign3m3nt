@@ -145,7 +145,7 @@ export default function KarnetReservationsPage() {
               <label className="text-xs font-medium text-ink-soft">Ressource</label>
               <select value={resourceId} onChange={(e) => setResourceId(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-canvas px-3 py-2 text-sm text-ink">
                 {resources.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name} — {formatXOF(r.price)}/{r.unit_display.replace("Par ", "")}</option>
+                  <option key={r.id} value={r.id}>{r.name} — {formatXOF(r.price)}/{(r.billing_unit_display || r.unit_display).replace("Par ", "")}</option>
                 ))}
               </select>
             </div>

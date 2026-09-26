@@ -92,6 +92,8 @@ export interface Organization {
 }
 
 export type KarnetResourceUnit = "jour" | "heure" | "unite";
+export type KarnetResourceBillingUnit = "hour" | "session" | "day" | "night" | "month" | "fixed";
+export type KarnetResourceCategory = "accommodation" | "beauty" | "workspace" | "events" | "parking" | "leisure" | "other";
 
 export interface KarnetClient {
   id: string;
@@ -118,6 +120,19 @@ export interface KarnetResource {
   price: string;
   is_active: boolean;
   created_at: string;
+  /** Champs ResourceBuilder (catalogue par catégorie/type) — `unit` reste dérivé
+   * de `billing_unit` côté serveur, jamais l'inverse (voir apps/karnet/models.py). */
+  category: KarnetResourceCategory;
+  category_display: string;
+  resource_type: string;
+  billing_unit: KarnetResourceBillingUnit | "";
+  billing_unit_display: string;
+  code: string;
+  description: string;
+  capacity: number | null;
+  location: string;
+  duration_label: string;
+  equipment: string;
 }
 
 export type KarnetReservationStatus = "en_cours" | "terminee" | "annulee";
