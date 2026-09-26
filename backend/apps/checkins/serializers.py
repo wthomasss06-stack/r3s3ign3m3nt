@@ -12,6 +12,11 @@ class FormFieldSchemaSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=ALLOWED_FIELD_TYPES)
     label = serializers.CharField(max_length=255)
     required = serializers.BooleanField(default=False)
+    identity_role = serializers.ChoiceField(
+        choices=("full_name", "phone", "email"),
+        required=False,
+        allow_null=True,
+    )
     options = serializers.ListField(child=serializers.CharField(), required=False)
     document_type = serializers.ChoiceField(choices=DOCUMENT_TYPES, required=False)
     extract_fields = serializers.ListField(child=serializers.ChoiceField(choices=DOCUMENT_EXTRACT_FIELDS), required=False)
@@ -77,9 +82,12 @@ class PublicFormSerializer(serializers.Serializer):
 
 
 class CheckInSerializer(serializers.ModelSerializer):
+    client_id = serializers.UUIDField(read_only=True, allow_null=True)
+    client_name = serializers.CharField(source="client.full_name", read_only=True, allow_null=True)
+
     class Meta:
         model = CheckIn
-        fields = ["id", "responses", "signature_blob", "created_at_client", "synced_at"]
+        fields = ["id", "responses", "signature_blob", "created_at_client", "synced_at", "client_id", "client_name"]
 
 
 class CheckInSyncItemSerializer(serializers.Serializer):

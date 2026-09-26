@@ -8,7 +8,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import type { OrganizationCapabilities } from "@/types";
 
 const SECTIONS: { key: keyof OrganizationCapabilities; href: string; label: string; icon: ElementType; description: string }[] = [
-  { key: "karnet", href: "/dashboard/karnet/visiteurs", label: "Visiteurs", icon: UsersThree, description: "Fiches clients, au-delà d'un simple passage au registre." },
+  { key: "karnet", href: "/dashboard", label: "Clients", icon: UsersThree, description: "Les visiteurs enregistrés deviennent des fiches clients réutilisables." },
   { key: "karnet", href: "/dashboard/karnet/ressources", label: "Ressources", icon: Cube, description: "Chambres, tables ou articles avec leur prix déclaré." },
   { key: "reservations", href: "/dashboard/karnet/reservations", label: "Réservations", icon: CalendarCheck, description: "Créneaux, montant calculé automatiquement à la création." },
   { key: "payments", href: "/dashboard/karnet/paiements", label: "Paiements", icon: CreditCard, description: "Suivi manuel des montants dus et encaissés — pas de vraie transaction pour l'instant." },
@@ -22,7 +22,7 @@ export default function KarnetOverviewPage() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-soft">
-        Le Registre reste ton socle : KARN3T ajoute les fonctions de gestion hôtelière autour de lui, débloquées progressivement.
+        L’accueil collecte les informations une seule fois : KARN3T les exploite ensuite pour gérer les ressources, réservations, paiements et rappels.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ key, href, label, icon: Icon, description }) => {

@@ -8,21 +8,23 @@ import type { CheckInRecord, FormField } from "@/types";
 interface CheckInsTableProps {
   records: CheckInRecord[];
   activeSchema: FormField[];
+  karnetEnabled?: boolean;
   page: number;
   pageSize: number;
   totalCount: number;
   onPageChange: (page: number) => void;
 }
 
-export default function CheckInsTable({ records, activeSchema, page, pageSize, totalCount, onPageChange }: CheckInsTableProps) {
+export default function CheckInsTable({ records, activeSchema, karnetEnabled = false, page, pageSize, totalCount, onPageChange }: CheckInsTableProps) {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const currentPage = Math.min(page, totalPages);
   const firstVisible = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const lastVisible = Math.min(currentPage * pageSize, totalCount);
+  const emptyColspan = activeSchema.length + (karnetEnabled ? 2 : 1);
 
   return <div className="overflow-hidden rounded-xl border border-border bg-surface">
-    <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b border-border bg-canvas text-ink-soft"><tr><th className="whitespace-nowrap p-3 font-medium">Heure d&apos;arrivée</th>{activeSchema.map((field) => <th key={field.id} className="whitespace-nowrap p-3 font-medium">{field.label}</th>)}</tr></thead><tbody className="divide-y divide-border">{records.map((record) => <tr key={record.id} className="transition hover:bg-canvas/60"><td className="whitespace-nowrap p-3 font-medium text-ink">{format(new Date(record.created_at_client), "HH:mm — dd/MM/yyyy", { locale: fr })}</td>{activeSchema.map((field) => <td key={field.id} className="p-3 text-ink-soft">{renderCell(field, record)}</td>)}</tr>)}{records.length === 0 && <tr><td colSpan={activeSchema.length + 1} className="p-10 text-center text-ink-soft">Aucun visiteur enregistré pour le moment.</td></tr>}</tbody></table></div>
-    {totalCount > 0 && <div className="flex flex-col gap-3 border-t border-border bg-surface px-3 py-3 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-4"><p>Visiteurs {firstVisible} à {lastVisible} sur {totalCount}</p><div className="flex items-center justify-between gap-2 sm:justify-end"><button type="button" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} aria-label="Page précédente" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40"><CaretLeft size={14} /> Précédente</button><span aria-live="polite" className="min-w-20 text-center font-medium text-ink">Page {currentPage} / {totalPages}</span><button type="button" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} aria-label="Page suivante" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">Suivante <CaretRight size={14} /></button></div></div>}
+    <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="border-b border-border bg-canvas text-ink-soft"><tr><th className="whitespace-nowrap p-3 font-medium">Heure d&apos;arrivée</th>{karnetEnabled && <th className="whitespace-nowrap p-3 font-medium">Client</th>}{activeSchema.map((field) => <th key={field.id} className="whitespace-nowrap p-3 font-medium">{field.label}</th>)}</tr></thead><tbody className="divide-y divide-border">{records.map((record) => <tr key={record.id} className="transition hover:bg-canvas/60"><td className="whitespace-nowrap p-3 font-medium text-ink">{format(new Date(record.created_at_client), "HH:mm — dd/MM/yyyy", { locale: fr })}</td>{karnetEnabled && <td className="p-3 text-ink-soft">{record.client_name || <span className="text-ink-soft/60">En attente d&apos;identité</span>}</td>}{activeSchema.map((field) => <td key={field.id} className="p-3 text-ink-soft">{renderCell(field, record)}</td>)}</tr>)}{records.length === 0 && <tr><td colSpan={emptyColspan} className="p-10 text-center text-ink-soft">Aucun {karnetEnabled ? "client" : "visiteur"} enregistré pour le moment.</td></tr>}</tbody></table></div>
+    {totalCount > 0 && <div className="flex flex-col gap-3 border-t border-border bg-surface px-3 py-3 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-4"><p>{karnetEnabled ? "Clients" : "Visiteurs"} {firstVisible} à {lastVisible} sur {totalCount}</p><div className="flex items-center justify-between gap-2 sm:justify-end"><button type="button" onClick={() => onPageChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} aria-label="Page précédente" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40"><CaretLeft size={14} /> Précédente</button><span aria-live="polite" className="min-w-20 text-center font-medium text-ink">Page {currentPage} / {totalPages}</span><button type="button" onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} aria-label="Page suivante" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 font-medium text-ink transition hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">Suivante <CaretRight size={14} /></button></div></div>}
   </div>;
 }
 
@@ -33,4 +35,3 @@ function renderCell(field: FormField, record: CheckInRecord) {
 }
 
 export { renderCell };
-

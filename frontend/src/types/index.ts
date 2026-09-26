@@ -5,6 +5,7 @@ export interface FormField {
   type: FieldType;
   label: string;
   required: boolean;
+  identity_role?: "full_name" | "phone" | "email" | null;
   options?: string[];
   document_type?: "cni" | "passport" | "free";
   extract_fields?: ("last_name" | "first_names" | "document_number" | "birth_date" | "nationality" | "expiry_date")[];
@@ -29,6 +30,8 @@ export interface CheckInRecord {
   signature_blob: string | null;
   created_at_client: string;
   synced_at: string;
+  client_id: string | null;
+  client_name: string | null;
 }
 
 export interface PaginatedResponse<T> {

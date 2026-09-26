@@ -63,3 +63,73 @@ def test_suspended_organization_cannot_receive_public_or_offline_checkins(db, ap
     assert public_response.status_code == 404
     assert sync_response.data["processed"][0]["status"] == "unknown_organization"
     assert CheckIn.objects.count() == 0
+
+
+def test_sync_creates_client_and_links_checkin_when_karnet_enabled(db, api_client, organization, form_template):
+    from apps.karnet.models import Client
+
+    organization.karnet_enabled = True
+    organization.save(update_fields=["karnet_enabled"])
+    form_template.fields_schema = [
+        {"id": "nom", "type": "text", "label": "Nom complet", "required": True},
+        {"id": "telephone", "type": "phone", "label": "Téléphone", "required": True},
+        {"id": "email", "type": "email", "label": "Email", "required": False},
+        {"id": "signature", "type": "signature", "label": "Signature", "required": True},
+    ]
+    form_template.save(update_fields=["fields_schema"])
+    payload = valid_checkin_payload(
+        organization.qr_secure_token,
+        responses={"nom": "Awa Kone", "telephone": "+225 07 00 00 00 00", "email": "AWA@EXAMPLE.COM"},
+    )
+
+    response = api_client.post("/api/v1/checkins/sync/", {"checkins": [payload]}, format="json")
+
+    assert response.data["processed"][0]["status"] == "created"
+    assert response.data["processed"][0]["client_action"] == "created"
+    client = Client.objects.get(organization=organization)
+    checkin = CheckIn.objects.get(idempotency_key=payload["idempotency_key"])
+    assert checkin.client_id == client.id
+    assert client.full_name == "Awa Kone"
+    assert client.phone == "+2250700000000"
+    assert client.email == "awa@example.com"
+
+
+def test_sync_reuses_existing_client_on_second_visit(db, api_client, organization, form_template):
+    from apps.karnet.models import Client
+
+    organization.karnet_enabled = True
+    organization.save(update_fields=["karnet_enabled"])
+    form_template.fields_schema = [
+        {"id": "nom", "type": "text", "label": "Nom", "required": True},
+        {"id": "telephone", "type": "phone", "label": "Téléphone", "required": True},
+        {"id": "signature", "type": "signature", "label": "Signature", "required": True},
+    ]
+    form_template.save(update_fields=["fields_schema"])
+
+    first_payload = valid_checkin_payload(
+        organization.qr_secure_token,
+        responses={"nom": "Awa Kone", "telephone": "0700000000"},
+    )
+    second_payload = valid_checkin_payload(
+        organization.qr_secure_token,
+        responses={"nom": "Awa Kone", "telephone": "07 00 00 00 00"},
+    )
+
+    api_client.post("/api/v1/checkins/sync/", {"checkins": [first_payload]}, format="json")
+    second = api_client.post("/api/v1/checkins/sync/", {"checkins": [second_payload]}, format="json")
+
+    assert second.data["processed"][0]["client_action"] == "matched"
+    assert Client.objects.filter(organization=organization).count() == 1
+    assert CheckIn.objects.filter(organization=organization, client__isnull=False).count() == 2
+
+
+def test_sync_keeps_level_one_without_creating_client(db, api_client, organization, form_template):
+    from apps.karnet.models import Client
+
+    payload = valid_checkin_payload(organization.qr_secure_token)
+    response = api_client.post("/api/v1/checkins/sync/", {"checkins": [payload]}, format="json")
+
+    assert response.data["processed"][0]["status"] == "created"
+    assert "client_id" not in response.data["processed"][0]
+    assert Client.objects.filter(organization=organization).count() == 0
+    assert CheckIn.objects.get(idempotency_key=payload["idempotency_key"]).client_id is None

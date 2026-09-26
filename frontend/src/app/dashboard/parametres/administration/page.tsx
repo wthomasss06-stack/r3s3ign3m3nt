@@ -38,7 +38,7 @@ export default function AdministrationPage() {
       tone: "brand",
       title: enabling ? "Activer KARN3T ?" : "Désactiver KARN3T ?",
       message: enabling
-        ? "Ton établissement passe au Niveau 2 : de nouvelles sections apparaissent dans la barre latérale."
+        ? "Ton établissement passe au Niveau 2 : le registre devient l’espace Clients et KARN3T ajoute les ressources, réservations, paiements et rappels."
         : "Les sections KARN3T disparaissent de la barre latérale. Rien n’est supprimé, tu pourras réactiver plus tard.",
       confirmLabel: enabling ? "Activer" : "Désactiver",
       cancelLabel: "Annuler",
@@ -80,8 +80,8 @@ export default function AdministrationPage() {
             <h2 className="font-semibold text-ink">Niveau 2 — KARN3T</h2>
             <p className="mt-1 max-w-md text-sm text-ink-soft">
               {organization?.karnet_enabled
-                ? "KARN3T est actif : les sections Visiteurs, Ressources, Réservations, Paiements et Rappels apparaissent dans la barre latérale."
-                : "Ajoute les fonctions de gestion hôtelière (visiteurs, ressources, réservations…) au-dessus de ton registre."}
+                ? "KARN3T est actif : les visiteurs enregistrés alimentent l’espace Clients, tandis que les opérations restent regroupées dans KARN3T."
+                : "Ajoute les fonctions de gestion hôtelière autour de ton registre : clients, ressources, réservations, paiements et rappels."}
             </p>
           </div>
           <button
