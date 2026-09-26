@@ -102,6 +102,14 @@ export interface KarnetClient {
   created_at: string;
 }
 
+/** Renvoyé uniquement par GET /karnet/clients/{id}/ — la fiche client complète
+ * (phase 7) ajoute des compteurs calculés côté serveur à l'en-tête. */
+export interface KarnetClientDetail extends KarnetClient {
+  checkins_count: number;
+  reservations_count: number;
+  last_visit_at: string | null;
+}
+
 export interface KarnetResource {
   id: string;
   name: string;

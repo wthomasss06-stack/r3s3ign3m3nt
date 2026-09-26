@@ -12,6 +12,7 @@ from apps.common.responses import error_response
 from .models import Client, Reservation, Resource
 from .permissions import HasKarnetEnabled
 from .serializers import (
+    ClientDetailSerializer,
     ClientSerializer,
     ReservationCreateSerializer,
     ReservationSerializer,
@@ -51,7 +52,17 @@ class ClientDetailView(APIView):
         client = self.get_object(request, pk)
         if not client:
             return error_response("Client introuvable.", status.HTTP_404_NOT_FOUND)
-        return Response(ClientSerializer(client).data)
+        # Phase 7 — fiche client complète : compteurs calculés pour l'en-tête,
+        # l'historique détaillé (passages, réservations) reste sur ses propres
+        # endpoints (/checkins/?client=, /karnet/reservations/?client=) pour
+        # profiter de leur pagination et de leurs filtres existants.
+        client.checkins_count = client.checkins.count()
+        client.reservations_count = client.reservations.count()
+        last_checkin = client.checkins.order_by("-created_at_client").values_list("created_at_client", flat=True).first()
+        last_reservation = client.reservations.order_by("-starts_at").values_list("starts_at", flat=True).first()
+        candidates = [d for d in (last_checkin, last_reservation) if d]
+        client.last_visit_at = max(candidates) if candidates else None
+        return Response(ClientDetailSerializer(client).data)
 
     def patch(self, request, pk):
         client = self.get_object(request, pk)
@@ -218,6 +229,12 @@ class ReservationDetailView(APIView):
             return error_response("La fonctionnalité Paiements n'est pas activée pour cet établissement.", status.HTTP_403_FORBIDDEN)
         if "reminder_acknowledged" in request.data and not caps["rappels"]:
             return error_response("La fonctionnalité Rappels n'est pas activée pour cet établissement.", status.HTTP_403_FORBIDDEN)
+        # Phase 9 — règle métier finale : encaisser un paiement reste ouvert à tout
+        # membre de l'équipe (c'est le geste d'accueil du quotidien), mais annuler un
+        # encaissement déjà enregistré est une correction sensible réservée à
+        # Patron/Gérant, pour éviter qu'un Staff ne masque une recette par erreur.
+        if request.data.get("is_paid") is False and reservation.is_paid and request.user.role not in ("BOSS", "GERANT"):
+            self.permission_denied(request, message=IsBossOrGerant.message)
 
         serializer = ReservationUpdateSerializer(reservation, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

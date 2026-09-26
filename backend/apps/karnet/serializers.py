@@ -13,6 +13,18 @@ class ClientSerializer(serializers.ModelSerializer):
         return value.strip()
 
 
+class ClientDetailSerializer(ClientSerializer):
+    """Fiche client complète (phase 7) : ajoute les compteurs utiles à l'en-tête
+    sans que l'appelant ait à recouper plusieurs requêtes lui-même."""
+
+    checkins_count = serializers.IntegerField(read_only=True)
+    reservations_count = serializers.IntegerField(read_only=True)
+    last_visit_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
+    class Meta(ClientSerializer.Meta):
+        fields = ClientSerializer.Meta.fields + ["checkins_count", "reservations_count", "last_visit_at"]
+
+
 class ResourceSerializer(serializers.ModelSerializer):
     unit_display = serializers.CharField(source="get_unit_display", read_only=True)
 

@@ -117,6 +117,48 @@ def test_marking_paid_sets_timestamp_and_respects_capability(db, boss_user, staf
     assert blocked.status_code == 403
 
 
+def test_client_detail_exposes_history_counters(db, staff_user, organization):
+    """Phase 7 — fiche client : l'en-tête expose des compteurs sans que le
+    frontend ait à les recalculer lui-même à partir de plusieurs listes."""
+    enable_karnet(organization)
+    resource = make_resource(organization)
+    client_record = Client.objects.create(organization=organization, full_name="David Kouassi", phone="0707070707")
+
+    empty = auth_client(staff_user).get(f"/api/v1/karnet/clients/{client_record.id}/")
+    assert empty.status_code == 200
+    assert empty.data["checkins_count"] == 0
+    assert empty.data["reservations_count"] == 0
+    assert empty.data["last_visit_at"] is None
+
+    Reservation.objects.create(
+        organization=organization, client=client_record, resource=resource, quantity=1,
+        unit_price=resource.price, total_amount=resource.price,
+    )
+
+    after = auth_client(staff_user).get(f"/api/v1/karnet/clients/{client_record.id}/")
+    assert after.data["reservations_count"] == 1
+    assert after.data["last_visit_at"] is not None
+
+
+def test_unmarking_a_payment_requires_boss_or_gerant(db, boss_user, staff_user, organization):
+    """Phase 9 — encaisser reste ouvert à tous, mais annuler un encaissement déjà
+    enregistré est réservé à Patron/Gérant."""
+    enable_karnet(organization)
+    resource = make_resource(organization)
+    reservation = Reservation.objects.create(
+        organization=organization, client=Client.objects.create(organization=organization, full_name="David"),
+        resource=resource, quantity=1, unit_price=resource.price, total_amount=resource.price,
+        is_paid=True,
+    )
+
+    denied = auth_client(staff_user).patch(f"/api/v1/karnet/reservations/{reservation.id}/", {"is_paid": False}, format="json")
+    assert denied.status_code == 403
+
+    allowed = auth_client(boss_user).patch(f"/api/v1/karnet/reservations/{reservation.id}/", {"is_paid": False}, format="json")
+    assert allowed.status_code == 200
+    assert allowed.data["is_paid"] is False
+
+
 def test_reminder_due_filter_and_acknowledgement(db, staff_user, organization):
     enable_karnet(organization)
     resource = make_resource(organization, unit=Resource.Unit.HEURE, price=Decimal("5000"))
